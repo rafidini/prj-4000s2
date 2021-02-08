@@ -3,7 +3,7 @@ This challenge focusses on prediction of colour attribute of products from a lar
 
 # Réunions
 
-## Mardi 19 Février 2021:
+## Mardi 19 Février 2021
 Blablabla
 
 # Avancement
