@@ -19,12 +19,9 @@
 ```python
 !tree -L 1
 ```
-
-    [01;34m.[00m
     ├── X_test.csv
     ├── X_train.csv
-    ├── [01;34mimages[00m
-    ├── introduction.ipynb
+    ├── images
     ├── metrics.py
     ├── sample_submission.csv
     └── y_train.csv
