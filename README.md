@@ -7,6 +7,5 @@ Blablabla
 # Avancement
 Blablabla
 
-# Notebooks
-
-- [introduction](notebooks/introduction.md)
+# Notebooks
+- [introduction.md](notebooks/introduction.md)
