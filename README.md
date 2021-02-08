@@ -8,4 +8,4 @@ Blablabla
 Blablabla
 
 # Notebooks
-- [introduction.md](notebooks/introduction.md)
+- [introduction.md](notebooks/introduction.html)
