@@ -1,2 +1,2 @@
-# Projet E4 - Rakuten Multi-modal Colour Extraction
+# Rakuten Multi-modal Colour Extraction
 
