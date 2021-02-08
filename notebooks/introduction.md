@@ -3,9 +3,7 @@
 - Date: 18 Février 2021
 - Auteur: Itokiana Rafidinarivo
 
-<div style="align:center">
-    <img src="https://challengedata.ens.fr/logo/public/RIT_logo_big_YnFAcFo.jpg" style="width:35%">
-<div>
+![rakuten.jpg](https://challengedata.ens.fr/logo/public/RIT_logo_big_YnFAcFo.jpg)
     
 ## Contexte
 - **Rakuten** a été créée en 1997 au Japon et à l'origine du concept de *"marketplace"* et est ainsi devenue une des plateformes les plus larges de **e-commerce**.
