@@ -1,5 +1,0 @@
-#!/bin/csh
-foreach file ($PINK/src/com/*.c)
-  $PINK/tools/filefilter $file tmpfile
-  mv tmpfile $file
-end

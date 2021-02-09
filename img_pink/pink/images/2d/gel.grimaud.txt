@@ -1,6 +1,0 @@
-Image gel.raw
--------------
-Image brute sans header sur 8 bits.
-256x256 pixels = 65536
-
-Mentionner "Copyright Micromorph ENSMP"
