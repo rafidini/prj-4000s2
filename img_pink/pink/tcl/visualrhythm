@@ -1,0 +1,121 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec tclsh $0 $1 $2 $3
+
+ if {($argc != 2) && ($argc != 3)} { 
+   puts stderr "usage: visualr in.mpg \[nframes\] out"
+   exit 
+ }
+
+set PINK "$env(PINK)"
+source "$PINK/tcl/my_exec.tcl"
+source "$PINK/tcl/my_read.tcl"
+source "$PINK/tcl/my_write.tcl"
+
+global VISUALR
+set VISUALR(name) "visualr"
+set VISUALR(infilename) [lindex $argv 0]
+if {($argc == 3)} { 
+   set VISUALR(nframes) [lindex $argv 1]
+} else {
+   set VISUALR(nframes) 1000000000
+}
+set VISUALR(outfilename) [lindex $argv [expr $argc - 1]]
+
+proc tmpfile {tmpname} {
+  global VISUALR
+  return [file join "/tmp" "$VISUALR(name)_$tmpname"]
+}
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%d %g" v1 v2
+  close $input
+  return $v2
+}
+
+puts "converting video file"
+#---------------------------
+if {($argc == 3)} { 
+   my_exec_q mplayer -vo pnm -frames $VISUALR(nframes) $VISUALR(infilename)
+} else {
+   my_exec_q mplayer -vo pnm $VISUALR(infilename)
+}
+
+puts "getting image size"
+#---------------------------
+set hdr [my_readpgmheader 00000001.ppm]
+set rs [lindex $hdr 1]
+set cs [lindex $hdr 2]
+
+puts "extracting lines"
+#---------------------------
+set i 1
+while {$i < $VISUALR(nframes)} {
+  set filecount [format "%04d" $i]
+  if {![file exists "0000$filecount.ppm"]} {
+    set VISUALR(nframes) $i
+  } else {
+    my_exec_q ppm2pgm "0000$filecount.ppm" [tmpfile r] [tmpfile g] [tmpfile b]
+    my_exec_q extractline [tmpfile r] 0 0 [expr $rs - 1] [expr $cs - 1] "r0000$filecount.pgm"
+    my_exec_q extractline [tmpfile g] 0 0 [expr $rs - 1] [expr $cs - 1] "g0000$filecount.pgm"
+    my_exec_q extractline [tmpfile b] 0 0 [expr $rs - 1] [expr $cs - 1] "b0000$filecount.pgm"
+    catch {exec rm "0000$filecount.ppm"} result
+    incr i    
+  }
+}
+
+incr VISUALR(nframes) -1
+
+puts "catenating $VISUALR(nframes) lines"
+#---------------------------
+my_exec_q catpgm "r0000" 1 $VISUALR(nframes) [tmpfile r]
+my_exec_q catpgm "g0000" 1 $VISUALR(nframes) [tmpfile g]
+my_exec_q catpgm "b0000" 1 $VISUALR(nframes) [tmpfile b]
+my_exec isometry [tmpfile r] yxz [tmpfile r]
+my_exec isometry [tmpfile g] yxz [tmpfile g]
+my_exec isometry [tmpfile b] yxz [tmpfile b]
+my_exec_q pgm2ppm [tmpfile r] [tmpfile g] [tmpfile b] $VISUALR(outfilename)
+foreach file [glob -nocomplain "?0000????.pgm"] {
+  catch {exec rm $file} result
+}
+foreach file [glob -nocomplain [tmpfile "?"]] {
+  catch {exec rm $file} result
+}

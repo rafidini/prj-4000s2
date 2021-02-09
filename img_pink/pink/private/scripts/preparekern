@@ -1,0 +1,18 @@
+#!/bin/sh
+USAGE="Usage: $0 in out"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+cadre    $1 _$1.cadre
+inverse  _$1.cadre _$1.cadre
+seuil    $1 1 255 1 255 _$1.seuil
+min      _$1.seuil _$1.cadre $2
+rm         _$1.cadre
+rm         _$1.seuil

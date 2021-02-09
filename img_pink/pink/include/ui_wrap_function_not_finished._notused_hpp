@@ -1,0 +1,155 @@
+/*
+  This software is licensed under 
+  CeCILL FREE SOFTWARE LICENSE AGREEMENT
+
+  This software comes in hope that it will be useful but 
+  without any warranty to the extent permitted by applicable law.
+  
+  (C) UjoImro, 2011
+  Université Paris-Est, Laboratoire d'Informatique Gaspard-Monge, Equipe A3SI, ESIEE Paris, 93162, Noisy le Grand CEDEX
+  ujoimro@gmail.com
+*/
+
+#ifndef UI_WRAP_FUNCTION_HPP
+#define UI_WRAP_FUNCTION_HPP
+
+#define MAX_PARAMETERS 3
+
+#include <boost/mpl/if.hpp>
+#include <boost/mpl/identity.hpp>
+#include <boost/preprocessor.hpp>
+
+
+
+#include "ui_decompose.hpp"
+#include "ui_convert_if.hpp"
+#include "ui_make_function.hpp"
+
+
+using pink::python::xv2pink;
+using pink::python::make_function;
+
+
+using boost::mpl::if_c;
+  
+
+
+#ifndef MAX_PARAMETERS
+#  define MAX_PARAMETERS 3
+#  define CLEAN_UP_MAX_PARAMETERS
+#endif /* MAX_PARAMETERS */
+
+#define CALL_DEF(z, n, text)                    \
+  def(fname, MAKE_FUNCTION_(z, n, text), doc )
+
+#define DECOMPOSE_PARAMS(z, n, text)           \
+  FT::T##n
+
+#define CALL_(z, n, text)               \
+  BOOST_PP_CAT(BOOST_PP_CAT(BOOST_PP_CAT(BOOST_PP_CAT(text,_), BOOST_PP_COUNTER), _), n)
+
+
+#define CASE_IMPL(n)                            \
+  BOOST_PP_IF(n, CASE(BOOST_PP_DEC(n)), ~)
+
+
+#define CASE_PRIORY(z, n, text)                         \
+  typename if_c <                                       \
+  FA == n, CALL_(z, n, text),
+
+
+#define CASE_POSTERIORY(z, n, text)             \
+  >::type
+
+#define CASE(z, n, text)                           \
+  BOOST_PP_REPEAT_FROM_TO(1, n, CASE_PRIORY, text)  \
+  int                                              \
+  BOOST_PP_REPEAT_FROM_TO(1, n, CASE_POSTERIORY, text)
+
+#define XV2PINK(z, n, text)                     \
+  typename xv2pink< typename BOOST_PP_CAT(text, n) >::type,
+
+#define DEF_FOR_TYPE(image_type, n, text)                               \
+  def(fname, make_function< image_type,                                 \
+      BOOST_PP_REPEAT_FROM_TO(1, n, XV2PINK, FT::T)                     \
+      text>, doc)
+
+#define MAKE_CALL(z, n, text)                                           \
+  struct CALL_(z, n, call)                                              \
+  {                                                                     \
+    template <class Fn>                                                 \
+      static void define(const char* fname, Fn fn, const char* doc)     \
+  {                                                                     \
+    typedef struct decompose<Fn> FT;                                    \
+                                                                        \
+    DEF_FOR_TYPE(char_image   , n, text);                               \
+    DEF_FOR_TYPE(short_image  , n, text);                               \
+    DEF_FOR_TYPE(int_image    , n, text);                               \
+    DEF_FOR_TYPE(float_image  , n, text);                               \
+    DEF_FOR_TYPE(double_image , n, text);                               \
+                                                                        \
+    }                                                                   \
+                                                                        \
+  };                                                                    
+
+
+// // checking for the proper usage
+// #ifndef BOOST_PP_COUNTER
+// #error: UI_WRAP_FUNCTION only makes sense with BOOST_PP_COUNTER defined
+// #endif /* BOOST_PP_COUNTER */
+
+#define UI_WRAP_FUNCTION(FNAME, FN, DOC)                                \
+  BOOST_PP_REPEAT_FROM_TO(1, MAX_PARAMETERS, MAKE_CALL, FN)             \
+                                                                        \
+  template <class Fn>                                                   \
+  void BOOST_PP_CAT(call,BOOST_PP_COUNTER)(const char* fname, Fn fn, const char* doc) \
+  {                                                                     \
+    const int FA = decompose<Fn>::arity;                                \
+                                                                        \
+    typedef CASE(MAX_PARAMETERS, MAX_PARAMETERS, call) wrapped_function; \
+                                                                        \
+    wrapped_function::define(fname, fn, doc);                           \
+                                                                        \
+  }                                                                     \
+                                                                        \
+  void BOOST_PP_CAT(export_function, BOOST_PP_COUNTER)()                \
+  {                                                                     \
+    BOOST_PP_CAT(call, BOOST_PP_COUNTER)(FNAME, FN, DOC);               \
+  }
+
+
+// the following preprocessor call would generate the below code
+
+#define BOOST_PP_COUNTER 0
+
+UI_WRAP_FUNCTION("greet", greet, "WRITE ME!!");
+
+#undef BOOST_PP_COUNTER
+#define BOOST_PP_COUNTER 1
+
+UI_WRAP_FUNCTION("new_greet", greeter, "READ ME!!");
+
+
+// the generated code
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#endif /* UI_WRAP_FUNCTION_HPP */
+// LuM end of file

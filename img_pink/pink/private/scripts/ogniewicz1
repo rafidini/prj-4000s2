@@ -1,0 +1,15 @@
+#!/bin/sh
+USAGE="Usage: $0 in.pgm param"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+# la liste resultante est dans /tmp/ogniewicz_temp
+ctran $1 - |voro - - |prune -pot -threshold $2 -fg -raw -
+exit 0

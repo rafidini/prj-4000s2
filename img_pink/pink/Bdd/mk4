@@ -1,0 +1,10 @@
+rm -f bddsurfend.carres.c
+echo ";" > __
+
+echo "int bddSurfendCarreX(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j)" > _
+cat _ __ >> bddsurfend.h ; cat _ bddsurfend.carrex.c >> bddsurfend.carres.c ; rm _ ;
+echo "int bddSurfendCarreY(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j)" > _
+cat _ __ >> bddsurfend.h ; cat _ bddsurfend.carrey.c >> bddsurfend.carres.c ; rm _ ;
+echo "int bddSurfendCarreZ(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j)" > _
+cat _ __ >> bddsurfend.h ; cat _ bddsurfend.carrez.c >> bddsurfend.carres.c ; rm _ ;
+rm __

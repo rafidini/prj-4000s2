@@ -1,0 +1,21 @@
+#!/bin/sh
+USAGE="Usage: $0 in alpha seuilprof out"
+if [ $# -gt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+deriche             $1            $2           0      _$1.g
+segment          _$1.g             4        prof         $3          min        _$1.sg
+bouchetrous     _$1.sg             4        1000    _$1.bsg
+erosfast       _$1.bsg         vois8    _$1.ebsg
+erosfast      _$1.ebsg         vois8    _$1.ebsg
+reconsdilat   _$1.ebsg       _$1.bsg       vois4  _$1.rebsg
+propgeo          _$1.g     _$1.rebsg           4       min1      _$1.prebsg
+lpemeyer         _$1.g    _$1.prebsg          $4
+#showsurimp          $1            $4&

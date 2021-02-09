@@ -1,0 +1,17 @@
+#!/bin/sh
+USAGE="Usage: $0 in connex out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+medialaxis $1 $2 0 /tmp/_squel1_1
+seuil      /tmp/_squel1_1 1 /tmp/_squel1_1
+hthin      $1 /tmp/_squel1_1 $2 -1 delta $3
+rm         /tmp/_squel1_?
+

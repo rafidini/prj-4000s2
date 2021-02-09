@@ -1,0 +1,57 @@
+derniers ajouts / modifications :
+
+12/01/2011 MC
+
+- images de complexes
+  - formats "pgm etendu" PE et PF (voir doc/formats.txt)
+  - typedef complex (dans mcimage)
+  - tags VFF_TYP_COMPLEX et VFF_TYP_DCOMPLEX pour xvimage
+  - macros COMPLEXDATA et DCOMPLEXDATA
+  - extension des opérations arithmétiques usuelles ainsi que crop, insert...
+  - operateur any2complex
+  - opérateurs complex_real, complex_imaginary, complex_modulus
+  - fft utilise maintenant les images de type complexe
+
+- nouveau TP: MC-TP5, images EDF
+  - analyse de corrosion des joints
+    script python mc-tp5-1.py testé
+  - correction de gradient d'illumination
+    script python mc-tp5-2.py testé
+  - correction d'un "effet de drappé" (utilisant la fft)
+    script bash mc-tp5-3.sh testé
+
+27/01/2011 MC
+
+- nouveaux tests dans zoom, openball, closeball, holeclosing...
+- suppression de dilatdisc, erosdisc, opendisc, closedisc (ldist.c)
+  et remplacement par XXXXXball
+- le code 0 pour les calculs de distance correspond maintenant à une
+  distance euclidienne exacte arrondie
+
+02/02/2011 MC
+
+- allocation à l'extérieur pour lmedialaxis_lmedialaxis()
+- ajout de lmedialaxis_openingfunction()
+
+23/02/2011 MC
+
+- remplacement des <x|y> par des {x|y} dans les docs (facilite le parsing)
+
+26/03/2011 MC
+
+- manipulate renvoie maintenant une valeur (la dernière valeur du paramètre)
+- 64 bits: larea() retourne un (index_t)
+- manipulate : action 'superimpose' implémentée
+- démonstration des opérateurs morpho de base dans 
+  tutorials/python/MC-TP1/solution/mc-demo-morph1.py
+
+05-08/04/2011 MC
+
+- operateur lambdamedialaxis pour python
+- initialise nouveau tutorial python MC-TP8 (squelettes euclidiens)
+- skel_CKG, lskelpar3d2 : algo 3D // guidé (init)
+
+Hugues Talbot	14 Apr 2011
+
+- lecture transparente des images TIFF
+

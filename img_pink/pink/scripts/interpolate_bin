@@ -1,0 +1,23 @@
+#!/bin/sh
+USAGE="Usage: $0 in1 in2 out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+min $1 $2 /tmp/_inter
+max $1 $2 /tmp/_union
+sub /tmp/_union /tmp/_inter /tmp/_diff
+inverse /tmp/_diff /tmp/_diff
+erosfast /tmp/_diff vois8 /tmp/_diff
+skiz /tmp/_diff /tmp/_skiz
+inverse /tmp/_skiz /tmp/_skiz
+erosfast /tmp/_inter vois8 /tmp/_inter
+reconsdilat /tmp/_inter /tmp/_skiz vois4 $3  
+#rm /tmp/_inter /tmp/_union /tmp/_diff /tmp/_skiz
+

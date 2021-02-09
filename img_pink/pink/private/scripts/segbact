@@ -1,0 +1,21 @@
+#!/bin/sh
+#-------------------------------------------------------
+# Experimentation d'une chaine de segmentation 
+# de bacteries dans une image de microscopie par epifluorescence
+# Michel Couprie - avril 1999 
+#-------------------------------------------------------
+USAGE="Usage: $0 in out"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+
+segment     $1 4 prof 23 max _segmax
+recons      $1 _segmax 4 $2
+rm          _segmax

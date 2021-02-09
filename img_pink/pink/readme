@@ -1,0 +1,189 @@
+Copyright ESIEE (2009) 
+
+m.couprie@esiee.fr
+
+This software is an image processing library whose purpose is to be
+used primarily for research and teaching.
+
+This software is governed by the CeCILL  license under French law and
+abiding by the rules of distribution of free software. You can  use, 
+modify and/ or redistribute the software under the terms of the CeCILL
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info". 
+
+As a counterpart to the access to the source code and  rights to copy,
+modify and redistribute granted by the license, users are provided only
+with a limited warranty  and the software's author,  the holder of the
+economic rights,  and the successive licensors  have only  limited
+liability. 
+
+In this respect, the user's attention is drawn to the risks associated
+with loading,  using,  modifying and/or developing or reproducing the
+software by the user in light of its specific status of free software,
+that may mean  that it is complicated to manipulate,  and  that  also
+therefore means  that it is reserved for developers  and  experienced
+professionals having in-depth computer knowledge. Users are therefore
+encouraged to load and test the software's suitability as regards their
+requirements in conditions enabling the security of their systems and/or 
+data to be ensured and,  more generally, to use and operate it in the 
+same conditions as regards security. 
+
+The fact that you are presently reading this means that you have had
+knowledge of the CeCILL license and that you accept its terms.
+=================================================================
+
+Installation
+***************************************
+
+Method 1 (with cmake)
+------------------------
+
+Create a directory anywhere, but preferably outside of the main Pink directory. Let's call this new directory ${BUILD} (only an example) and ${PINK} the main Pink directory. Then do the following:
+
+cd ${BUILD} 
+cmake ${PINK}
+make
+
+this should work with default settings. If you want to peek at the settings, the procedure is
+
+cd ${BUILD}
+ccmake ${PINK}
+
+then there is an interactive configuration screen. Type 'c' to configure the defaults ; 'c' again (that's the way it is), and then 'g' to generate the makefiles.
+For the batch interface (default), the variable 'BASH_FRONT_END' should be 'ON'.
+For the python interface, the variable 'PYTHON_FRONT_END' and the variable 'LIAR' should be both 'ON'.
+IMPORTANT: do not select both bash and python interfaces at once, even if you want to install both. In this case, perform the installation twice.
+
+then type 
+
+make
+
+The executables to be called from the bash (or csh, tcsh...) interface are located in directory '${BUILD}/bash'.
+
+For launching the python interface, use the script '${BUILD}/pink.sh'.
+
+Method 2 (without cmake)
+------------------------
+
+Linux
+
+To install:
+
+tar zxvf pink.tgz
+mv Pinktmp <main_pink_directory>
+cd <main_pink_directory>
+./makelin
+
+Executable files are in '<main_pink_directory>/linux/bin',
+scripts are in '<main_pink_directory>/scripts',  '<main_pink_directory>/python', and in '<main_pink_directory>/tcl'
+Update your $path variable accordingly.
+For example (csh): 
+
+setenv PINK <main_pink_directory>
+set path=( $path $PINK/linux/bin $PINK/scripts $PINK/tcl  $PINK/scripts $PINK/python)
+
+or (bash):
+
+export PINK=<main_pink_directory>
+export PATH=$PATH:$PINK/linux/bin:$PINK/scripts:$PINK/tcl:$PINK/scripts:$PINK/python
+
+Windows
+
+First, install <A HREF="http://www.mingw.org/">MinGW</A> (Minimalist GNU For Windows), 
+and 'make' from the MinGW distribution (separate installation).
+
+Uncompress the archive 'pink.tgz' (e.g. with WinZip or WinRar).
+
+Depending on your configuration, update files 'mgw.make' and 'makemgw.bat'.
+
+Launch a DOS terminal and go to the main pink directory.
+
+then type: 
+
+makemgw
+
+Executable files are in '<main_pink_directory>\bin',
+Update your PATH variable accordingly.
+
+For example:
+
+\verbatim
+set PATH=<main_pink_directory>\bin;%PATH%
+\endverbatim
+
+The following software should also be installed:
+
+<A HREF="http://www.doxygen.org">Doxygen</A>
+<A HREF="http://dev.scriptics.com/">ActiveTcl 8.3</A>
+<A HREF="http://public.kitware.com/VTK/">VTK</A>
+<A HREF="http://hugues.zahlt.info/Imview.html">ImView</A>
+<A HREF="http://www.mplayerhq.hu/design7/news.html">MPlayer</A>
+<A HREF="http://www.gnuplot.info/">Gnuplot</A>
+
+*******************************************************
+
+CREATOR:
+
+Michel Couprie
+
+MAIN CONTRIBUTORS:
+
+Michel Couprie, 
+Hugues Talbot, 
+Laurent Najman, 
+Jean Cousty,
+Lazlo Marak
+
+OTHER CONTRIBUTORS:
+
+Cédric Allène,
+John Chaussard,
+Nicolas Combaret, 
+Camille Couprie, 
+Sébastien Couprie, 
+Xavier Daragon, 
+Christophe Doublier,
+Silvio Jamil Guimaraes,
+Gu Jun,
+Hildegard Koehler, 
+Laurent Mercier,
+Benjamin Raynal,
+Mohamed Amine Salem,
+André Vital Saude, 
+Rita Zrour
+
+CODE UNDER FREE LICENCE INCLUDED:
+
+Dario Bressanini: mcpowell.c
+Lilian Buzer: lbdigitalline.cxx
+David Coeurjolly: lvoronoilabelling.c
+Andrew W. Fitzgibbon: lbresen.c
+Stefan Gustavson: lfft.c
+
+*********************************************************
+
+Erreurs de compilation possibles et solutions:
+
+message d'erreur contenant "M_PI"
+cause: version MinGW obsolete
+solution rapide: recopier le contenu du fichier Pink/tools/pinkconst.h
+dans le fichier MinGW/include/math.h
+
+message d'erreur contenant "uint8_t", "int8_t", "uint16_t", etc 
+cause: version MinGW obsolete
+solution rapide: recopier le contenu du fichier Pink/tools/pinktypes.h
+dans le fichier MinGW/include/stdint.h
+
+message d'erreur contenant "chrono"
+cause: flag de mise au point oublié
+solution rapide: chercher le "#define CHRONO" dans le fichier source et le retirer
+
+La documentation de trouve dans Pink/doc.
+
+======================================================
+Michel Couprie  -  Professeur  -  Departement Informatique
+ESIEE 2, Bd Blaise Pascal - B.P. 99
+93162 Noisy-Le-Grand CEDEX
+mail: m.couprie@esiee.fr 
+url:  http://www.esiee.fr/~coupriem
+tel:  01 45 92 66 88          fax:  01 45 92 66 99          

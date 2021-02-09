@@ -1,0 +1,14 @@
+#!/bin/sh
+USAGE="Usage: $0 in rayon connex out"
+if [ $# -gt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+dilatball  $1  $2  $4
+hthick     $1  $4  $3  10000 delta $4

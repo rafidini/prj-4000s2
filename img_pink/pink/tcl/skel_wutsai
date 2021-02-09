@@ -1,0 +1,246 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec tclsh $0 $1 $2 $3
+
+ if {($argc != 3)} { 
+   puts stderr "usage: wutsai in nsteps out"
+   exit 
+ }
+
+set PINK "$env(PINK)"
+set MASKS "$env(PINK)/masks"
+source "$PINK/tcl/my_exec.tcl"
+
+global WUTSAI
+set WUTSAI(name) "wutsai"
+set WUTSAI(infilename) [lindex $argv 0]
+set WUTSAI(nsteps) [lindex $argv 1]
+set WUTSAI(outfilename) [lindex $argv 2]
+my_exec_q cp $WUTSAI(infilename) "/tmp/$WUTSAI(name)_t0" 
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%d %d" v1 v2
+  close $input
+  return $v2
+}
+
+# expanding templates
+#-----------------------------------
+# codage des templates : 
+# 0 = don't care
+# 1 = hit
+# 2 = miss
+
+my_exec_q rotse "$MASKS/WUTSAI1.pgm" 90 "/tmp/WUTSAI2"
+
+my_exec_q seuil "$MASKS/WUTSAI1.pgm" 1 2 "/tmp/WUTSAI1_h" 
+my_exec_q setorigin "/tmp/WUTSAI1_h" "$MASKS/WUTSAI1.pgm"
+my_exec_q seuil "$MASKS/WUTSAI1.pgm" 2 3 "/tmp/WUTSAI1_m" 
+my_exec_q setorigin "/tmp/WUTSAI1_m" "$MASKS/WUTSAI1.pgm"
+
+my_exec_q seuil "/tmp/WUTSAI2" 1 2 "/tmp/WUTSAI2_h" 
+my_exec_q setorigin "/tmp/WUTSAI2_h" "/tmp/WUTSAI2"
+my_exec_q seuil "/tmp/WUTSAI2" 2 3 "/tmp/WUTSAI2_m" 
+my_exec_q setorigin "/tmp/WUTSAI2_m" "/tmp/WUTSAI2"
+
+my_exec_q rotse "$MASKS/WUTSAI3.pgm" 90 "/tmp/WUTSAI4"
+
+my_exec_q seuil "$MASKS/WUTSAI3.pgm" 1 2 "/tmp/WUTSAI3_h" 
+my_exec_q setorigin "/tmp/WUTSAI3_h" "$MASKS/WUTSAI3.pgm"
+my_exec_q seuil "$MASKS/WUTSAI3.pgm" 2 3 "/tmp/WUTSAI3_m" 
+my_exec_q setorigin "/tmp/WUTSAI3_m" "$MASKS/WUTSAI3.pgm"
+
+my_exec_q seuil "/tmp/WUTSAI4" 1 2 "/tmp/WUTSAI4_h" 
+my_exec_q setorigin "/tmp/WUTSAI4_h" "/tmp/WUTSAI4"
+my_exec_q seuil "/tmp/WUTSAI4" 2 3 "/tmp/WUTSAI4_m" 
+my_exec_q setorigin "/tmp/WUTSAI4_m" "/tmp/WUTSAI4"
+
+my_exec_q rotse "$MASKS/WUTSAI5.pgm" 90 "/tmp/WUTSAI6"
+
+my_exec_q seuil "$MASKS/WUTSAI5.pgm" 1 2 "/tmp/WUTSAI5_h" 
+my_exec_q setorigin "/tmp/WUTSAI5_h" "$MASKS/WUTSAI5.pgm"
+my_exec_q seuil "$MASKS/WUTSAI5.pgm" 2 3 "/tmp/WUTSAI5_m" 
+my_exec_q setorigin "/tmp/WUTSAI5_m" "$MASKS/WUTSAI5.pgm"
+
+my_exec_q seuil "/tmp/WUTSAI6" 1 2 "/tmp/WUTSAI6_h" 
+my_exec_q setorigin "/tmp/WUTSAI6_h" "/tmp/WUTSAI6"
+my_exec_q seuil "/tmp/WUTSAI6" 2 3 "/tmp/WUTSAI6_m" 
+my_exec_q setorigin "/tmp/WUTSAI6_m" "/tmp/WUTSAI6"
+
+my_exec_q rotse "$MASKS/WUTSAI7.pgm" 90 "/tmp/WUTSAI8"
+
+my_exec_q seuil "$MASKS/WUTSAI7.pgm" 1 2 "/tmp/WUTSAI7_h" 
+my_exec_q setorigin "/tmp/WUTSAI7_h" "$MASKS/WUTSAI7.pgm"
+my_exec_q seuil "$MASKS/WUTSAI7.pgm" 2 3 "/tmp/WUTSAI7_m" 
+my_exec_q setorigin "/tmp/WUTSAI7_m" "$MASKS/WUTSAI7.pgm"
+
+my_exec_q seuil "/tmp/WUTSAI8" 1 2 "/tmp/WUTSAI8_h" 
+my_exec_q setorigin "/tmp/WUTSAI8_h" "/tmp/WUTSAI8"
+my_exec_q seuil "/tmp/WUTSAI8" 2 3 "/tmp/WUTSAI8_m" 
+my_exec_q setorigin "/tmp/WUTSAI8_m" "/tmp/WUTSAI8"
+
+my_exec_q rotse "$MASKS/WUTSAI9.pgm" 90 "/tmp/WUTSAI10"
+
+my_exec_q seuil "$MASKS/WUTSAI9.pgm" 1 2 "/tmp/WUTSAI9_h" 
+my_exec_q setorigin "/tmp/WUTSAI9_h" "$MASKS/WUTSAI9.pgm"
+my_exec_q seuil "$MASKS/WUTSAI9.pgm" 2 3 "/tmp/WUTSAI9_m" 
+my_exec_q setorigin "/tmp/WUTSAI9_m" "$MASKS/WUTSAI9.pgm"
+
+my_exec_q seuil "/tmp/WUTSAI10" 1 2 "/tmp/WUTSAI10_h" 
+my_exec_q setorigin "/tmp/WUTSAI10_h" "/tmp/WUTSAI10"
+my_exec_q seuil "/tmp/WUTSAI10" 2 3 "/tmp/WUTSAI10_m" 
+my_exec_q setorigin "/tmp/WUTSAI10_m" "/tmp/WUTSAI10"
+
+my_exec_q rotse "$MASKS/WUTSAI11.pgm" 90 "/tmp/WUTSAI12"
+
+my_exec_q seuil "$MASKS/WUTSAI11.pgm" 1 2 "/tmp/WUTSAI11_h" 
+my_exec_q setorigin "/tmp/WUTSAI11_h" "$MASKS/WUTSAI11.pgm"
+my_exec_q seuil "$MASKS/WUTSAI11.pgm" 2 3 "/tmp/WUTSAI11_m" 
+my_exec_q setorigin "/tmp/WUTSAI11_m" "$MASKS/WUTSAI11.pgm"
+
+my_exec_q seuil "/tmp/WUTSAI12" 1 2 "/tmp/WUTSAI12_h" 
+my_exec_q setorigin "/tmp/WUTSAI12_h" "/tmp/WUTSAI12"
+my_exec_q seuil "/tmp/WUTSAI12" 2 3 "/tmp/WUTSAI12_m" 
+my_exec_q setorigin "/tmp/WUTSAI12_m" "/tmp/WUTSAI12"
+
+my_exec_q rotse "$MASKS/WUTSAI13.pgm" 90 "/tmp/WUTSAI14"
+
+my_exec_q seuil "$MASKS/WUTSAI13.pgm" 1 2 "/tmp/WUTSAI13_h" 
+my_exec_q setorigin "/tmp/WUTSAI13_h" "$MASKS/WUTSAI13.pgm"
+my_exec_q seuil "$MASKS/WUTSAI13.pgm" 2 3 "/tmp/WUTSAI13_m" 
+my_exec_q setorigin "/tmp/WUTSAI13_m" "$MASKS/WUTSAI13.pgm"
+
+my_exec_q seuil "/tmp/WUTSAI14" 1 2 "/tmp/WUTSAI14_h" 
+my_exec_q setorigin "/tmp/WUTSAI14_h" "/tmp/WUTSAI14"
+my_exec_q seuil "/tmp/WUTSAI14" 2 3 "/tmp/WUTSAI14_m" 
+my_exec_q setorigin "/tmp/WUTSAI14_m" "/tmp/WUTSAI14"
+
+my_exec_q rotse "$MASKS/WUTSAI15.pgm" 90 "/tmp/WUTSAI16"
+my_exec_q rotse "$MASKS/WUTSAI15.pgm" 180 "/tmp/WUTSAI17"
+my_exec_q rotse "$MASKS/WUTSAI15.pgm" 270 "/tmp/WUTSAI18"
+
+my_exec_q seuil "$MASKS/WUTSAI15.pgm" 1 2 "/tmp/WUTSAI15_h" 
+my_exec_q setorigin "/tmp/WUTSAI15_h" "$MASKS/WUTSAI15.pgm"
+my_exec_q seuil "$MASKS/WUTSAI15.pgm" 2 3 "/tmp/WUTSAI15_m" 
+my_exec_q setorigin "/tmp/WUTSAI15_m" "$MASKS/WUTSAI15.pgm"
+
+my_exec_q seuil "/tmp/WUTSAI16" 1 2 "/tmp/WUTSAI16_h" 
+my_exec_q setorigin "/tmp/WUTSAI16_h" "/tmp/WUTSAI16"
+my_exec_q seuil "/tmp/WUTSAI16" 2 3 "/tmp/WUTSAI16_m" 
+my_exec_q setorigin "/tmp/WUTSAI16_m" "/tmp/WUTSAI16"
+
+my_exec_q seuil "/tmp/WUTSAI17" 1 2 "/tmp/WUTSAI17_h" 
+my_exec_q setorigin "/tmp/WUTSAI17_h" "/tmp/WUTSAI17"
+my_exec_q seuil "/tmp/WUTSAI17" 2 3 "/tmp/WUTSAI17_m" 
+my_exec_q setorigin "/tmp/WUTSAI17_m" "/tmp/WUTSAI17"
+
+my_exec_q seuil "/tmp/WUTSAI18" 1 2 "/tmp/WUTSAI18_h" 
+my_exec_q setorigin "/tmp/WUTSAI18_h" "/tmp/WUTSAI18"
+my_exec_q seuil "/tmp/WUTSAI18" 2 3 "/tmp/WUTSAI18_m" 
+my_exec_q setorigin "/tmp/WUTSAI18_m" "/tmp/WUTSAI18"
+
+# One thinning step
+#-----------------------------------
+proc one_step {} {
+    global WUTSAI
+    global MASKS
+    my_exec_q cp "/tmp/$WUTSAI(name)_t0" "/tmp/$WUTSAI(name)_t0_sav" 
+
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI1_h" "/tmp/WUTSAI1_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q mv "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI2_h" "/tmp/WUTSAI2_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI3_h" "/tmp/WUTSAI3_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI4_h" "/tmp/WUTSAI4_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI5_h" "/tmp/WUTSAI5_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI6_h" "/tmp/WUTSAI6_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI7_h" "/tmp/WUTSAI7_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI8_h" "/tmp/WUTSAI8_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI9_h" "/tmp/WUTSAI9_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI10_h" "/tmp/WUTSAI10_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI11_h" "/tmp/WUTSAI11_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI12_h" "/tmp/WUTSAI12_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI13_h" "/tmp/WUTSAI13_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI14_h" "/tmp/WUTSAI14_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI15_h" "/tmp/WUTSAI15_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI16_h" "/tmp/WUTSAI16_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI17_h" "/tmp/WUTSAI17_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    my_exec_q hitormiss "/tmp/$WUTSAI(name)_t0" "/tmp/WUTSAI18_h" "/tmp/WUTSAI18_m" "/tmp/$WUTSAI(name)_t01"
+    my_exec_q max "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t01" "/tmp/$WUTSAI(name)_t1"
+    
+    my_exec_q sub "/tmp/$WUTSAI(name)_t0" "/tmp/$WUTSAI(name)_t1" "/tmp/$WUTSAI(name)_t0"
+
+    my_exec_q sub "/tmp/$WUTSAI(name)_t0_sav" "/tmp/$WUTSAI(name)_t0" "/tmp/$WUTSAI(name)_t0_sav"
+    my_exec_q area "/tmp/$WUTSAI(name)_t0_sav" "/tmp/$WUTSAI(name)_area"
+    set delta [my_read_val "/tmp/$WUTSAI(name)_area"]
+    return $delta
+}
+
+if {$WUTSAI(nsteps) != -1} {
+    for {set j 1} {$j<=$WUTSAI(nsteps)} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }
+} else {
+    set delta 1
+    for {set j 1} {$delta != 0} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }    
+}
+
+my_exec_q cp "/tmp/$WUTSAI(name)_t0" $WUTSAI(outfilename) 
+#my_exec_q rm "/tmp/$WUTSAI(name)_*" "/tmp/WUTSAI*" 

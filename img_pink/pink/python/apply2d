@@ -1,0 +1,55 @@
+#!/usr/bin/python
+import sys
+import os
+import re
+
+# application d'un operateur 2d a chaque plan xy d'une image 3d
+# usage : apply2d in.pgm op arg1 ... argn out.pgm
+
+name = "apply2d"
+
+if (len(sys.argv) < 4) : 
+    print "usage: " + name + " in.pgm op arg1 ... argn out.pgm"
+    sys.exit ()
+
+# reads a pgm image header
+# returns the image sizes in the form of a list : [rowsize, colsize] (in 2D)
+# or [rowsize, colsize, depth] in 3D
+#-----------------------------------
+def my_readpgmheader(filename) :
+  f = open(filename, 'r')
+  # read tag
+  s = f.readline()
+  # skip comment lines and reads one more line
+  l = f.readline().split()
+  while (l[0][0] == '#') or (len(l) == 0) :    
+    l = f.readline().split()
+  return l
+
+def my_exec_q(command, *args) :
+  s = command
+  for arg in args:
+    s = s+" "+str(arg)
+  os.system(s)
+
+infilename = sys.argv[1]
+outfilename = sys.argv[len(sys.argv) - 1]
+tmpprefix = "/tmp/_"+name
+sizes = my_readpgmheader(infilename)
+largs = sys.argv[:]
+largs.pop()
+largs.pop(0)
+largs.pop(0)
+comm = largs.pop(0)
+args = ""
+for arg in largs:
+  args = args +" "+str(arg)
+
+my_exec_q("genimage", infilename, 0, outfilename)
+
+for i in range(0,int(sizes[2])):
+  my_exec_q("extractplane", infilename, i, "xy", tmpprefix+"p")
+  my_exec_q(comm, tmpprefix+"p", args, tmpprefix+"r")
+  my_exec_q("insert", tmpprefix+"r", outfilename, 0, 0, i, outfilename)
+
+my_exec_q("rm", tmpprefix+"?")

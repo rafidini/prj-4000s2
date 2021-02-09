@@ -1,0 +1,27 @@
+1.
+Image : images/joints.pgm
+But : extraire les joints et mesurer la corrosion (parties noires) le
+long des joints
+
+2.
+Images : images/pex?.pgm
+But : corriger le gradient d'illumination
+
+3.
+Image : images/trois003.pgm
+But : corriger l'effet de "drappé"
+
+4.
+Image : images/carbures.pgm
+But : segmenter les carbures et mesurer les tailles des amas
+
+5.
+Image : images/mortier_2d.pgm
+But : corriger le gradient radial d'illumination
+
+6.
+Image : images/mortier_3d.pgm
+But : segmenter les quatre phases (cavités, matrice, inclusions sombres, inclusions claires)
+
+
+

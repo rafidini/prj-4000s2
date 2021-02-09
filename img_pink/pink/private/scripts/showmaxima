@@ -1,0 +1,12 @@
+maxima      $1         8 _$1.maxima
+inverse    _$1.maxima    _$1.maximainv
+min         $1           _$1.maximainv   _$1.maximamin
+add        _$1.maximamin _$1.maxima      _$1.maxima
+bw2rgb     _$1.maxima    _$1.maximamin   _$1.maximamin    _$1.maxima
+if [ $# -gt 1 ]
+then
+	xv   -geometry +$2+$3 -fixed      _$1.maxima
+else
+	xv         _$1.maxima
+fi
+rm         _$1.maxima*

@@ -1,0 +1,44 @@
+#!/bin/sh
+#-------------------------------------------------------
+# Experimentation d'une chaine de segmentation 
+# et de compression selective de documents
+# Segmentation multiclasses
+# Michel Couprie - mai 1999 
+#-------------------------------------------------------
+USAGE="Usage: $0 in out"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+#-------------------------------------------------------
+# segmentation du texte
+#-------------------------------------------------------
+segmentnum  $1      prof    15      _seg
+#-------------------------------------------------------
+# bouchage des trous
+#-------------------------------------------------------
+tmp         _seg    4      _segb
+#-------------------------------------------------------
+# extraction des frontieres (suppression du cadre)
+#-------------------------------------------------------
+border      _segb   8      _bord
+long2byte   _bord   _bord
+cadre       _bord   _tmp
+sub         _bord   _tmp   _bord
+#-------------------------------------------------------
+# marquage des regions epaisses
+#-------------------------------------------------------
+dist        _bord   0      _dist
+seuilbin    _dist   15     _mark
+#-------------------------------------------------------
+# reconstruction
+#-------------------------------------------------------
+reconsplateaux _segb _mark 4 _rec
+long2byte   _rec    _tmp
+seuilbin    _tmp    1      $2

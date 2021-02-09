@@ -1,0 +1,161 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec tclsh $0 $1 $2 $3 $4 $5
+
+ if {($argc != 5)} { 
+   puts stderr "usage: dirthick in template1 template2 nsteps out"
+   exit 
+ }
+
+set PINK "$env(PINK)"
+source "$PINK/tcl/my_exec.tcl"
+
+global DIRTHICK
+set DIRTHICK(name) "dirthick"
+set DIRTHICK(infilename) [lindex $argv 0]
+set DIRTHICK(template1name) [lindex $argv 1]
+set DIRTHICK(template2name) [lindex $argv 2]
+set DIRTHICK(nsteps) [lindex $argv 3]
+set DIRTHICK(outfilename) [lindex $argv 4]
+
+proc tmpfile {tmpname} {
+  global DIRTHICK
+  return [file join "/tmp" "$DIRTHICK(name)_$tmpname"]
+}
+
+my_exec_q cp $DIRTHICK(infilename) [tmpfile t0] 
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%d %d" v1 v2
+  close $input
+  return $v2
+}
+
+# expanding templates
+#-----------------------------------
+# codage des templates : 
+# 0 = don't care
+# 1 = hit
+# 2 = miss
+
+my_exec_q seuil $DIRTHICK(template1name) 1 2 [tmpfile h1_0] 
+my_exec_q setorigin [tmpfile h1_0] $DIRTHICK(template1name)
+
+my_exec_q seuil $DIRTHICK(template1name) 2 3 [tmpfile m1_0] 
+my_exec_q setorigin [tmpfile m1_0] $DIRTHICK(template1name)
+
+my_exec_q rotse [tmpfile h1_0] 90 [tmpfile h1_90]
+my_exec_q rotse [tmpfile h1_0] 180 [tmpfile h1_180]
+my_exec_q rotse [tmpfile h1_0] 270 [tmpfile h1_270]
+
+my_exec_q rotse [tmpfile m1_0] 90 [tmpfile m1_90]
+my_exec_q rotse [tmpfile m1_0] 180 [tmpfile m1_180]
+my_exec_q rotse [tmpfile m1_0] 270 [tmpfile m1_270]
+
+my_exec_q seuil $DIRTHICK(template2name) 1 2 [tmpfile h2_0] 
+my_exec_q setorigin [tmpfile h2_0] $DIRTHICK(template2name)
+
+my_exec_q seuil $DIRTHICK(template2name) 2 3 [tmpfile m2_0] 
+my_exec_q setorigin [tmpfile m2_0] $DIRTHICK(template2name)
+
+my_exec_q rotse [tmpfile h2_0] 90 [tmpfile h2_90]
+my_exec_q rotse [tmpfile h2_0] 180 [tmpfile h2_180]
+my_exec_q rotse [tmpfile h2_0] 270 [tmpfile h2_270]
+
+my_exec_q rotse [tmpfile m2_0] 90 [tmpfile m2_90]
+my_exec_q rotse [tmpfile m2_0] 180 [tmpfile m2_180]
+my_exec_q rotse [tmpfile m2_0] 270 [tmpfile m2_270]
+
+#-----------------------------------
+proc one_step {} {
+    global DIRTHICK
+    my_exec_q cp [tmpfile t0] [tmpfile t0_sav] 
+
+    my_exec_q hitormiss [tmpfile t0] [tmpfile h1_0] [tmpfile m1_0]
+    [tmpfile t1] 
+    my_exec_q max [tmpfile t0] [tmpfile t1] [tmpfile t0] 
+    my_exec_q hitormiss [tmpfile t0] [tmpfile h1_90] [tmpfile m1_90]
+    [tmpfile t1] 
+    my_exec_q max [tmpfile t0] [tmpfile t1] [tmpfile t0] 
+    my_exec_q hitormiss [tmpfile t0] [tmpfile h1_180] [tmpfile m1_180]
+    [tmpfile t1] 
+    my_exec_q max [tmpfile t0] [tmpfile t1] [tmpfile t0] 
+    my_exec_q hitormiss [tmpfile t0] [tmpfile h1_270] [tmpfile m1_270]
+    [tmpfile t1] 
+    my_exec_q max [tmpfile t0] [tmpfile t1] [tmpfile t0] 
+
+    my_exec_q hitormiss [tmpfile t0] [tmpfile h2_0] [tmpfile m2_0]
+    [tmpfile t1] 
+    my_exec_q max [tmpfile t0] [tmpfile t1] [tmpfile t0] 
+    my_exec_q hitormiss [tmpfile t0] [tmpfile h2_90] [tmpfile m2_90]
+    [tmpfile t1] 
+    my_exec_q max [tmpfile t0] [tmpfile t1] [tmpfile t0] 
+    my_exec_q hitormiss [tmpfile t0] [tmpfile h2_180] [tmpfile m2_180]
+    [tmpfile t1] 
+    my_exec_q max [tmpfile t0] [tmpfile t1] [tmpfile t0] 
+    my_exec_q hitormiss [tmpfile t0] [tmpfile h2_270] [tmpfile m2_270]
+    [tmpfile t1] 
+    my_exec_q max [tmpfile t0] [tmpfile t1] [tmpfile t0] 
+
+    my_exec_q sub [tmpfile t0] [tmpfile t0_sav] [tmpfile t0_sav]
+    my_exec_q area [tmpfile t0_sav] [tmpfile area]
+    set delta [my_read_val [tmpfile area]]
+    return $delta
+}
+
+if {$DIRTHICK(nsteps) != -1} {
+    for {set j 1} {$j<=$DIRTHICK(nsteps)} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }
+} else {
+    set delta 1
+    for {set j 1} {$delta != 0} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }    
+}
+
+my_exec_q cp [tmpfile t0] $DIRTHICK(outfilename) 
+
+foreach file [glob -nocomplain [tmpfile "*"]] {
+  catch {exec rm $file} result
+}

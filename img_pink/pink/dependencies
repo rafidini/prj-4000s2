@@ -1,0 +1,100 @@
+// Dependency and platform file
+
+tried platforms:
+OpenSuSE 11.2
+Ubuntu 10.4 LTS
+MacOS X snow leopard (bash front-end only)
+Windows XP (bash front-end only)
+
+// *************************************************
+// Pink-python dependenies on ubuntu 10.4
+// *************************************************
+
+libx11-dev
+python-dev 
+libgsl0-dev 
+libboost1.40-dev 
+libboost-python1.40-dev 
+//boostpythongenerator 
+libeigen2-dev 
+liblapack-dev 
+libboost-thread-dev
+libncurses5-dev
+doxygen
+libpthread-stubs0-dev
+
+python PIL, Tkinter
+
+and the usual gcc, g++, cmake, make
+
+// recommended:
+ipython
+// *************************************************
+// *************************************************
+// *************************************************
+
+// *************************************************
+// Pink-python dependencies on debian lenny (5.0, 32bit)
+// *************************************************
+
+// installed before compilation 
+subversion // for development
+cmake // for compilation 
+
+// building pink's bash front-end
+libx11-dev
+ncurses (libncurses-dev)
+doxygen (check!)
+and the usual gcc, g++, make
+
+// building the python front-end
+python-dev
+  
+// boost version 1.34 not enough
+libboost1.35-dev (libboost-dev) // also included libboost-python1.40-dev libboost-thread-dev
+  
+// special functions not needed for EDF
+libgsl0-dev 
+libeigen2-dev 
+liblapack-dev 
+
+libncurses5-dev
+
+// for view3d
+python-tk
+python-imaging
+python-imaging-tk
+
+// for render
+python-vtk
+
+// recommended:
+ipython
+
+// some editor
+emacs, emacs-gtk
+
+// *************************************************
+// *************************************************
+// *************************************************
+
+
+// *************************************************
+// Pink-python dependencies on debian squeeze (6.0, 64bit)
+// *************************************************
+
+// mandatory 
+sudo apt-get install imview libboost-dev libncurses-dev cmake python-imaging-tk python-vtk ipython python-dev libx11-dev g++ gcc make libtiff-dev
+
+// optional
+sudo apt-get install cmake-gui
+
+// *************************************************
+// Pink-Python dependencies on openSUSE (11.2, 64bit)
+// *************************************************
+
+BuildRequires:  boost-devel ncurses-devel cmake python-imaging python-tk ipython python-devel xorg-x11-devel gcc-c++ gcc make libtiff-devel
+
+
+
+

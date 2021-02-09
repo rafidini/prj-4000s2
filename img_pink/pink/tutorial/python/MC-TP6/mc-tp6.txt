@@ -1,0 +1,3 @@
+Image : images/uo.pgm
+But : extraire les cellules
+

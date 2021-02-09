@@ -1,0 +1,642 @@
+/*
+Copyright ESIEE (2009) 
+
+m.couprie@esiee.fr
+
+This software is an image processing library whose purpose is to be
+used primarily for research and teaching.
+
+This software is governed by the CeCILL  license under French law and
+abiding by the rules of distribution of free software. You can  use, 
+modify and/ or redistribute the software under the terms of the CeCILL
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info". 
+
+As a counterpart to the access to the source code and  rights to copy,
+modify and redistribute granted by the license, users are provided only
+with a limited warranty  and the software's author,  the holder of the
+economic rights,  and the successive licensors  have only  limited
+liability. 
+
+In this respect, the user's attention is drawn to the risks associated
+with loading,  using,  modifying and/or developing or reproducing the
+software by the user in light of its specific status of free software,
+that may mean  that it is complicated to manipulate,  and  that  also
+therefore means  that it is reserved for developers  and  experienced
+professionals having in-depth computer knowledge. Users are therefore
+encouraged to load and test the software's suitability as regards their
+requirements in conditions enabling the security of their systems and/or 
+data to be ensured and,  more generally, to use and operate it in the 
+same conditions as regards security. 
+
+The fact that you are presently reading this means that you have had
+knowledge of the CeCILL license and that you accept its terms.
+*/
+
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <mccodimage.h>
+#include <mcimage.h>
+#include <mctopo.h>
+#include <mctopo3d.h>
+#include <mcutil.h>
+#include <mcindic.h>
+#include <mcrlifo.h>
+#include <lskelpar3d.h>
+
+#define I_INHIBIT     1
+
+#define IS_INHIBIT(f) (f&I_INHIBIT)
+#define SET_INHIBIT(f) (f|=I_INHIBIT)
+
+#define S_OBJECT      1
+#define S_SIMPLE      2
+#define S_DCRUCIAL    4
+#define S_CURVE      32
+#define S_SURF       64
+#define S_SELECTED  128
+
+#define IS_OBJECT(f)     (f&S_OBJECT)
+#define IS_SIMPLE(f)     (f&S_SIMPLE)
+#define IS_DCRUCIAL(f)   (f&S_DCRUCIAL)
+#define IS_CURVE(f)      (f&S_CURVE)
+#define IS_SURF(f)       (f&S_SURF)
+#define IS_SELECTED(f)   (f&S_SELECTED)
+
+#define SET_OBJECT(f)     (f|=S_OBJECT)
+#define SET_SIMPLE(f)     (f|=S_SIMPLE)
+#define SET_DCRUCIAL(f)   (f|=S_DCRUCIAL)
+#define SET_CURVE(f)      (f|=S_CURVE)
+#define SET_SURF(f)       (f|=S_SURF)
+#define SET_SELECTED(f)   (f|=S_SELECTED)
+
+#define UNSET_CURVE(f)      (f&=~S_CURVE)
+#define UNSET_OBJECT(f)     (f&=~S_OBJECT)
+#define UNSET_SIMPLE(f)     (f&=~S_SIMPLE)
+#define UNSET_DCRUCIAL(f)   (f&=~S_DCRUCIAL)
+#define UNSET_SELECTED(f)   (f&=~S_SELECTED)
+
+#define MAXFLOAT	3.40282347e+38F
+
+//#define VERBOSE
+//#define DEBUG_SKEL_CK3P
+//#define DEBUG_SKEL_MK3A
+//#define DEBUG_SKEL_CK3A
+//#define DEBUG
+#ifdef DEBUG
+int32_t trace = 1;
+#endif
+
+#define NEW_ISTHMUS
+#define RESIDUEL6
+#define DIRTOURNE
+//#define USE_NKP_END
+#define USE_END
+
+#define EN_LIFO       0
+
+/* ==================================== */
+static void extract_vois(
+  uint8_t *img,          /* pointeur base image */
+  index_t p,                       /* index du point */
+  index_t rs,                      /* taille rangee */
+  index_t ps,                      /* taille plan */
+  index_t N,                       /* taille image */
+  uint8_t *vois)    
+/* 
+  retourne dans "vois" les valeurs des 27 voisins de p, dans l'ordre suivant: 
+
+               12      11      10       
+               13       8       9
+               14      15      16
+
+		3	2	1
+		4      26	0
+		5	6	7
+
+               21      20      19
+               22      17      18
+               23      24      25
+
+  le point p ne doit pas être un point de bord de l'image
+*/
+/* ==================================== */
+{
+#undef F_NAME
+#define F_NAME "extract_vois"
+  register uint8_t * ptr = img+p;
+  if ((p%rs==rs-1) || (p%ps<rs) || (p%rs==0) || (p%ps>=ps-rs) || 
+      (p < ps) || (p >= N-ps)) /* point de bord */
+  {
+    printf("%s: ERREUR: point de bord\n", F_NAME);
+    exit(0);
+  }
+  vois[ 0] = *(ptr+1);
+  vois[ 1] = *(ptr+1-rs);
+  vois[ 2] = *(ptr-rs);
+  vois[ 3] = *(ptr-rs-1);
+  vois[ 4] = *(ptr-1);
+  vois[ 5] = *(ptr-1+rs);
+  vois[ 6] = *(ptr+rs);
+  vois[ 7] = *(ptr+rs+1);
+
+  vois[ 8] = *(ptr-ps);
+  vois[ 9] = *(ptr-ps+1);
+  vois[10] = *(ptr-ps+1-rs);
+  vois[11] = *(ptr-ps-rs);
+  vois[12] = *(ptr-ps-rs-1);
+  vois[13] = *(ptr-ps-1);
+  vois[14] = *(ptr-ps-1+rs);
+  vois[15] = *(ptr-ps+rs);
+  vois[16] = *(ptr-ps+rs+1);
+
+  vois[17] = *(ptr+ps);
+  vois[18] = *(ptr+ps+1);
+  vois[19] = *(ptr+ps+1-rs);
+  vois[20] = *(ptr+ps-rs);
+  vois[21] = *(ptr+ps-rs-1);
+  vois[22] = *(ptr+ps-1);
+  vois[23] = *(ptr+ps-1+rs);
+  vois[24] = *(ptr+ps+rs);
+  vois[25] = *(ptr+ps+rs+1);
+
+  vois[26] = *(ptr);
+} /* extract_vois() */
+
+/* ==================================== */
+static void insert_vois(
+  uint8_t *vois,			
+  uint8_t *img,          /* pointeur base image */
+  index_t p,                       /* index du point */
+  index_t rs,                      /* taille rangee */
+  index_t ps,                      /* taille plan */
+  index_t N)                       /* taille image */    
+/* 
+  recopie vois dans le voisinage de p
+  le point p ne doit pas être un point de bord de l'image
+*/
+/* ==================================== */
+{
+#undef F_NAME
+#define F_NAME "insert_vois"
+  register uint8_t * ptr = img+p;
+  if ((p%rs==rs-1) || (p%ps<rs) || (p%rs==0) || (p%ps>=ps-rs) || 
+      (p < ps) || (p >= N-ps)) /* point de bord */
+  {
+    printf("%s: ERREUR: point de bord\n", F_NAME);
+    exit(0);
+  }
+  *(ptr+1) = vois[ 0];
+  *(ptr+1-rs) = vois[ 1];
+  *(ptr-rs) = vois[ 2];
+  *(ptr-rs-1) = vois[ 3];
+  *(ptr-1) = vois[ 4];
+  *(ptr-1+rs) = vois[ 5];
+  *(ptr+rs) = vois[ 6];
+  *(ptr+rs+1) = vois[ 7];
+
+  *(ptr-ps) = vois[ 8];
+  *(ptr-ps+1) = vois[ 9];
+  *(ptr-ps+1-rs) = vois[10];
+  *(ptr-ps-rs) = vois[11];
+  *(ptr-ps-rs-1) = vois[12];
+  *(ptr-ps-1) = vois[13];
+  *(ptr-ps-1+rs) = vois[14];
+  *(ptr-ps+rs) = vois[15];
+  *(ptr-ps+rs+1) = vois[16];
+
+  *(ptr+ps) = vois[17];
+  *(ptr+ps+1) = vois[18];
+  *(ptr+ps+1-rs) = vois[19];
+  *(ptr+ps-rs) = vois[20];
+  *(ptr+ps-rs-1) = vois[21];
+  *(ptr+ps-1) = vois[22];
+  *(ptr+ps-1+rs) = vois[23];
+  *(ptr+ps+rs) = vois[24];
+  *(ptr+ps+rs+1) = vois[25];
+
+  *(ptr) = vois[26];
+} /* insert_vois() */
+
+#ifdef DEBUG
+/* ==================================== */
+static void print_vois(uint8_t *vois)    
+/* 
+   affiche vois (debug)
+*/
+/* ==================================== */
+{
+  printf("%2d %2d %2d     %2d %2d %2d     %2d %2d %2d\n", 
+	 vois[12],vois[11],vois[10],vois[3],vois[2],vois[1],vois[21],vois[20],vois[19]);
+  printf("%2d %2d %2d     %2d %2d %2d     %2d %2d %2d\n", 
+	 vois[13],vois[8],vois[9],vois[4],vois[26],vois[0],vois[22],vois[17],vois[18]);
+  printf("%2d %2d %2d     %2d %2d %2d     %2d %2d %2d\n\n", 
+	 vois[14],vois[15],vois[16],vois[5],vois[6],vois[7],vois[23],vois[24],vois[25]);
+} /* print_vois() */
+#endif
+
+/* ==================================== */
+static void isometrieXZ_vois(uint8_t *vois) 
+// effectue une isométrie du voisinage "vois" par échange des axes X et Z (+ symétries)
+// cette isométrie est de plus une involution
+/* ==================================== */
+{
+  uint8_t v[26];
+  int32_t i;
+  v[ 0] = vois[17];  v[ 1] = vois[20];  v[ 2] = vois[ 2];  v[ 3] = vois[11];
+  v[ 4] = vois[ 8];  v[ 5] = vois[15];  v[ 6] = vois[ 6];  v[ 7] = vois[24];
+  v[ 8] = vois[ 4];  v[ 9] = vois[22];  v[10] = vois[21];  v[11] = vois[ 3];
+  v[12] = vois[12];  v[13] = vois[13];  v[14] = vois[14];  v[15] = vois[ 5];
+  v[16] = vois[23];  v[17] = vois[ 0];  v[18] = vois[18];  v[19] = vois[19];
+  v[20] = vois[ 1];  v[21] = vois[10];  v[22] = vois[ 9];  v[23] = vois[16];
+  v[24] = vois[ 7];  v[25] = vois[25];
+  for (i = 0; i < 26; i++) vois[i] = v[i];
+} /* isometrieXZ_vois() */
+
+/* ==================================== */
+static void isometrieYZ_vois(uint8_t *vois)
+// effectue une isométrie du voisinage "vois" par échange des axes Y et Z (+ symétries)  
+// cette isométrie est de plus une involution
+/* ==================================== */
+{
+  uint8_t v[26];
+  int32_t i;
+  v[ 0] = vois[ 0];  v[ 1] = vois[18];  v[ 2] = vois[17];  v[ 3] = vois[22];
+  v[ 4] = vois[ 4];  v[ 5] = vois[13];  v[ 6] = vois[ 8];  v[ 7] = vois[ 9];
+  v[ 8] = vois[ 6];  v[ 9] = vois[ 7];  v[10] = vois[25];  v[11] = vois[24];
+  v[12] = vois[23];  v[13] = vois[ 5];  v[14] = vois[14];  v[15] = vois[15];
+  v[16] = vois[16];  v[17] = vois[ 2];  v[18] = vois[ 1];  v[19] = vois[19];
+  v[20] = vois[20];  v[21] = vois[21];  v[22] = vois[ 3];  v[23] = vois[12];
+  v[24] = vois[11];  v[25] = vois[10];
+  for (i = 0; i < 26; i++) vois[i] = v[i];
+} /* isometrieYZ_vois() */
+
+
+/* ==================================== */
+static int32_t asym_match_vois2(uint8_t *v)
+/* ==================================== */
+/*
+               12      11      10       
+               13       8       9
+               14      15      16
+
+		3	2	1			
+		4      26	0
+		5	6	7
+Teste si les conditions suivantes sont réunies:
+1: v[8] et v[26] doivent être dans l'objet et simples
+2: for i = 0 to 7 do w[i] = v[i] || v[i+9] ; w[0...7] doit être non 2D-simple
+Si le test réussit, le point 8 est marqué DCRUCIAL
+*/
+{
+  uint8_t t;
+  if (!IS_SIMPLE(v[8]) || !IS_SIMPLE(v[26])) return 0;
+  if (v[0] || v[9]) t = 1; else t = 0;
+  if (v[1] || v[10]) t |= 2;
+  if (v[2] || v[11]) t |= 4;
+  if (v[3] || v[12]) t |= 8;
+  if (v[4] || v[13]) t |= 16;
+  if (v[5] || v[14]) t |= 32;
+  if (v[6] || v[15]) t |= 64;
+  if (v[7] || v[16]) t |= 128;
+  if ((t4b(t) == 1) && (t8(t) == 1)) return 0; // simple 2D
+  SET_DCRUCIAL(v[8]);
+  return 1;
+} // asym_match_vois2()
+
+/* ==================================== */
+static int32_t asym_match_vois1(uint8_t *v)
+/* ==================================== */
+// A A  P1 P2  B B
+// A A  P3 P4  B B
+// avec pour localisations possibles :
+// 12 11   3  2   21 20 
+// 13  8   4 26   22 17
+// et :
+// 11 10    2 1   20 19
+//  8  9   26 0   17 18
+//
+// Teste si les trois conditions suivantes sont réunies:
+// 1: (P1 et P4) ou (P2 et P3)
+// 2: tous les points Pi non nuls doivent être simples et non marqués DCRUCIAL
+// 3: A et B sont tous nuls ou [au moins un A non nul et au moins un B non nul]
+// Si le test réussit, un des points Pi non nuls est marqué SELECTED
+{
+  int32_t ret = 0;
+  if (!((v[2] && v[4]) || (v[3] && v[26]))) goto next1;
+  if ((IS_OBJECT(v[2])  && (!IS_SIMPLE(v[2])  || IS_DCRUCIAL(v[2]))) ||
+      (IS_OBJECT(v[3])  && (!IS_SIMPLE(v[3])  || IS_DCRUCIAL(v[3]))) ||
+      (IS_OBJECT(v[4])  && (!IS_SIMPLE(v[4])  || IS_DCRUCIAL(v[4]))) ||
+      (IS_OBJECT(v[26]) && (!IS_SIMPLE(v[26]) || IS_DCRUCIAL(v[26])))) goto next1;
+  if ((v[12] || v[11] || v[13] || v[8] || v[21] || v[20] || v[22] || v[17]) &&
+      ((!v[12] && !v[11] && !v[13] && !v[8]) || 
+       (!v[21] && !v[20] && !v[22] && !v[17]))) goto next1;
+  if (v[2])  SET_SELECTED(v[2]);
+  else if (v[3])  SET_SELECTED(v[3]);
+  else if (v[4])  SET_SELECTED(v[4]);
+  else if (v[26]) SET_SELECTED(v[26]);
+  ret = 1;
+ next1:
+  if (!((v[2] && v[0]) || (v[1] && v[26]))) goto next2;
+  if ((IS_OBJECT(v[2])  && (!IS_SIMPLE(v[2])  || IS_DCRUCIAL(v[2]))) ||
+      (IS_OBJECT(v[1])  && (!IS_SIMPLE(v[1])  || IS_DCRUCIAL(v[1]))) ||
+      (IS_OBJECT(v[0])  && (!IS_SIMPLE(v[0])  || IS_DCRUCIAL(v[0]))) ||
+      (IS_OBJECT(v[26]) && (!IS_SIMPLE(v[26]) || IS_DCRUCIAL(v[26])))) goto next2;
+  if ((v[10] || v[11] || v[9] || v[8] || v[19] || v[20] || v[18] || v[17]) &&
+      ((!v[10] && !v[11] && !v[9] && !v[8]) || 
+       (!v[19] && !v[20] && !v[18] && !v[17]))) goto next2;
+  if (v[2])  SET_SELECTED(v[2]);
+  else if (v[1])  SET_SELECTED(v[1]);
+  else if (v[0])  SET_SELECTED(v[0]);
+  else if (v[26]) SET_SELECTED(v[26]);
+  ret = 1;
+ next2:
+  return ret;
+} // asym_match_vois1()
+
+/* ==================================== */
+static int32_t asym_match_vois0(uint8_t *v)
+/* ==================================== */
+/*
+               12      11      10
+               13       8       9
+               14      15      16
+
+		3	2	1
+		4      26	0
+		5	6	7
+
+               21      20      19
+               22      17      18
+               23      24      25
+
+Teste si les conditions suivantes sont réunies:
+1: au moins un des ensembles {26,12}, {26,10}, {26,14}, {26,21} est inclus dans l'objet, et
+2: les points non nuls du cube 2x2x2 contenant cet ensemble sont tous simples, 
+   non marqués DCRUCIAL
+Si le test réussit, le point 26 est marqué SELECTED
+*/
+{
+  if (!v[26]) return 0;
+  if (!IS_SIMPLE(v[26]) || IS_DCRUCIAL(v[26])) return 0;
+  if (!(v[12] || v[10] || v[14] || v[21])) return 0;
+  if (v[12])
+  { /*         12      11
+               13       8
+
+		3	2
+		4      26 */
+     if (!IS_SIMPLE(v[12]) || IS_DCRUCIAL(v[12])) return 0;
+     if (v[11] && (!IS_SIMPLE(v[11]) || IS_DCRUCIAL(v[11]))) return 0;
+     if (v[13] && (!IS_SIMPLE(v[13]) || IS_DCRUCIAL(v[13]))) return 0;
+     if (v[ 8] && (!IS_SIMPLE(v[ 8]) || IS_DCRUCIAL(v[ 8]))) return 0;
+     if (v[ 3] && (!IS_SIMPLE(v[ 3]) || IS_DCRUCIAL(v[ 3]))) return 0;
+     if (v[ 2] && (!IS_SIMPLE(v[ 2]) || IS_DCRUCIAL(v[ 2]))) return 0;
+     if (v[ 4] && (!IS_SIMPLE(v[ 4]) || IS_DCRUCIAL(v[ 4]))) return 0;
+  }
+  if (v[10])
+  { /*
+               11      10
+               8       9
+
+		2	1
+		26	0 */
+     if (!IS_SIMPLE(v[10]) || IS_DCRUCIAL(v[10])) return 0;
+     if (v[11] && (!IS_SIMPLE(v[11]) || IS_DCRUCIAL(v[11]))) return 0;
+     if (v[ 8] && (!IS_SIMPLE(v[ 8]) || IS_DCRUCIAL(v[ 8]))) return 0;
+     if (v[ 9] && (!IS_SIMPLE(v[ 9]) || IS_DCRUCIAL(v[ 9]))) return 0;
+     if (v[ 1] && (!IS_SIMPLE(v[ 1]) || IS_DCRUCIAL(v[ 1]))) return 0;
+     if (v[ 2] && (!IS_SIMPLE(v[ 2]) || IS_DCRUCIAL(v[ 2]))) return 0;
+     if (v[ 0] && (!IS_SIMPLE(v[ 0]) || IS_DCRUCIAL(v[ 0]))) return 0;
+  }
+  if (v[14])
+  { /*         13       8
+               14      15
+
+		4      26
+		5	6 */
+     if (!IS_SIMPLE(v[14]) || IS_DCRUCIAL(v[14])) return 0;
+     if (v[13] && (!IS_SIMPLE(v[13]) || IS_DCRUCIAL(v[13]))) return 0;
+     if (v[15] && (!IS_SIMPLE(v[15]) || IS_DCRUCIAL(v[15]))) return 0;
+     if (v[ 8] && (!IS_SIMPLE(v[ 8]) || IS_DCRUCIAL(v[ 8]))) return 0;
+     if (v[ 6] && (!IS_SIMPLE(v[ 6]) || IS_DCRUCIAL(v[ 6]))) return 0;
+     if (v[ 5] && (!IS_SIMPLE(v[ 5]) || IS_DCRUCIAL(v[ 5]))) return 0;
+     if (v[ 4] && (!IS_SIMPLE(v[ 4]) || IS_DCRUCIAL(v[ 4]))) return 0;
+  }
+  if (v[21])
+  {  /*		3	2
+		4      26
+
+               21      20
+               22      17 */
+     if (!IS_SIMPLE(v[21]) || IS_DCRUCIAL(v[21])) return 0;
+     if (v[17] && (!IS_SIMPLE(v[17]) || IS_DCRUCIAL(v[17]))) return 0;
+     if (v[20] && (!IS_SIMPLE(v[20]) || IS_DCRUCIAL(v[20]))) return 0;
+     if (v[22] && (!IS_SIMPLE(v[22]) || IS_DCRUCIAL(v[22]))) return 0;
+     if (v[ 3] && (!IS_SIMPLE(v[ 3]) || IS_DCRUCIAL(v[ 3]))) return 0;
+     if (v[ 2] && (!IS_SIMPLE(v[ 2]) || IS_DCRUCIAL(v[ 2]))) return 0;
+     if (v[ 4] && (!IS_SIMPLE(v[ 4]) || IS_DCRUCIAL(v[ 4]))) return 0;
+  }
+  SET_SELECTED(v[26]);
+  return 1;
+} // asym_match_vois0()
+
+/* ==================================== */
+static int32_t asym_match2(uint8_t *v)
+/* ==================================== */
+{
+  int32_t ret = 0;
+  if (asym_match_vois2(v)) ret = 1;
+  isometrieXZ_vois(v);
+  if (asym_match_vois2(v)) ret = 1;
+  isometrieXZ_vois(v);
+  isometrieYZ_vois(v);
+  if (asym_match_vois2(v)) ret = 1;
+  isometrieYZ_vois(v);
+  return ret;
+} /* asym_match2() */
+
+/* ==================================== */
+static int32_t asym_match1(uint8_t *v)
+/* ==================================== */
+{
+  int32_t ret = 0;
+  if (asym_match_vois1(v)) ret = 1;
+  isometrieXZ_vois(v);
+  if (asym_match_vois1(v)) ret = 1;
+  isometrieXZ_vois(v);
+  isometrieYZ_vois(v);
+  if (asym_match_vois1(v)) ret = 1;
+  isometrieYZ_vois(v);
+  return ret;
+} /* asym_match1() */
+
+/* ==================================== */
+static int32_t asym_match0(uint8_t *v)
+/* ==================================== */
+{
+  int32_t ret = 0;
+  if (asym_match_vois0(v)) ret = 1;
+  return ret;
+} /* asym_match0() */
+
+
+/* ==================================== */
+int32_t lskelACK3a(struct xvimage *image, 
+	     int32_t n_steps,
+	     struct xvimage *inhibit)
+/* ==================================== */
+/*
+Squelette asymétrique curviligne
+Algo ACK3a données: S
+Répéter jusqu'à stabilité
+  C := points de courbe de S
+  I := I \cup C
+  P := voxels simples pour S et pas dans I
+  C2 := voxels 2-D-cruciaux (asym_match2)
+  C1 := voxels 1-D-cruciaux (asym_match1)
+  C0 := voxels 0-D-cruciaux (asym_match0)
+  P := P  \  [C2 \cup C1 \cup C0]
+  S := S \ P
+
+Attention : l'objet ne doit pas toucher le bord de l'image
+*/
+#undef F_NAME
+#define F_NAME "lskelACK3a"
+{ 
+  index_t i;
+  index_t rs = rowsize(image);     /* taille ligne */
+  index_t cs = colsize(image);     /* taille colonne */
+  index_t ds = depth(image);       /* nb plans */
+  index_t ps = rs * cs;            /* taille plan */
+  index_t N = ps * ds;             /* taille image */
+  uint8_t *S = UCHARDATA(image);      /* l'image de depart */
+  struct xvimage *t = copyimage(image); 
+  uint8_t *T = UCHARDATA(t);
+  uint8_t *I;
+  int32_t step, nonstab, allocinhib = 0;
+  int32_t top, topb;
+  uint8_t v[27];
+
+#ifdef VERBOSE
+  printf("%s: n_steps = %d\n", F_NAME, n_steps);
+#endif
+
+  if (inhibit == NULL) 
+  {
+    inhibit = copyimage(image); 
+    razimage(inhibit);
+    I = UCHARDATA(inhibit);
+    allocinhib = 1;
+  }
+  else
+  {
+    I = UCHARDATA(inhibit);
+    for (i = 0; i < N; i++) if (I[i]) I[i] = I_INHIBIT;
+  }
+
+  if (n_steps == -1) n_steps = 1000000000;
+
+  for (i = 0; i < N; i++) if (S[i]) S[i] = S_OBJECT;
+
+  mctopo3d_init_topo3d();
+
+  /* ================================================ */
+  /*               DEBUT ALGO                         */
+  /* ================================================ */
+
+  step = 0;
+  nonstab = 1;
+  while (nonstab && (step < n_steps))
+  {
+    nonstab = 0;
+    step++;
+#ifdef VERBOSE
+    printf("step %d\n", step);
+#endif
+
+    // MARQUE LES POINTS DE COURBE (3)
+    for (i = 0; i < N; i++)
+    {
+      if (IS_OBJECT(S[i]))
+      {    
+//#ifdef USE_NKP_END
+//	if (NKP_end(S, i, rs, ps, N)) SET_CURVE(S[i]);
+#ifdef USE_END
+        if (mctopo3d_nbvoiso26(S, i, rs, ps, N) == 1)  SET_CURVE(S[i]);
+#else
+	mctopo3d_top26(S, i, rs, ps, N, &top, &topb);
+	if (top > 1) SET_CURVE(S[i]);
+#endif
+      }
+    }
+
+    // MARQUE LES POINTS SIMPLES NON DANS I
+    for (i = 0; i < N; i++) 
+      if (IS_OBJECT(S[i]) && !IS_INHIBIT(I[i]) && mctopo3d_simple26(S, i, rs, ps, N))
+	SET_SIMPLE(S[i]);
+
+    // DEMARQUE PTS DE COURBE ET LES MEMORISE DANS I
+    for (i = 0; i < N; i++)
+    { 
+      if (IS_CURVE(S[i])) { UNSET_SIMPLE(S[i]); SET_INHIBIT(I[i]); }
+    }
+    // MARQUE LES POINTS 2-D-CRUCIAUX
+    for (i = 0; i < N; i++) 
+      if (IS_SIMPLE(S[i]))
+      { 
+	extract_vois(S, i, rs, ps, N, v);
+	if (asym_match2(v))
+	  insert_vois(v, S, i, rs, ps, N);
+      }
+    // MARQUE LES POINTS 1-D-CRUCIAUX
+    for (i = 0; i < N; i++) 
+      if (IS_SIMPLE(S[i]))
+      { 
+	extract_vois(S, i, rs, ps, N, v);
+	if (asym_match1(v))
+	  insert_vois(v, S, i, rs, ps, N);
+      }
+    for (i = 0; i < N; i++) 
+      if (IS_SELECTED(S[i])) { UNSET_SELECTED(S[i]); SET_DCRUCIAL(S[i]); }
+    // MARQUE LES POINTS 0-D-CRUCIAUX
+    for (i = 0; i < N; i++) 
+      if (IS_SIMPLE(S[i]))
+      { 
+	extract_vois(S, i, rs, ps, N, v);
+	if (asym_match0(v))
+	  insert_vois(v, S, i, rs, ps, N);
+      }
+    for (i = 0; i < N; i++) 
+      if (IS_SELECTED(S[i])) { UNSET_SELECTED(S[i]); SET_DCRUCIAL(S[i]); }
+
+    memset(T, 0, N);
+    for (i = 0; i < N; i++) // T := [S \ P] \cup M, où M représente les pts marqués
+      if ((S[i] && !IS_SIMPLE(S[i])) || IS_DCRUCIAL(S[i]))
+	T[i] = 1;
+
+    for (i = 0; i < N; i++)
+      if (S[i] && !T[i]) 
+      {
+	S[i] = 0; 
+	nonstab = 1; 
+      }
+    for (i = 0; i < N; i++) if (S[i]) S[i] = S_OBJECT;
+  }
+
+#ifdef VERBOSE1
+    printf("number of steps: %d\n", step);
+#endif
+
+  for (i = 0; i < N; i++) if (S[i]) S[i] = NDG_MAX;
+  for (i = 0; i < N; i++) if (I[i]) I[i] = NDG_MAX;
+
+  if (allocinhib) freeimage(inhibit); 
+  freeimage(t);
+  mctopo3d_termine_topo3d();
+  return(1);
+} /* lskelACK3a() */

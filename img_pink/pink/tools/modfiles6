@@ -1,0 +1,5 @@
+#!/bin/csh
+foreach file ($PINK/src/lib/*.c)
+  sed -e 's/MAXFLOAT/FLT_MAX/g' $file > toto
+  sed -e 's/MAXDOUBLE/DBL_MAX/g' toto > $file
+end

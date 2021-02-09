@@ -1,0 +1,32 @@
+xv -geometry +0+0      gel.pgm &
+showminima             gel.pgm 265 0 &
+
+dyn2          gel.pgm          _a.filtragedyn
+filtragedyn   gel.pgm          _a.filtragedyn    50     _b.filtragedyn 
+
+xv -geometry +0+290  _b.filtragedyn &
+showminima           _b.filtragedyn 265 290 &
+
+shadow        gel.pgm          2                 _c.filtragedyn
+
+xv -geometry +530+0 _c.filtragedyn &
+
+shadow        _b.filtragedyn   2                 _d.filtragedyn
+
+xv -geometry +530+290 _d.filtragedyn &
+
+echo -n "ok pour le menage des fichiers temporaires ? "
+read REP
+case $REP in
+      o|O|y|Y) rm _?.filtragedyn
+esac
+
+echo -n "ok pour le menage des fenetres xv ? "
+read REP
+case $REP in
+      o|O|y|Y) echo 'kill -9 \' > clearscreen
+               ps -a|grep xv|awk '{printf(" %s", $1)}' >> clearscreen
+               chmod 755 clearscreen
+               clearscreen
+               rm clearscreen
+esac

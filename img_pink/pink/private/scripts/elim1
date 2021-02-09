@@ -1,0 +1,9 @@
+rgb2bw $1 _r _g _b
+xv _r &
+echo "fabriquer un masque blanc sur fond noir _m, par exemple : "
+echo "seuilbin _r 230 _rs ; xv _rs"
+echo "showgrid _rs &"
+echo "selrect _rs x y w h _rss"
+echo "dilat _rss vois4 _m"
+echo "et lancer elim2 <element-structurant>"
+

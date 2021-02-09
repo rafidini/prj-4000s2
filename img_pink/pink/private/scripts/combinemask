@@ -1,0 +1,19 @@
+#!/bin/sh
+USAGE="Usage: $0 i1 i2 mask out"
+if [ $# -gt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+
+min $2 $3 /tmp/_combinemask_1
+inverse $3 /tmp/_combinemask_i
+min $1 /tmp/_combinemask_i /tmp/_combinemask_2
+max /tmp/_combinemask_1 /tmp/_combinemask_2 $4
+
+rm /tmp/_combinemask_?

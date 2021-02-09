@@ -1,0 +1,326 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec tclsh $0 $1 $2 $3
+
+# Jang and Chin : "Reconstructable Parallel Thinning", PRAI 1993
+
+ if {($argc != 3)} { 
+   puts stderr "usage: jang in nsteps out"
+   exit 
+ }
+
+set PINK "$env(PINK)"
+set MASKS "$env(PINK)/masks"
+source "$PINK/tcl/my_exec.tcl"
+
+global JANGR
+set JANGR(name) "jangr"
+set JANGR(infilename) [lindex $argv 0]
+set JANGR(nsteps) [lindex $argv 1]
+set JANGR(outfilename) [lindex $argv 2]
+my_exec_q cp $JANGR(infilename) "/tmp/$JANGR(name)_t0" 
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%d %d" v1 v2
+  close $input
+  return $v2
+}
+
+# expanding templates
+#-----------------------------------
+# codage des templates : 
+# 0 = don't care
+# 1 = hit
+# 2 = miss
+
+my_exec_q rotse "$MASKS/JANGR1a.pgm" 90 "/tmp/JANGR2a"
+my_exec_q rotse "$MASKS/JANGR1a.pgm" 180 "/tmp/JANGR3a"
+my_exec_q rotse "$MASKS/JANGR1a.pgm" 270 "/tmp/JANGR4a"
+
+my_exec_q seuil   "$MASKS/JANGR1a.pgm" 1 2 "/tmp/JANGR1a_h" 
+my_exec_q setorigin "/tmp/JANGR1a_h"     "$MASKS/JANGR1a.pgm"
+my_exec_q seuil   "$MASKS/JANGR1a.pgm" 2 3 "/tmp/JANGR1a_m" 
+my_exec_q setorigin "/tmp/JANGR1a_m"     "$MASKS/JANGR1a.pgm"
+
+my_exec_q seuil     "/tmp/JANGR2a" 1 2 "/tmp/JANGR2a_h" 
+my_exec_q setorigin "/tmp/JANGR2a_h"   "/tmp/JANGR2a"
+my_exec_q seuil     "/tmp/JANGR2a" 2 3 "/tmp/JANGR2a_m" 
+my_exec_q setorigin "/tmp/JANGR2a_m"   "/tmp/JANGR2a"
+
+my_exec_q seuil     "/tmp/JANGR3a" 1 2 "/tmp/JANGR3a_h" 
+my_exec_q setorigin "/tmp/JANGR3a_h"   "/tmp/JANGR3a"
+my_exec_q seuil     "/tmp/JANGR3a" 2 3 "/tmp/JANGR3a_m" 
+my_exec_q setorigin "/tmp/JANGR3a_m"   "/tmp/JANGR3a"
+
+my_exec_q seuil     "/tmp/JANGR4a" 1 2 "/tmp/JANGR4a_h" 
+my_exec_q setorigin "/tmp/JANGR4a_h"   "/tmp/JANGR4a"
+my_exec_q seuil     "/tmp/JANGR4a" 2 3 "/tmp/JANGR4a_m" 
+my_exec_q setorigin "/tmp/JANGR4a_m"   "/tmp/JANGR4a"
+
+
+my_exec_q rotse "$MASKS/JANGR1b.pgm" 90  "/tmp/JANGR2b"
+my_exec_q rotse "$MASKS/JANGR1b.pgm" 180 "/tmp/JANGR3b"
+my_exec_q rotse "$MASKS/JANGR1b.pgm" 270 "/tmp/JANGR4b"
+
+my_exec_q seuil   "$MASKS/JANGR1b.pgm" 1 2 "/tmp/JANGR1b_h" 
+my_exec_q setorigin "/tmp/JANGR1b_h"     "$MASKS/JANGR1b.pgm"
+my_exec_q seuil   "$MASKS/JANGR1b.pgm" 2 3 "/tmp/JANGR1b_m" 
+my_exec_q setorigin "/tmp/JANGR1b_m"     "$MASKS/JANGR1b.pgm"
+
+my_exec_q seuil     "/tmp/JANGR2b" 1 2 "/tmp/JANGR2b_h" 
+my_exec_q setorigin "/tmp/JANGR2b_h"   "/tmp/JANGR2b"
+my_exec_q seuil     "/tmp/JANGR2b" 2 3 "/tmp/JANGR2b_m" 
+my_exec_q setorigin "/tmp/JANGR2b_m"   "/tmp/JANGR2b"
+
+my_exec_q seuil     "/tmp/JANGR3b" 1 2 "/tmp/JANGR3b_h" 
+my_exec_q setorigin "/tmp/JANGR3b_h"   "/tmp/JANGR3b"
+my_exec_q seuil     "/tmp/JANGR3b" 2 3 "/tmp/JANGR3b_m" 
+my_exec_q setorigin "/tmp/JANGR3b_m"   "/tmp/JANGR3b"
+
+my_exec_q seuil     "/tmp/JANGR4b" 1 2 "/tmp/JANGR4b_h" 
+my_exec_q setorigin "/tmp/JANGR4b_h"   "/tmp/JANGR4b"
+my_exec_q seuil     "/tmp/JANGR4b" 2 3 "/tmp/JANGR4b_m" 
+my_exec_q setorigin "/tmp/JANGR4b_m"   "/tmp/JANGR4b"
+
+
+my_exec_q rotse "$MASKS/JANGR5.pgm" 90 "/tmp/JANGR6"
+my_exec_q rotse "$MASKS/JANGR5.pgm" 180 "/tmp/JANGR7"
+my_exec_q rotse "$MASKS/JANGR5.pgm" 270 "/tmp/JANGR8"
+
+my_exec_q seuil "$MASKS/JANGR5.pgm" 1 2 "/tmp/JANGR5_h" 
+my_exec_q setorigin "/tmp/JANGR5_h" "$MASKS/JANGR5.pgm"
+my_exec_q seuil "$MASKS/JANGR5.pgm" 2 3 "/tmp/JANGR5_m" 
+my_exec_q setorigin "/tmp/JANGR5_m" "$MASKS/JANGR5.pgm"
+
+my_exec_q seuil "/tmp/JANGR6" 1 2 "/tmp/JANGR6_h" 
+my_exec_q setorigin "/tmp/JANGR6_h" "/tmp/JANGR6"
+my_exec_q seuil "/tmp/JANGR6" 2 3 "/tmp/JANGR6_m" 
+my_exec_q setorigin "/tmp/JANGR6_m" "/tmp/JANGR6"
+
+my_exec_q seuil "/tmp/JANGR7" 1 2 "/tmp/JANGR7_h" 
+my_exec_q setorigin "/tmp/JANGR7_h" "/tmp/JANGR7"
+my_exec_q seuil "/tmp/JANGR7" 2 3 "/tmp/JANGR7_m" 
+my_exec_q setorigin "/tmp/JANGR7_m" "/tmp/JANGR7"
+
+my_exec_q seuil "/tmp/JANGR8" 1 2 "/tmp/JANGR8_h" 
+my_exec_q setorigin "/tmp/JANGR8_h" "/tmp/JANGR8"
+my_exec_q seuil "/tmp/JANGR8" 2 3 "/tmp/JANGR8_m" 
+my_exec_q setorigin "/tmp/JANGR8_m" "/tmp/JANGR8"
+
+my_exec_q rotse "$MASKS/JANGR9.pgm" 90  "/tmp/JANGR10"
+my_exec_q rotse "$MASKS/JANGR9.pgm" 180 "/tmp/JANGR11"
+my_exec_q rotse "$MASKS/JANGR9.pgm" 270 "/tmp/JANGR12"
+
+my_exec_q seuil   "$MASKS/JANGR9.pgm" 1 2 "/tmp/JANGR9_h" 
+my_exec_q setorigin "/tmp/JANGR9_h"     "$MASKS/JANGR9.pgm"
+my_exec_q seuil   "$MASKS/JANGR9.pgm" 2 3 "/tmp/JANGR9_m" 
+my_exec_q setorigin "/tmp/JANGR9_m"     "$MASKS/JANGR9.pgm"
+
+my_exec_q seuil     "/tmp/JANGR10" 1 2 "/tmp/JANGR10_h" 
+my_exec_q setorigin "/tmp/JANGR10_h"   "/tmp/JANGR10"
+my_exec_q seuil     "/tmp/JANGR10" 2 3 "/tmp/JANGR10_m" 
+my_exec_q setorigin "/tmp/JANGR10_m"   "/tmp/JANGR10"
+
+my_exec_q seuil     "/tmp/JANGR11" 1 2 "/tmp/JANGR11_h" 
+my_exec_q setorigin "/tmp/JANGR11_h"   "/tmp/JANGR11"
+my_exec_q seuil     "/tmp/JANGR11" 2 3 "/tmp/JANGR11_m" 
+my_exec_q setorigin "/tmp/JANGR11_m"   "/tmp/JANGR11"
+
+my_exec_q seuil     "/tmp/JANGR12" 1 2 "/tmp/JANGR12_h" 
+my_exec_q setorigin "/tmp/JANGR12_h"   "/tmp/JANGR12"
+my_exec_q seuil     "/tmp/JANGR12" 2 3 "/tmp/JANGR12_m" 
+my_exec_q setorigin "/tmp/JANGR12_m"   "/tmp/JANGR12"
+
+my_exec_q rotse "$MASKS/JANGR13.pgm" 90  "/tmp/JANGR14"
+my_exec_q rotse "$MASKS/JANGR13.pgm" 180 "/tmp/JANGR15"
+my_exec_q rotse "$MASKS/JANGR13.pgm" 270 "/tmp/JANGR16"
+
+my_exec_q seuil   "$MASKS/JANGR13.pgm" 1 2 "/tmp/JANGR13_h" 
+my_exec_q setorigin "/tmp/JANGR13_h"     "$MASKS/JANGR13.pgm"
+my_exec_q seuil   "$MASKS/JANGR13.pgm" 2 3 "/tmp/JANGR13_m" 
+my_exec_q setorigin "/tmp/JANGR13_m"     "$MASKS/JANGR13.pgm"
+
+my_exec_q seuil     "/tmp/JANGR14" 1 2 "/tmp/JANGR14_h" 
+my_exec_q setorigin "/tmp/JANGR14_h"   "/tmp/JANGR14"
+my_exec_q seuil     "/tmp/JANGR14" 2 3 "/tmp/JANGR14_m" 
+my_exec_q setorigin "/tmp/JANGR14_m"   "/tmp/JANGR14"
+
+my_exec_q seuil     "/tmp/JANGR15" 1 2 "/tmp/JANGR15_h" 
+my_exec_q setorigin "/tmp/JANGR15_h"   "/tmp/JANGR15"
+my_exec_q seuil     "/tmp/JANGR15" 2 3 "/tmp/JANGR15_m" 
+my_exec_q setorigin "/tmp/JANGR15_m"   "/tmp/JANGR15"
+
+my_exec_q seuil     "/tmp/JANGR16" 1 2 "/tmp/JANGR16_h" 
+my_exec_q setorigin "/tmp/JANGR16_h"   "/tmp/JANGR16"
+my_exec_q seuil     "/tmp/JANGR16" 2 3 "/tmp/JANGR16_m" 
+my_exec_q setorigin "/tmp/JANGR16_m"   "/tmp/JANGR16"
+
+
+my_exec_q seuil   "$MASKS/JANGR17.pgm" 1 2 "/tmp/JANGR17_h" 
+my_exec_q setorigin "/tmp/JANGR17_h"     "$MASKS/JANGR17.pgm"
+my_exec_q seuil   "$MASKS/JANGR17.pgm" 2 3 "/tmp/JANGR17_m" 
+my_exec_q setorigin "/tmp/JANGR17_m"     "$MASKS/JANGR17.pgm"
+
+my_exec_q seuil   "$MASKS/JANGR18.pgm" 1 2 "/tmp/JANGR18_h" 
+my_exec_q setorigin "/tmp/JANGR18_h"     "$MASKS/JANGR18.pgm"
+my_exec_q seuil   "$MASKS/JANGR18.pgm" 2 3 "/tmp/JANGR18_m" 
+my_exec_q setorigin "/tmp/JANGR18_m"     "$MASKS/JANGR18.pgm"
+
+my_exec_q seuil   "$MASKS/JANGR19.pgm" 1 2 "/tmp/JANGR19_h" 
+my_exec_q setorigin "/tmp/JANGR19_h"     "$MASKS/JANGR19.pgm"
+my_exec_q seuil   "$MASKS/JANGR19.pgm" 2 3 "/tmp/JANGR19_m" 
+my_exec_q setorigin "/tmp/JANGR19_m"     "$MASKS/JANGR19.pgm"
+
+my_exec_q seuil   "$MASKS/JANGR20.pgm" 1 2 "/tmp/JANGR20_h" 
+my_exec_q setorigin "/tmp/JANGR20_h"     "$MASKS/JANGR20.pgm"
+my_exec_q seuil   "$MASKS/JANGR20.pgm" 2 3 "/tmp/JANGR20_m" 
+my_exec_q setorigin "/tmp/JANGR20_m"     "$MASKS/JANGR20.pgm"
+
+my_exec_q seuil   "$MASKS/JANGR21.pgm" 1 2 "/tmp/JANGR21_h" 
+my_exec_q setorigin "/tmp/JANGR21_h"     "$MASKS/JANGR21.pgm"
+my_exec_q seuil   "$MASKS/JANGR21.pgm" 2 3 "/tmp/JANGR21_m" 
+my_exec_q setorigin "/tmp/JANGR21_m"     "$MASKS/JANGR21.pgm"
+
+my_exec_q seuil   "$MASKS/JANGR22.pgm" 1 2 "/tmp/JANGR22_h" 
+my_exec_q setorigin "/tmp/JANGR22_h"     "$MASKS/JANGR22.pgm"
+my_exec_q seuil   "$MASKS/JANGR22.pgm" 2 3 "/tmp/JANGR22_m" 
+my_exec_q setorigin "/tmp/JANGR22_m"     "$MASKS/JANGR22.pgm"
+
+my_exec_q seuil   "$MASKS/JANGR23.pgm" 1 2 "/tmp/JANGR23_h" 
+my_exec_q setorigin "/tmp/JANGR23_h"     "$MASKS/JANGR23.pgm"
+my_exec_q seuil   "$MASKS/JANGR23.pgm" 2 3 "/tmp/JANGR23_m" 
+my_exec_q setorigin "/tmp/JANGR23_m"     "$MASKS/JANGR23.pgm"
+
+
+# Compute the medial axis
+#-----------------------------------
+
+my_exec_q medialaxis "/tmp/$JANGR(name)_t0" 4 "/tmp/$JANGR(name)_ma4" 
+my_exec_q seuil "/tmp/$JANGR(name)_ma4" 1 "/tmp/$JANGR(name)_ma4" 
+
+# One thinning step
+#-----------------------------------
+proc one_step {} {
+    global JANGR
+    my_exec_q cp "/tmp/$JANGR(name)_t0" "/tmp/$JANGR(name)_t0_sav" 
+
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR1a_h" "/tmp/JANGR1a_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q mv "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR2a_h" "/tmp/JANGR2a_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR3a_h" "/tmp/JANGR3a_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR4a_h" "/tmp/JANGR4a_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR1b_h" "/tmp/JANGR1b_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR2b_h" "/tmp/JANGR2b_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR3b_h" "/tmp/JANGR3b_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR4b_h" "/tmp/JANGR4b_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR5_h" "/tmp/JANGR5_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR6_h" "/tmp/JANGR6_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR7_h" "/tmp/JANGR7_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR8_h" "/tmp/JANGR8_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR9_h" "/tmp/JANGR9_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR10_h" "/tmp/JANGR10_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR11_h" "/tmp/JANGR11_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR12_h" "/tmp/JANGR12_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR13_h" "/tmp/JANGR13_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR14_h" "/tmp/JANGR14_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR15_h" "/tmp/JANGR15_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR16_h" "/tmp/JANGR16_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t1"
+
+
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR17_h" "/tmp/JANGR17_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q mv "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR18_h" "/tmp/JANGR18_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t2" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR19_h" "/tmp/JANGR19_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t2" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR20_h" "/tmp/JANGR20_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t2" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR21_h" "/tmp/JANGR21_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t2" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR22_h" "/tmp/JANGR22_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t2" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANGR(name)_t0" "/tmp/JANGR23_h" "/tmp/JANGR23_m" "/tmp/$JANGR(name)_t01"
+    my_exec_q max "/tmp/$JANGR(name)_t2" "/tmp/$JANGR(name)_t01" "/tmp/$JANGR(name)_t2"
+
+    my_exec_q sub "/tmp/$JANGR(name)_t1" "/tmp/$JANGR(name)_t2" "/tmp/$JANGR(name)_t3"
+    my_exec_q sub "/tmp/$JANGR(name)_t0" "/tmp/$JANGR(name)_t3" "/tmp/$JANGR(name)_t0"
+    my_exec_q max "/tmp/$JANGR(name)_t0" "/tmp/$JANGR(name)_ma4" "/tmp/$JANGR(name)_t0"
+
+    my_exec_q sub "/tmp/$JANGR(name)_t0_sav" "/tmp/$JANGR(name)_t0" "/tmp/$JANGR(name)_t0_sav"
+    my_exec_q area "/tmp/$JANGR(name)_t0_sav" "/tmp/$JANGR(name)_area"
+    set delta [my_read_val "/tmp/$JANGR(name)_area"]
+    return $delta
+}
+
+if {$JANGR(nsteps) != -1} {
+    for {set j 1} {$j<=$JANGR(nsteps)} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }
+} else {
+    set delta 1
+    for {set j 1} {$delta != 0} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }    
+}
+
+my_exec_q cp "/tmp/$JANGR(name)_t0" $JANGR(outfilename) 
+my_exec_q rm "/tmp/$JANGR(name)_*" "/tmp/JANGR*" 

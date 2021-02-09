@@ -1,0 +1,18 @@
+#!/bin/sh
+USAGE="Usage: $0 in.pgm param out.pgm"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+ogniewicz1 $1 $2
+genimage $1 0 /tmp/ogniewicz_0
+# la liste resultante est dans /tmp/ogniewicz_temp
+drawlines /tmp/ogniewicz_0 /tmp/ogniewicz_temp $3
+#rm -f /tmp/ogniewicz_*
+exit 0

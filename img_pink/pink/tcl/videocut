@@ -1,0 +1,154 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec tclsh $0 $1 $2 $3
+
+ if {($argc != 2) && ($argc != 3)} { 
+   puts stderr "usage: videocut in.mpg \[nframes\] out"
+   exit 
+ }
+
+set PINK "$env(PINK)"
+source "$PINK/tcl/my_exec.tcl"
+source "$PINK/tcl/my_write.tcl"
+
+global VIDEOCUT
+set VIDEOCUT(name) "videocut"
+set VIDEOCUT(infilename) [lindex $argv 0]
+if {($argc == 3)} { 
+   set VIDEOCUT(nframes) [lindex $argv 1]
+} else {
+   set VIDEOCUT(nframes) 1000000000
+}
+set VIDEOCUT(outfilename) [lindex $argv [expr $argc - 1]]
+
+proc tmpfile {tmpname} {
+  global VIDEOCUT
+  return [file join "/tmp" "$VIDEOCUT(name)_$tmpname"]
+}
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%d %g" v1 v2
+  close $input
+  return $v2
+}
+
+# computes dissimilarity between two images
+#-----------------------------------
+proc compute_diss {i j} {
+  set file1 [format "%08d" $i]
+  set file2 [format "%08d" $j]
+  my_exec_q diffimages "$file1.pgm" "$file2.pgm" [tmpfile 1]
+  my_exec_q volume [tmpfile 1] [tmpfile 2]
+  set diss [my_read_val [tmpfile 2]]
+  return $diss
+}
+
+puts "converting video file"
+#---------------------------
+if {($argc == 3)} { 
+   my_exec_q mplayer -vo pnm -frames $VIDEOCUT(nframes) $VIDEOCUT(infilename)
+} else {
+   my_exec_q mplayer -vo pnm $VIDEOCUT(infilename)
+}
+
+puts "converting to grayscale"
+#---------------------------
+set i 1
+while {$i < $VIDEOCUT(nframes)} {
+  set filecount [format "%08d" $i]
+  if {![file exists "$filecount.ppm"]} {
+    set VIDEOCUT(nframes) $i
+  } else {
+    my_exec_q rgb2hls "$filecount.ppm" "/dev/null" "$filecount.pgm" "/dev/null"
+    catch {exec rm "$filecount.ppm"} result
+    incr i
+  }
+}
+
+incr VIDEOCUT(nframes) -1
+
+#puts "reducing resolution"
+#---------------------------
+#for {set i 1} {$i < $VIDEOCUT(nframes)} {incr i} {
+#  set filecount [format "%08d" $i]
+#  my_exec_q zoom "$filecount.pgm" 0.125 "$filecount.pgm"
+#}
+
+puts "computing dissimilarities"
+#---------------------------
+set data [list]
+for {set i 1} {$i < [expr $VIDEOCUT(nframes) - 1]} {incr i} {
+  set j [expr $i + 1]
+  set diss [compute_diss $i $j]
+  puts "images $i,$j: $diss"
+  set data [concat $data $diss]
+}
+
+set i 1
+while {$i < $VIDEOCUT(nframes)} {
+  set filecount [format "%08d" $i]
+  catch {exec rm "$filecount.pgm"} result
+  incr i
+}
+
+puts "normalizing list"
+#---------------------------
+set max [lindex $data 0]
+for {set i 1} {$i < [expr $VIDEOCUT(nframes) - 2]} {incr i} {
+  set d [lindex $data $i]
+  if {$d > $max} {
+    set max $d
+  }
+}
+set newdata [list]
+for {set i 0} {$i < [expr $VIDEOCUT(nframes) - 2]} {incr i} {
+  set d [lindex $data $i]
+  set newdata [concat $newdata [expr 255 * [expr $d / $max]]]  
+}
+
+puts "writing file"
+#---------------------------
+#my_write_gp_list $VIDEOCUT(outfilename) $newdata
+my_write_pgm1d_list $VIDEOCUT(outfilename) $newdata
+
+foreach file [glob -nocomplain [tmpfile "*"]] {
+  catch {exec rm $file} result
+}

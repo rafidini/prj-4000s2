@@ -1,0 +1,79 @@
+# -*- sh -*-
+# UjoImro, 2011
+
+project
+  : requirements <variant>release <link>shared ;
+
+
+using msvc ;
+using python : 2.7 : C:\\Python27 ;
+
+import python ;
+
+if ! [ python.configured ]
+{
+    ECHO "notice: no Python configured in user-config.jam" ;
+    ECHO "notice: will use default configuration" ;
+    using python ;
+}
+
+# Specify the path to the Boost project.  If you move this project,
+# adjust this path to refer to the Boost root directory.
+use-project boost
+  : "C:/boost_1_45_0" ;
+
+### ***********************************************************************************************
+### ***********************************************************************************************
+### ***********************************************************************************************
+###                    YOU SHOULDN'T NEED TO CHANGE ANYTHING BELOW THIS POINT
+### ***********************************************************************************************
+### ***********************************************************************************************
+### ***********************************************************************************************
+
+#project
+#  : requirements <variant>release <link>static ;
+
+project
+  : requirements <variant>debug <link>static ;
+
+# Set up the project-wide requirements that everything uses the
+# boost_python library from the project whose global ID is
+# /boost/python.
+project
+  : requirements <library>/boost/python//boost_python 
+                 <include>include 
+		 <include>src/liar
+                 <library>/boost/thread//boost_thread
+		 <library>/boost//date_time 
+		 <define>WIN32 ;
+
+# Declare the three extension modules.  You can specify multiple
+# source files after the colon separated by spaces.
+python-extension libcpp_pink : 
+                               [ glob src/bdd/*.c ]
+                               [ glob src/lib/*.c ]
+			       [ glob src/python/*.c ]
+			       [ glob src/liar/*.c : excluded_files src/liar/imclient.c src/liar/startim.c src/liar/democlient.c ]
+                               [ glob src/bdd/*.cpp ]
+                               [ glob src/lib/*.cpp ]
+			       [ glob src/python/*.cpp : excluded_files src/python/pymview.cpp ]
+			       [ glob src/liar/*.cpp ]
+                               [ glob src/bdd/*.cxx ]
+                               [ glob src/lib/*.cxx ]
+			       [ glob src/python/*.cxx ]
+			       [ glob src/liar/*.cxx ]
+			       ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+# LuM end of file

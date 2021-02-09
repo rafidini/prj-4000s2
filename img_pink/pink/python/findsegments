@@ -1,0 +1,74 @@
+#!/usr/bin/python
+import sys
+import os
+import re
+
+if (len(sys.argv) != 3) : 
+    print "usage: followskel in.pgm out.pgm"
+    sys.exit ()
+
+name = sys.argv[0]
+infilename = sys.argv[1]
+outfilename = sys.argv[2]
+tmpprefix = "/tmp/"
+
+# reads a list of values (scalars, points, ...) from a file
+def my_readlistdata(filename) :
+  f = open(filename, 'r')
+  l = f.readline().split()
+  tag = l[0]
+  n = l[1]
+  r = []
+  for i in range(1,int(n)+1):
+    l = f.readline().split()
+    r.append(l)
+  return r
+
+# system call
+def my_exec_q(command, *args) :
+  s = command
+  for arg in args:
+    s = s+" "+str(arg)
+#  print s
+  os.system(s)
+
+# main program
+
+# suppress border points
+my_exec_q("frame", infilename, tmpprefix+"_f")
+my_exec_q("sub", infilename, tmpprefix+"_f", tmpprefix+"_f")
+
+# we want only curve points and end points
+my_exec_q("skelend", tmpprefix+"_f", 8, tmpprefix+"_s")
+my_exec_q("ptcurve", tmpprefix+"_s", 8, tmpprefix+"_c")
+my_exec_q("ptend", tmpprefix+"_s", 8, tmpprefix+"_e")
+my_exec_q("max", tmpprefix+"_c", tmpprefix+"_e", tmpprefix+"_cei")
+my_exec_q("ptisolated", tmpprefix+"_cei", 8, tmpprefix+"_i")
+my_exec_q("sub", tmpprefix+"_cei", tmpprefix+"_i", tmpprefix+"_ce")
+my_exec_q("ptend", tmpprefix+"_ce", 8, tmpprefix+"_e")
+
+# loop on all end points
+my_exec_q("pgm2list", tmpprefix+"_e", "b", tmpprefix+"_e.list")
+E = my_readlistdata(tmpprefix+"_e.list")
+processed = []
+my_exec_q("cp", tmpprefix+"_ce", tmpprefix+"_seg")
+for point in E:
+  print point
+  if not(point in processed):
+    # find the curve
+    my_exec_q("pgm2curve", tmpprefix+"_ce", 8, point[0], point[1], tmpprefix+"_c.list")
+    C = my_readlistdata(tmpprefix+"_c.list")
+    otherend = C[-1]
+    processed.append(otherend)
+    # find segments extremities
+    my_exec_q("curve2segments", tmpprefix+"_c.list", 2.5, tmpprefix+"_s.list")
+    S = my_readlistdata(tmpprefix+"_s.list")
+    del S[0]
+    del S[-1]
+    for ps in S:
+      # delete segment extremity from result
+      my_exec_q("point", tmpprefix+"_seg", ps[0], ps[1], 0, 0, tmpprefix+"_seg")
+      
+my_exec_q("label", tmpprefix+"_seg", 8, "fgd", outfilename)
+
+

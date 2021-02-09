@@ -1,0 +1,31 @@
+==============================
+
+Image: cells.pgm
+But: éliminer les petites particules et les petits trous
+
+==============================
+
+Image: cells.pgm
+But: éliminer les particules touchant le bord
+
+==============================
+
+Image: cells.pgm
+But: boucher tous les trous
+
+==============================
+
+Image: cells.pgm
+But: extraire les objets ayant au moins un trou
+
+==============================
+
+Image: circuit.pgm
+But: extraire les pistes (en éliminant les pastilles)
+
+==============================
+
+Image: meb.pgm
+But: extraire la "corne" en bas à droite, composée de petites billes
+
+==============================

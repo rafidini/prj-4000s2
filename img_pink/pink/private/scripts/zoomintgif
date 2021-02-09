@@ -1,0 +1,21 @@
+#!/bin/sh
+USAGE="Usage: $0 in.gif zoom-int-factor out.gif"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+convert    $1 _$1.ppm
+rgb2bw    _$1.ppm _$1.r _$1.g _$1.b
+zoomint   _$1.r $2 _$1.r
+zoomint   _$1.g $2 _$1.g
+zoomint   _$1.b $2 _$1.b
+bw2rgb    _$1.r _$1.g _$1.b _$1.ppm
+convert   _$1.ppm $3
+rm        _$1.?
+

@@ -1,0 +1,16 @@
+#!/bin/sh
+USAGE="Usage: $0 img msk"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+fusreg      $1  $2 1  _tmprr
+long2byte   _tmprr 1 _tmprr
+randrgb     _tmprr _tmprr
+xv _tmprr&

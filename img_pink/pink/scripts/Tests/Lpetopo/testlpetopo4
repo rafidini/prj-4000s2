@@ -1,0 +1,25 @@
+stretch pseudochateau.pgm _a.testlpetopo4
+zoom _a.testlpetopo4  8  _az.testlpetopo4
+xv -geometry +0+0 _az.testlpetopo4 &
+lpetopo _a.testlpetopo4 1 _b.testlpetopo4
+zoom _b.testlpetopo4  8  _bz.testlpetopo4
+xv -geometry +110+0 _bz.testlpetopo4 &
+lpetopo _b.testlpetopo4 256 _c.testlpetopo4
+zoom _c.testlpetopo4  8  _cz.testlpetopo4
+xv -geometry +220+0 _cz.testlpetopo4 &
+
+echo -n "ok pour le menage des fichiers temporaires ? "
+read REP
+case $REP in
+      o|O|y|Y) rm _*.testlpetopo4
+esac
+
+echo -n "ok pour le menage des fenetres xv ? "
+read REP
+case $REP in
+      o|O|y|Y) echo 'kill -9 \' > clearscreen
+               ps -a|grep xv|grep testlpetopo4|awk '{printf(" %s", $1)}' >> clearscreen
+               chmod 755 clearscreen
+               clearscreen
+               rm clearscreen
+esac

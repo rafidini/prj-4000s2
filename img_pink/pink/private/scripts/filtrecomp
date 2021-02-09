@@ -1,0 +1,23 @@
+#!/bin/sh
+USAGE="Usage: $0 in connex tailletrous out"
+if [ $# -gt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+attribute    $1      $2      0     max    area    _$1.a
+seuilbin    _$1.a    $3     _$1.s
+seuilbin    _$1.a    1      _$1.s1
+sub         _$1.s1  _$1.s   _$1.t
+inverse     _$1.t   _$1.t
+min          $1     _$1.t    $4
+rm          _$1.a
+rm          _$1.s
+rm          _$1.s1
+rm          _$1.t
+

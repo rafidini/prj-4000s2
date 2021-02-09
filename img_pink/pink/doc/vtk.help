@@ -1,0 +1,1123 @@
+installer cmake, tcl, tk, libtcl-devel, libtk-devel (urpmi cmake; ...)
+
+0/ su root
+1/ cd /usr/local
+2/ expand vtk archive here
+3/ cd VTK
+4/ ccmake .
+5/ type c
+6/ turn on VTK_WRAP_TCL
+7/ type c
+8/ type c
+9/ type g
+10/ make 
+11/ make install
+
+ajouter au .cshrc : 
+setenv TCLLIBPATH /usr/local/VTK/Wrapping/Tcl
+setenv LD_LIBRARY_PATH /usr/local/bin:/usr/local/lib
+au .bashrc : 
+export TCLLIBPATH=/usr/local/VTK/Wrapping/Tcl
+export LD_LIBRARY_PATH=/usr/local/bin:/usr/local/lib
+
+# - Find Tcl includes and libraries.
+# This module finds if TCL is installed and determines where the
+# include files and libraries are. It also determines what the name of
+# the library is. This code sets the following variables:
+#  TCL_LIBRARY        = path to Tcl library (tcl tcl80)
+#  TCL_LIBRARY_DEBUG  = path to Tcl library (debug)
+#  TCL_STUB_LIBRARY   = path to Tcl stub library
+#  TCL_STUB_LIBRARY_DEBUG = path to debug stub library
+#  TCL_INCLUDE_PATH   = path to where tcl.h can be found
+#  TCL_TCLSH          = path to tclsh binary (tcl tcl80)
+#  TK_LIBRARY         = path to Tk library (tk tk80 etc)
+#  TK_LIBRARY_DEBUG   = path to Tk library (debug)
+#  TK_STUB_LIBRARY    = path to Tk stub library
+#  TK_STUB_LIBRARY_DEBUG = path to debug Tk stub library
+#  TK_INCLUDE_PATH    = path to where tk.h can be found
+#  TK_INTERNAL_PATH   = path to where tkWinInt.h is found
+#    ex: /local/VTK/Utilities/TclTk/internals/tk8.4
+#  TK_WISH            = full path to the wish executable
+
+# This is the CMakeCache file.
+# For build in directory: /home4/rsz/pub/linux/vtk/vtk-4.5/src
+# You can edit this file to change values found and used by cmake.
+# If you do not want to change any of the values, simply exit the editor.
+# If you do want to change a value, simply edit, save, and exit the editor.
+# The syntax for the file is as follows:
+# KEY:TYPE=VALUE
+# KEY is the name of a variable in the cache.
+# TYPE is a hint to GUI's for the type of VALUE, DO NOT EDIT TYPE!.
+# VALUE is the current value for the KEY.
+
+########################
+# EXTERNAL cache entries
+########################
+
+//Build the documentation (Doxygen).
+BUILD_DOCUMENTATION:BOOL=OFF
+
+//Build VTK examples.
+BUILD_EXAMPLES:BOOL=ON
+
+//Build VTK with shared libraries.
+BUILD_SHARED_LIBS:BOOL=ON
+
+//Build the testing tree.
+BUILD_TESTING:BOOL=ON
+
+//Path to a program.
+CMAKE_AR:FILEPATH=/usr/bin/ar
+
+//For backwards compatibility, what version of CMake commands and
+// syntax should this version of CMake allow.
+CMAKE_BACKWARDS_COMPATIBILITY:STRING=2.0
+
+//Choose the type of build, options are: None(CMAKE_CXX_FLAGS or
+// CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.
+//
+CMAKE_BUILD_TYPE:STRING=Release
+
+//C++ compiler
+CMAKE_CXX_COMPILER:STRING=c++
+
+//Flags used by the compiler during all build types.
+CMAKE_CXX_FLAGS:STRING=
+
+//Flags used by the compiler during debug builds.
+CMAKE_CXX_FLAGS_DEBUG:STRING=-g
+
+//Flags used by the compiler during release minsize builds.
+CMAKE_CXX_FLAGS_MINSIZEREL:STRING=-Os
+
+//Flags used by the compiler during release builds (/MD /Ob1 /Oi
+// /Ot /Oy /Gs will produce slightly less optimized but smaller
+// files).
+CMAKE_CXX_FLAGS_RELEASE:STRING=-O3
+
+//Flags used by the compiler during Release with Debug Info builds.
+//
+CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g
+
+//C compiler
+CMAKE_C_COMPILER:STRING=gcc
+
+//Flags for C compiler.
+CMAKE_C_FLAGS:STRING=
+
+//Flags used by the compiler during debug builds.
+CMAKE_C_FLAGS_DEBUG:STRING=-g
+
+//Flags used by the compiler during release minsize builds.
+CMAKE_C_FLAGS_MINSIZEREL:STRING=-Os
+
+//Flags used by the compiler during release builds (/MD /Ob1 /Oi
+// /Ot /Oy /Gs will produce slightly less optimized but smaller
+// files).
+CMAKE_C_FLAGS_RELEASE:STRING=-O3
+
+//Flags used by the compiler during Release with Debug Info builds.
+//
+CMAKE_C_FLAGS_RELWITHDEBINFO:STRING=-O2 -g
+
+//Flags used by the linker.
+CMAKE_EXE_LINKER_FLAGS:STRING=
+
+//Flags used by the linker during debug builds.
+CMAKE_EXE_LINKER_FLAGS_DEBUG:STRING=
+
+//Flags used by the linker during release minsize builds.
+CMAKE_EXE_LINKER_FLAGS_MINSIZEREL:STRING=
+
+//Flags used by the linker during release builds.
+CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
+
+//Flags used by the linker during Release with Debug Info builds.
+//
+CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
+
+//Use HP pthreads.
+CMAKE_HP_PTHREADS:BOOL=OFF
+
+//Install path prefix, prepended onto install directories.
+CMAKE_INSTALL_PREFIX:PATH=/home/rsz/pub/linux/vtk/vtk-4.5/opengl
+
+//Path to a program.
+CMAKE_MAKE_PROGRAM:FILEPATH=/usr/bin/gmake
+
+//Flags used by the linker during the creation of modules.
+CMAKE_MODULE_LINKER_FLAGS:STRING=
+
+//Flags used by the linker during debug builds.
+CMAKE_MODULE_LINKER_FLAGS_DEBUG:STRING=
+
+//Flags used by the linker during release minsize builds.
+CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL:STRING=
+
+//Flags used by the linker during release builds.
+CMAKE_MODULE_LINKER_FLAGS_RELEASE:STRING=
+
+//Flags used by the linker during Release with Debug Info builds.
+//
+CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
+
+//Path to a program.
+CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
+
+//Flags used by the linker during the creation of dll's.
+CMAKE_SHARED_LINKER_FLAGS:STRING=
+
+//Flags used by the linker during debug builds.
+CMAKE_SHARED_LINKER_FLAGS_DEBUG:STRING=
+
+//Flags used by the linker during release minsize builds.
+CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL:STRING=
+
+//Flags used by the linker during release builds.
+CMAKE_SHARED_LINKER_FLAGS_RELEASE:STRING=
+
+//Flags used by the linker during Release with Debug Info builds.
+//
+CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO:STRING=
+
+//If set, runtime paths are not added when using shared libraries.
+//
+CMAKE_SKIP_RPATH:BOOL=OFF
+
+//Thread library used.
+CMAKE_THREAD_LIBS:STRING=-lpthread
+
+//Use the pthreads library.
+CMAKE_USE_PTHREADS:BOOL=ON
+
+//If true, cmake will use relative paths in makefiles and projects.
+//
+CMAKE_USE_RELATIVE_PATHS:BOOL=OFF
+
+//Use sproc libs.
+CMAKE_USE_SPROC:BOOL=OFF
+
+//Use the win32 thread library.
+CMAKE_USE_WIN32_THREADS:BOOL=OFF
+
+//If this value is on, makefiles will be generated without the
+// .SILENT directive, and all commands will be echoed to the console
+// during the make.  This is useful for debugging only. With Visual
+// Studio IDE projects all commands are done without /nologo.
+CMAKE_VERBOSE_MAKEFILE:BOOL=OFF
+
+//X11 extra flags.
+CMAKE_X_CFLAGS:STRING=-I/usr/X11R6/include
+
+//Libraries and options used in X11 programs.
+CMAKE_X_LIBS:STRING=-lSM;-lICE;-lSM;-lICE;/usr/X11R6/lib/libX11.so;/usr/X11R6/lib/libXext.so;/usr/X11R6/lib/libX11.so;/usr/X11R6/lib/libXext.so
+
+//Path to program used to compress files for transfer to the dart
+// server
+COMPRESSIONCOMMAND:FILEPATH=/bin/gzip
+
+//Path to the coverage program that Dart client uses for performing
+// coverage inspection
+COVERAGE_COMMAND:FILEPATH=/usr/bin/gcov
+
+//Path to a program.
+CVSCOMMAND:FILEPATH=/usr/bin/cvs
+
+//Options passed to the cvs update command.
+CVS_UPDATE_OPTIONS:STRING=-d -A -P
+
+//Limit of reported errors, -1 reports all.
+DART_BUILD_ERROR_REPORT_LIMIT:BOOL=OFF
+
+//Limit of reported warnings, -1 reports all.
+DART_BUILD_WARNING_REPORT_LIMIT:BOOL=OFF
+
+//If you have Dart installed, where is it located?
+DART_ROOT:PATH=DART_ROOT-NOTFOUND
+
+//Time alloted for a test before Dart will kill the test.
+DART_TESTING_TIMEOUT:STRING=1500
+
+//Show the actual output of the build, or if off show a . for each
+// 1024 bytes.
+DART_VERBOSE_BUILD:BOOL=OFF
+
+//Should Dart server send email when build errors are found in
+// Continuous builds?
+DELIVER_CONTINUOUS_EMAIL:BOOL=OFF
+
+//Value Computed by CMake
+DICOMParser_BINARY_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/DICOMParser
+
+//Value Computed by CMake
+DICOMParser_SOURCE_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/DICOMParser
+
+//Path to gunzip executable
+GUNZIPCOMMAND:FILEPATH=/bin/gunzip
+
+//Path to java command, used by the Dart server to create html.
+//
+JAVACOMMAND:FILEPATH=/usr/java/j2sdk1.4.1_01/bin/java
+
+//Command used to build entire project from the command line.
+MAKECOMMAND:STRING=/usr/bin/gmake -i
+
+//Path to Rational purify command, used for memory error detection.
+//
+MEMORYCHECK_COMMAND:FILEPATH=MEMORYCHECK_COMMAND-NOTFOUND
+
+//File that contains suppressions for the memmory checker
+MEMORYCHECK_SUPPRESSIONS_FILE:FILEPATH=
+
+//What is the path where the file GL/gl.h can be found
+OPENGL_INCLUDE_DIR:PATH=/usr/share/doc/NVIDIA_GLX-1.0/include
+
+//Where can one of the MesaGL or GL libraries be found
+OPENGL_gl_LIBRARY:FILEPATH=/usr/lib/libGL.so
+
+//Where can one of the MesaGLU or GLU libraries be found
+OPENGL_glu_LIBRARY:FILEPATH=/usr/lib/libGLU.so
+
+//What is the path where the file GL/xmesa.h can be found
+OPENGL_xmesa_INCLUDE_DIR:PATH=/usr/include
+
+//Path to a program.
+PYTHON_EXECUTABLE:FILEPATH=/home/rsz/pub/linux/python/Python-2.3.4/bin/python2.3
+
+//What is the path where the file Python.h can be found
+PYTHON_INCLUDE_PATH:PATH=/home/rsz/pub/linux/python/Python-2.3.4/include/python2.3
+
+//Where can one of the python23, python2.3, python2.3.dll, python22,
+// python2.2, python2.2.dll, python21, python2.1, python2.1.dll,
+// python20, python2.0, python2.0.dll, python16, python1.6, python1.6.dll,
+// python15, python1.5 or python1.5.dll libraries be found
+PYTHON_LIBRARY:FILEPATH=/home/rsz/pub/linux/python/Python-2.3.4/lib/python2.3/config/libpython2.3.a
+
+//Utility library needed for vtkpython
+PYTHON_UTIL_LIBRARY:FILEPATH=/usr/lib/libutil.so
+
+//Path to scp command, used by some Dart clients for submitting
+// results to a Dart server (when not using ftp for submissions)
+//
+SCPCOMMAND:FILEPATH=/usr/bin/scp
+
+//Name of the computer/site where compile is being run
+SITE:STRING=rsz
+
+//What is the path where the file tcl.h can be found
+TCL_INCLUDE_PATH:PATH=/usr/include
+
+//Where can one of the tcl, tcl84, tcl8.4, tcl83, tcl8.3, tcl82,
+// tcl8.2, tcl80 or tcl8.0 libraries be found
+TCL_LIBRARY:FILEPATH=/usr/lib/libtcl.so
+
+//Path to a program.
+TCL_TCLSH:FILEPATH=/usr/bin/tclsh
+
+//Build with static Tcl/Tk support. TCL_LIBRARY and TK_LIBRARY
+// must point to the corresponding Tcl/Tk static libraries (example,
+// tcl84sx.lib, tk84sx.lib).
+TCL_TK_STATIC:BOOL=OFF
+
+//What is the path where the file tk.h can be found
+TK_INCLUDE_PATH:PATH=/usr/include
+
+//Where can one of the tk, tk84, tk8.4, tk83, tk8.3, tk82, tk8.2,
+// tk80 or tk8.0 libraries be found
+TK_LIBRARY:FILEPATH=/usr/lib/libtk.so
+
+//Value Computed by CMake
+VTKEXPAT_BINARY_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkexpat
+
+//Value Computed by CMake
+VTKEXPAT_SOURCE_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkexpat
+
+//Value Computed by CMake
+VTKFREETYPE_BINARY_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/freetype
+
+//Value Computed by CMake
+VTKFREETYPE_SOURCE_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/freetype
+
+//Value Computed by CMake
+VTKFTGL_BINARY_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/ftgl
+
+//Value Computed by CMake
+VTKFTGL_SOURCE_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/ftgl
+
+//Value Computed by CMake
+VTKJPEG_BINARY_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkjpeg
+
+//Value Computed by CMake
+VTKJPEG_SOURCE_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkjpeg
+
+//Value Computed by CMake
+VTKPNG_BINARY_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkpng
+
+//Value Computed by CMake
+VTKPNG_SOURCE_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkpng
+
+//Value Computed by CMake
+VTKTIFF_BINARY_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtktiff
+
+//Value Computed by CMake
+VTKTIFF_SOURCE_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtktiff
+
+//Value Computed by CMake
+VTKZLIB_BINARY_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkzlib
+
+//Value Computed by CMake
+VTKZLIB_SOURCE_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkzlib
+
+//Value Computed by CMake
+VTK_BINARY_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src
+
+//What is the path where the file VTKData.readme can be found
+VTK_DATA_ROOT:PATH=/net2/rsz/anyos/VTKData
+
+//Build leak checking support into VTK.
+VTK_DEBUG_LEAKS:BOOL=OFF
+
+//The opengl library being used supports off screen Mesa calls.
+//
+VTK_OPENGL_HAS_OSMESA:BOOL=OFF
+
+//Value Computed by CMake
+VTK_SOURCE_DIR:STATIC=/home/rsz/pub/linux/vtk/vtk-4.5/src
+
+//Build VTK with 64 bit ids
+VTK_USE_64BIT_IDS:BOOL=OFF
+
+//Use the ANSI standard iostream library.
+VTK_USE_ANSI_STDLIB:BOOL=ON
+
+//Turn this option off and tests will not popup windows
+VTK_USE_DISPLAY:BOOL=ON
+
+//Build VTK with gl2ps support.
+VTK_USE_GL2PS:BOOL=ON
+
+//Build the vtkHybrid kit.
+VTK_USE_HYBRID:BOOL=ON
+
+//Use mangled Mesa with OpenGL.
+VTK_USE_MANGLED_MESA:BOOL=OFF
+
+//Build the vtkParallel kit.
+VTK_USE_PARALLEL:BOOL=OFF
+
+//Build the vtkPatented kit.  These classes are patented and may
+// require a license to use.
+VTK_USE_PATENTED:BOOL=OFF
+
+//Build the vtkRendering kit.  Needed for displaying data.
+VTK_USE_RENDERING:BOOL=ON
+
+//Use the system's expat library.
+VTK_USE_SYSTEM_EXPAT:BOOL=OFF
+
+//Use the system's jpeg library.
+VTK_USE_SYSTEM_JPEG:BOOL=OFF
+
+//Use the system's png library.
+VTK_USE_SYSTEM_PNG:BOOL=OFF
+
+//Use the system's tiff library.
+VTK_USE_SYSTEM_TIFF:BOOL=OFF
+
+//Use the system's zlib library.
+VTK_USE_SYSTEM_ZLIB:BOOL=OFF
+
+//Build VTK with VolumePro support.
+VTK_USE_VOLUMEPRO:BOOL=OFF
+
+//Where can the hints file be found
+VTK_WRAP_HINTS:FILEPATH=/home/rsz/pub/linux/vtk/vtk-4.5/src/Wrapping/hints
+
+//Wrap VTK classes into the Java language.
+VTK_WRAP_JAVA:BOOL=OFF
+
+//Wrap VTK classes into the Python language.
+VTK_WRAP_PYTHON:BOOL=ON
+
+//Path to an internal program.
+VTK_WRAP_PYTHON_EXE:FILEPATH=/home/rsz/pub/linux/vtk/vtk-4.5/src/bin/vtkWrapPython
+
+//Wrap VTK classes into the TCL language.
+VTK_WRAP_TCL:BOOL=ON
+
+//Path to an internal program.
+VTK_WRAP_TCL_EXE:FILEPATH=/home/rsz/pub/linux/vtk/vtk-4.5/src/bin/vtkWrapTcl
+
+//Path to an internal program.
+VTK_WRAP_TCL_INIT_EXE:FILEPATH=/home/rsz/pub/linux/vtk/vtk-4.5/src/bin/vtkWrapTclInit
+
+//What is the path where the file X11/X.h can be found
+X11_X11_INCLUDE_PATH:PATH=/usr/X11R6/include
+
+//Where can the X11 library be found
+X11_X11_LIB:FILEPATH=/usr/X11R6/lib/libX11.so
+
+//Where can the Xext library be found
+X11_Xext_LIB:FILEPATH=/usr/X11R6/lib/libXext.so
+
+//What is the path where the file X11/Xlib.h can be found
+X11_Xlib_INCLUDE_PATH:PATH=/usr/X11R6/include
+
+//What is the path where the file X11/Xutil.h can be found
+X11_Xutil_INCLUDE_PATH:PATH=/usr/X11R6/include
+
+//Dependencies for the target
+vtkCommonPython_LIB_DEPENDS:STATIC=vtkCommon;
+
+//Dependencies for the target
+vtkCommonTCL_LIB_DEPENDS:STATIC=vtkCommon;/usr/lib/libtcl.so;m;
+
+//Dependencies for the target
+vtkCommon_LIB_DEPENDS:STATIC=-lpthread;-ldl;-lm;
+
+//Dependencies for target
+vtkDICOMParser_LIB_DEPENDS:STATIC=
+
+//Dependencies for the target
+vtkFilteringPython_LIB_DEPENDS:STATIC=vtkFiltering;vtkCommonPython;
+
+//Dependencies for the target
+vtkFilteringTCL_LIB_DEPENDS:STATIC=vtkFiltering;vtkCommonTCL;
+
+//Dependencies for the target
+vtkFiltering_LIB_DEPENDS:STATIC=vtkCommon;
+
+//Dependencies for the target
+vtkGenericFilteringPython_LIB_DEPENDS:STATIC=vtkGenericFiltering;vtkFilteringPython;vtkGraphicsPython;
+
+//Dependencies for the target
+vtkGenericFilteringTCL_LIB_DEPENDS:STATIC=vtkGenericFiltering;vtkFilteringTCL;vtkGraphicsTCL;
+
+//Dependencies for the target
+vtkGenericFiltering_LIB_DEPENDS:STATIC=vtkFiltering;vtkGraphics;
+
+//Dependencies for the target
+vtkGraphicsPython_LIB_DEPENDS:STATIC=vtkGraphics;vtkFilteringPython;
+
+//Dependencies for the target
+vtkGraphicsTCL_LIB_DEPENDS:STATIC=vtkGraphics;vtkFilteringTCL;
+
+//Dependencies for the target
+vtkGraphics_LIB_DEPENDS:STATIC=vtkFiltering;
+
+//Dependencies for the target
+vtkHybridPython_LIB_DEPENDS:STATIC=vtkHybrid;vtkRenderingPython;vtkIOPython;
+
+//Dependencies for the target
+vtkHybridTCL_LIB_DEPENDS:STATIC=vtkHybrid;vtkRenderingTCL;vtkIOTCL;
+
+//Dependencies for the target
+vtkHybrid_LIB_DEPENDS:STATIC=vtkRendering;vtkIO;
+
+//Dependencies for the target
+vtkIOPython_LIB_DEPENDS:STATIC=vtkIO;vtkFilteringPython;
+
+//Dependencies for the target
+vtkIOTCL_LIB_DEPENDS:STATIC=vtkIO;vtkFilteringTCL;
+
+//Dependencies for the target
+vtkIO_LIB_DEPENDS:STATIC=vtkFiltering;vtkDICOMParser;vtkpng;vtkzlib;vtkjpeg;vtktiff;vtkexpat;
+
+//Dependencies for the target
+vtkImagingPython_LIB_DEPENDS:STATIC=vtkImaging;vtkFilteringPython;
+
+//Dependencies for the target
+vtkImagingTCL_LIB_DEPENDS:STATIC=vtkImaging;vtkFilteringTCL;
+
+//Dependencies for the target
+vtkImaging_LIB_DEPENDS:STATIC=vtkFiltering;
+
+//Dependencies for the target
+vtkRenderingPythonTkWidgets_LIB_DEPENDS:STATIC=vtkRendering;/usr/lib/libtk.so;/usr/lib/libtcl.so;m;
+
+//Dependencies for the target
+vtkRenderingPython_LIB_DEPENDS:STATIC=vtkRendering;vtkGraphicsPython;vtkImagingPython;
+
+//Dependencies for the target
+vtkRenderingTCL_LIB_DEPENDS:STATIC=vtkRendering;vtkGraphicsTCL;vtkImagingTCL;/usr/lib/libtk.so;/usr/lib/libtcl.so;m;
+
+//Dependencies for the target
+vtkRendering_LIB_DEPENDS:STATIC=vtkGraphics;vtkImaging;vtkIO;vtkftgl;vtkfreetype;vtkzlib;/usr/lib/libGL.so;-lXt;-lSM;-lICE;-lSM;-lICE;-lSM;-lICE;/usr/X11R6/lib/libX11.so;/usr/X11R6/lib/libXext.so;/usr/X11R6/lib/libX11.so;/usr/X11R6/lib/libXext.so;/usr/X11R6/lib/libX11.so;/usr/X11R6/lib/libXext.so;
+
+//Dependencies for target
+vtkexpat_LIB_DEPENDS:STATIC=
+
+//Dependencies for target
+vtkfreetype_LIB_DEPENDS:STATIC=
+
+//Dependencies for the target
+vtkftgl_LIB_DEPENDS:STATIC=/usr/lib/libGL.so;vtkfreetype;
+
+//Dependencies for target
+vtkjpeg_LIB_DEPENDS:STATIC=
+
+//Dependencies for the target
+vtkpng_LIB_DEPENDS:STATIC=vtkzlib;
+
+//Dependencies for the target
+vtktiff_LIB_DEPENDS:STATIC=vtkzlib;vtkjpeg;
+
+//Dependencies for target
+vtkzlib_LIB_DEPENDS:STATIC=
+
+
+########################
+# INTERNAL cache entries
+########################
+
+//Executable to project name.
+/home/rsz/pub/linux/vtk/vtk-4.5/src/bin/vtkWrapPython:INTERNAL=vtkWrapPython
+//Executable to project name.
+/home/rsz/pub/linux/vtk/vtk-4.5/src/bin/vtkWrapTcl:INTERNAL=vtkWrapTcl
+//Executable to project name.
+/home/rsz/pub/linux/vtk/vtk-4.5/src/bin/vtkWrapTclInit:INTERNAL=vtkWrapTclInit
+//Advanced flag for variable: BUILD_DOCUMENTATION
+BUILD_DOCUMENTATION-ADVANCED:INTERNAL=1
+//Advanced flag for variable: BUILD_TESTING
+BUILD_TESTING-ADVANCED:INTERNAL=1
+//Result of TRY_COMPILE
+CMAKE_ANSI_FOR_SCOPE:INTERNAL=TRUE
+//Have include iostream
+CMAKE_ANSI_STREAM_HEADERS:INTERNAL=1
+//Advanced flag for variable: CMAKE_AR
+CMAKE_AR-ADVANCED:INTERNAL=1
+//What is the target build tool cmake is generating for.
+CMAKE_BUILD_TOOL:INTERNAL=/usr/bin/gmake
+//This is the directory where this CMakeCahe.txt was created
+CMAKE_CACHEFILE_DIR:INTERNAL=/home4/rsz/pub/linux/vtk/vtk-4.5/src
+//Major version of cmake used to create the current loaded cache
+//
+CMAKE_CACHE_MAJOR_VERSION:INTERNAL=2
+//Minor version of cmake used to create the current loaded cache
+//
+CMAKE_CACHE_MINOR_VERSION:INTERNAL=0
+//Major version of cmake used to create the current loaded cache
+//
+CMAKE_CACHE_RELEASE_VERSION:INTERNAL=patch 3
+//Path to CMake executable.
+CMAKE_COMMAND:INTERNAL=/home4/rsz/pub/altix/cmake/cmake-2.0.3/bin/cmake
+//Path to ctest program executable.
+CMAKE_CTEST_COMMAND:INTERNAL=/home4/rsz/pub/altix/cmake/cmake-2.0.3/bin/ctest
+//Advanced flag for variable: CMAKE_CXX_COMPILER
+CMAKE_CXX_COMPILER-ADVANCED:INTERNAL=1
+//full path to the compiler cmake found
+CMAKE_CXX_COMPILER_FULLPATH:INTERNAL=/usr/bin/c++
+//Result of TRY_COMPILE
+CMAKE_CXX_COMPILER_WORKS:INTERNAL=TRUE
+//Advanced flag for variable: CMAKE_CXX_FLAGS
+CMAKE_CXX_FLAGS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_CXX_FLAGS_DEBUG
+CMAKE_CXX_FLAGS_DEBUG-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_CXX_FLAGS_MINSIZEREL
+CMAKE_CXX_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_CXX_FLAGS_RELEASE
+CMAKE_CXX_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_CXX_FLAGS_RELWITHDEBINFO
+CMAKE_CXX_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_C_COMPILER
+CMAKE_C_COMPILER-ADVANCED:INTERNAL=1
+//full path to the compiler cmake found
+CMAKE_C_COMPILER_FULLPATH:INTERNAL=/usr/bin/gcc
+//Result of TRY_COMPILE
+CMAKE_C_COMPILER_WORKS:INTERNAL=TRUE
+//Advanced flag for variable: CMAKE_C_FLAGS
+CMAKE_C_FLAGS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_C_FLAGS_DEBUG
+CMAKE_C_FLAGS_DEBUG-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_C_FLAGS_MINSIZEREL
+CMAKE_C_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_C_FLAGS_RELEASE
+CMAKE_C_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_C_FLAGS_RELWITHDEBINFO
+CMAKE_C_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
+//Path to cache edit program executable.
+CMAKE_EDIT_COMMAND:INTERNAL=/home4/rsz/pub/altix/cmake/cmake-2.0.3/bin/ccmake
+//Advanced flag for variable: CMAKE_EXE_LINKER_FLAGS
+CMAKE_EXE_LINKER_FLAGS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_EXE_LINKER_FLAGS_DEBUG
+CMAKE_EXE_LINKER_FLAGS_DEBUG-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_EXE_LINKER_FLAGS_MINSIZEREL
+//
+CMAKE_EXE_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_EXE_LINKER_FLAGS_RELEASE
+CMAKE_EXE_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO
+//
+CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
+//Name of generator.
+CMAKE_GENERATOR:INTERNAL=Unix Makefiles
+//Have include sstream
+CMAKE_HAS_ANSI_STRING_STREAM:INTERNAL=1
+//Is X11 around.
+CMAKE_HAS_X:INTERNAL=1
+//Have function connect
+CMAKE_HAVE_CONNECT:INTERNAL=1
+//Have function gethostbyname
+CMAKE_HAVE_GETHOSTBYNAME:INTERNAL=1
+//Have include limits.h
+CMAKE_HAVE_LIMITS_H:INTERNAL=1
+//Have library pthreads
+CMAKE_HAVE_PTHREADS_CREATE:INTERNAL=
+//Have library pthread
+CMAKE_HAVE_PTHREAD_CREATE:INTERNAL=1
+//Have include pthread.h
+CMAKE_HAVE_PTHREAD_H:INTERNAL=1
+//Have function remove
+CMAKE_HAVE_REMOVE:INTERNAL=1
+//Have function shmat
+CMAKE_HAVE_SHMAT:INTERNAL=1
+//Have include sys/prctl.h
+CMAKE_HAVE_SYS_PRCTL_H:INTERNAL=1
+//Have include unistd.h
+CMAKE_HAVE_UNISTD_H:INTERNAL=1
+//Start directory with the top level CMakeLists.txt file for this
+// project
+CMAKE_HOME_DIRECTORY:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src
+//Advanced flag for variable: CMAKE_HP_PTHREADS
+CMAKE_HP_PTHREADS-ADVANCED:INTERNAL=1
+//Have library ICE
+CMAKE_LIB_ICE_HAS_ICECONNECTIONNUMBER:INTERNAL=1
+//Advanced flag for variable: CMAKE_MAKE_PROGRAM
+CMAKE_MAKE_PROGRAM-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_MODULE_LINKER_FLAGS
+CMAKE_MODULE_LINKER_FLAGS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_MODULE_LINKER_FLAGS_DEBUG
+CMAKE_MODULE_LINKER_FLAGS_DEBUG-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL
+//
+CMAKE_MODULE_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_MODULE_LINKER_FLAGS_RELEASE
+//
+CMAKE_MODULE_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO
+//
+CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
+//Does the compiler support ansi for scope.
+CMAKE_NO_ANSI_FOR_SCOPE:INTERNAL=0
+//Does the compiler support headers like iostream.
+CMAKE_NO_ANSI_STREAM_HEADERS:INTERNAL=0
+//Does the compiler support std::.
+CMAKE_NO_STD_NAMESPACE:INTERNAL=0
+//Advanced flag for variable: CMAKE_RANLIB
+CMAKE_RANLIB-ADVANCED:INTERNAL=1
+//Path to CMake installation.
+CMAKE_ROOT:INTERNAL=/home4/rsz/pub/altix/cmake/cmake-2.0.3/share/CMake
+//Advanced flag for variable: CMAKE_SHARED_LINKER_FLAGS
+CMAKE_SHARED_LINKER_FLAGS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_SHARED_LINKER_FLAGS_DEBUG
+CMAKE_SHARED_LINKER_FLAGS_DEBUG-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL
+//
+CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_SHARED_LINKER_FLAGS_RELEASE
+//
+CMAKE_SHARED_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO
+//
+CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
+//Result of TRY_RUN
+CMAKE_SIZEOF_CHAR:INTERNAL=1
+//Result of TRY_RUN
+CMAKE_SIZEOF_DOUBLE:INTERNAL=8
+//Result of TRY_RUN
+CMAKE_SIZEOF_FLOAT:INTERNAL=4
+//Result of TRY_RUN
+CMAKE_SIZEOF_INT:INTERNAL=4
+//Result of TRY_RUN
+CMAKE_SIZEOF_LONG:INTERNAL=4
+//Result of TRY_RUN
+CMAKE_SIZEOF_SHORT:INTERNAL=2
+//Result of TRY_RUN
+CMAKE_SIZEOF_VOID_P:INTERNAL=4
+//Advanced flag for variable: CMAKE_SKIP_RPATH
+CMAKE_SKIP_RPATH-ADVANCED:INTERNAL=1
+//Result of TRY_COMPILE
+CMAKE_STD_NAMESPACE:INTERNAL=TRUE
+//Advanced flag for variable: CMAKE_THREAD_LIBS
+CMAKE_THREAD_LIBS-ADVANCED:INTERNAL=1
+//uname command
+CMAKE_UNAME:INTERNAL=/bin/uname
+//Advanced flag for variable: CMAKE_USE_PTHREADS
+CMAKE_USE_PTHREADS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_USE_RELATIVE_PATHS
+CMAKE_USE_RELATIVE_PATHS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_USE_SPROC
+CMAKE_USE_SPROC-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_USE_WIN32_THREADS
+CMAKE_USE_WIN32_THREADS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_VERBOSE_MAKEFILE
+CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//Result of TRY_RUN
+CMAKE_WORDS_BIGENDIAN:INTERNAL=0
+//Advanced flag for variable: CMAKE_X_CFLAGS
+CMAKE_X_CFLAGS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CMAKE_X_LIBS
+CMAKE_X_LIBS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: COMPRESSIONCOMMAND
+COMPRESSIONCOMMAND-ADVANCED:INTERNAL=1
+//Advanced flag for variable: COVERAGE_COMMAND
+COVERAGE_COMMAND-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CVSCOMMAND
+CVSCOMMAND-ADVANCED:INTERNAL=1
+//Advanced flag for variable: CVS_UPDATE_OPTIONS
+CVS_UPDATE_OPTIONS-ADVANCED:INTERNAL=1
+//Path to an executable
+CommonCxxTests_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Common/Testing/Cxx
+//Advanced flag for variable: DART_BUILD_ERROR_REPORT_LIMIT
+DART_BUILD_ERROR_REPORT_LIMIT-ADVANCED:INTERNAL=1
+//Advanced flag for variable: DART_BUILD_WARNING_REPORT_LIMIT
+DART_BUILD_WARNING_REPORT_LIMIT-ADVANCED:INTERNAL=1
+//Advanced flag for variable: DART_ROOT
+DART_ROOT-ADVANCED:INTERNAL=1
+//Advanced flag for variable: DART_TESTING_TIMEOUT
+DART_TESTING_TIMEOUT-ADVANCED:INTERNAL=1
+//Advanced flag for variable: DART_VERBOSE_BUILD
+DART_VERBOSE_BUILD-ADVANCED:INTERNAL=1
+//Advanced flag for variable: DELIVER_CONTINUOUS_EMAIL
+DELIVER_CONTINUOUS_EMAIL-ADVANCED:INTERNAL=1
+//Single output directory for building all executables.
+EXECUTABLE_OUTPUT_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/bin
+//Path to an executable
+FilteringCxxTests_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Filtering/Testing/Cxx
+//Advanced flag for variable: GUNZIPCOMMAND
+GUNZIPCOMMAND-ADVANCED:INTERNAL=1
+//Path to an executable
+GenericFilteringCxxTests_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/GenericFiltering/Testing/Cxx
+//Path to an executable
+GraphicsCxxTests_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Graphics/Testing/Cxx
+//Result of TRY_COMPILE
+HAVE_CMAKE_SIZEOF_CHAR:INTERNAL=TRUE
+//Result of TRY_COMPILE
+HAVE_CMAKE_SIZEOF_DOUBLE:INTERNAL=TRUE
+//Result of TRY_COMPILE
+HAVE_CMAKE_SIZEOF_FLOAT:INTERNAL=TRUE
+//Result of TRY_COMPILE
+HAVE_CMAKE_SIZEOF_INT:INTERNAL=TRUE
+//Result of TRY_COMPILE
+HAVE_CMAKE_SIZEOF_LONG:INTERNAL=TRUE
+//Result of TRY_COMPILE
+HAVE_CMAKE_SIZEOF_SHORT:INTERNAL=TRUE
+//Result of TRY_COMPILE
+HAVE_CMAKE_SIZEOF_VOID_P:INTERNAL=TRUE
+//Result of TRY_COMPILE
+HAVE_CMAKE_WORDS_BIGENDIAN:INTERNAL=TRUE
+//Have include fcntl.h
+HAVE_FCNTL_H:INTERNAL=1
+//Result of TRY_COMPILE
+HAVE_NO_ICC_IDYNAMIC_NEEDED:INTERNAL=FALSE
+//Have include unistd.h
+HAVE_UNISTD_H:INTERNAL=1
+//Result of TRY_COMPILE
+HAVE_VTK_SIZEOF_LONG_LONG:INTERNAL=TRUE
+//Result of TRY_COMPILE
+HAVE_VTK_SIZEOF___INT64:INTERNAL=FALSE
+//Path to an executable
+HybridCxxTests_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Hybrid/Testing/Cxx
+//Path to an executable
+IOCxxTests_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/IO/Testing/Cxx
+//Path to an executable
+ImagingCxxTests_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Imaging/Testing/Cxx
+//Advanced flag for variable: JAVACOMMAND
+JAVACOMMAND-ADVANCED:INTERNAL=1
+//Single output directory for building all libraries.
+LIBRARY_OUTPUT_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/bin
+//Advanced flag for variable: MAKECOMMAND
+MAKECOMMAND-ADVANCED:INTERNAL=1
+//Advanced flag for variable: MEMORYCHECK_COMMAND
+MEMORYCHECK_COMMAND-ADVANCED:INTERNAL=1
+//Advanced flag for variable: MEMORYCHECK_SUPPRESSIONS_FILE
+MEMORYCHECK_SUPPRESSIONS_FILE-ADVANCED:INTERNAL=1
+//Advanced flag for variable: OPENGL_INCLUDE_DIR
+OPENGL_INCLUDE_DIR-ADVANCED:INTERNAL=1
+//Advanced flag for variable: OPENGL_gl_LIBRARY
+OPENGL_gl_LIBRARY-ADVANCED:INTERNAL=1
+//Advanced flag for variable: OPENGL_glu_LIBRARY
+OPENGL_glu_LIBRARY-ADVANCED:INTERNAL=1
+//Advanced flag for variable: OPENGL_xmesa_INCLUDE_DIR
+OPENGL_xmesa_INCLUDE_DIR-ADVANCED:INTERNAL=1
+//Advanced flag for variable: PYTHON_EXECUTABLE
+PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
+//Advanced flag for variable: PYTHON_UTIL_LIBRARY
+PYTHON_UTIL_LIBRARY-ADVANCED:INTERNAL=1
+//Path to an executable
+RenderingCxxTests_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Rendering/Testing/Cxx
+//Advanced flag for variable: SCPCOMMAND
+SCPCOMMAND-ADVANCED:INTERNAL=1
+//Advanced flag for variable: SITE
+SITE-ADVANCED:INTERNAL=1
+//This value is not used by VTK.
+TCL_LIBRARY_DEBUG:INTERNAL=TCL_LIBRARY_DEBUG-NOTFOUND
+//This value is not used by VTK.
+TCL_STUB_LIBRARY:INTERNAL=/usr/lib/libtclstub.a
+//This value is not used by VTK.
+TCL_STUB_LIBRARY_DEBUG:INTERNAL=TCL_STUB_LIBRARY_DEBUG-NOTFOUND
+//Advanced flag for variable: TCL_TCLSH
+TCL_TCLSH-ADVANCED:INTERNAL=1
+//Very few users should worry about this option. If VTK is built
+// against a static Tcl/Tk lib (see TCL_TK_STATIC) or a shared
+// Tcl/Tk bundled inside a project with no library support files
+// (ex: ParaViewComplete), this variable should be set to ON and
+// both TCL_SUPPORT_LIBRARY_PATH and TK_SUPPORT_LIBRARY_PATH should
+// point to the directories that hold those files (typically, lib/tcl8.4
+// and lib/tk8.4 for a typical Tcl/Tk installation, or tcl8.4.5/library
+// and tk8.4.5/library for a Tcl/Tk source repository). Once this
+// variable is set to ON, support files will automatically be copied
+// to the build directory and the executables will try to use that
+// location to initialize Tcl/Tk.
+TCL_TK_COPY_SUPPORT_LIBRARY:INTERNAL=OFF
+//Advanced flag for variable: TCL_TK_STATIC
+TCL_TK_STATIC-ADVANCED:INTERNAL=1
+//This value is not used by VTK.
+TK_LIBRARY_DEBUG:INTERNAL=TK_LIBRARY_DEBUG-NOTFOUND
+//This value is not used by VTK.
+TK_STUB_LIBRARY:INTERNAL=/usr/lib/libtkstub.a
+//This value is not used by VTK.
+TK_STUB_LIBRARY_DEBUG:INTERNAL=TK_STUB_LIBRARY_DEBUG-NOTFOUND
+//This value is not used by VTK.
+TK_WISH:INTERNAL=/usr/bin/wish
+//Path to an executable
+TestCxxFeatures_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Common/Testing/Cxx
+//Path to an executable
+TestInstantiator_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Common/Testing/Cxx
+//Path to an executable
+VTKBenchMark_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Rendering/Testing/Cxx
+//Result of TRY_COMPILE
+VTK_ANSI_STREAM_EOF_COMPILED:INTERNAL=TRUE
+//Result of TRY_RUN
+VTK_ANSI_STREAM_EOF_RESULT:INTERNAL=0
+//Result of TRY_COMPILE
+VTK_CMAKE_EXTENSIONS_COMPILED:INTERNAL=TRUE
+//Support for C++ type bool
+VTK_COMPILER_HAS_BOOL:INTERNAL=1
+//Advanced flag for variable: VTK_DEBUG_LEAKS
+VTK_DEBUG_LEAKS-ADVANCED:INTERNAL=1
+//Disables the automatic initialization of Tk widgets when loading
+// the rendering library.
+VTK_DISABLE_TK_INIT:INTERNAL=OFF
+//Support for C++ explict templates
+VTK_EXPLICIT_TEMPLATES:INTERNAL=1
+//Have include iosfwd
+VTK_HAVE_ANSI_STREAMS:INTERNAL=1
+//Have include iostream.h
+VTK_HAVE_OLD_STREAMS:INTERNAL=1
+//Have include strstream.h
+VTK_HAVE_OLD_STRSTREAM_H:INTERNAL=1
+//Have include strstrea.h
+VTK_HAVE_OLD_STRSTREA_H:INTERNAL=
+//Whether istream supports long long
+VTK_ISTREAM_SUPPORTS_LONG_LONG:INTERNAL=1
+//Advanced flag for variable: VTK_OPENGL_HAS_OSMESA
+VTK_OPENGL_HAS_OSMESA-ADVANCED:INTERNAL=1
+//Whether ostream supports long long
+VTK_OSTREAM_SUPPORTS_LONG_LONG:INTERNAL=1
+//Result of TRY_RUN
+VTK_SIZEOF_LONG_LONG:INTERNAL=8
+//Whether char is signed.
+VTK_TYPE_CHAR_IS_SIGNED:INTERNAL=1
+//Result of TRY_COMPILE
+VTK_TYPE_CHAR_IS_SIGNED_COMPILED:INTERNAL=TRUE
+//Advanced flag for variable: VTK_USE_64BIT_IDS
+VTK_USE_64BIT_IDS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: VTK_USE_ANSI_STDLIB
+VTK_USE_ANSI_STDLIB-ADVANCED:INTERNAL=1
+//Build classes using Carbon API.
+VTK_USE_CARBON:INTERNAL=
+//Build classes using Cocoa API.
+VTK_USE_COCOA:INTERNAL=
+//Advanced flag for variable: VTK_USE_DISPLAY
+VTK_USE_DISPLAY-ADVANCED:INTERNAL=1
+//Advanced flag for variable: VTK_USE_GL2PS
+VTK_USE_GL2PS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: VTK_USE_MANGLED_MESA
+VTK_USE_MANGLED_MESA-ADVANCED:INTERNAL=1
+//Use Matrox Imaging Library for video input.
+VTK_USE_MATROX_IMAGING:INTERNAL=
+//Use Message Passing Interface (MPI) library for parallel support.
+//
+VTK_USE_MPI:INTERNAL=
+//Advanced flag for variable: VTK_USE_SYSTEM_EXPAT
+VTK_USE_SYSTEM_EXPAT-ADVANCED:INTERNAL=1
+//Advanced flag for variable: VTK_USE_SYSTEM_JPEG
+VTK_USE_SYSTEM_JPEG-ADVANCED:INTERNAL=1
+//Advanced flag for variable: VTK_USE_SYSTEM_PNG
+VTK_USE_SYSTEM_PNG-ADVANCED:INTERNAL=1
+//Advanced flag for variable: VTK_USE_SYSTEM_TIFF
+VTK_USE_SYSTEM_TIFF-ADVANCED:INTERNAL=1
+//Advanced flag for variable: VTK_USE_SYSTEM_ZLIB
+VTK_USE_SYSTEM_ZLIB-ADVANCED:INTERNAL=1
+//Use Video for Windows for video input.
+VTK_USE_VIDEO_FOR_WINDOWS:INTERNAL=
+//Advanced flag for variable: VTK_USE_VOLUMEPRO
+VTK_USE_VOLUMEPRO-ADVANCED:INTERNAL=1
+//Build classes for the X11 window system.
+VTK_USE_X:INTERNAL=
+//Advanced flag for variable: VTK_WRAP_HINTS
+VTK_WRAP_HINTS-ADVANCED:INTERNAL=1
+//Advanced flag for variable: VTK_WRAP_PYTHON_EXE
+VTK_WRAP_PYTHON_EXE-ADVANCED:INTERNAL=1
+//Advanced flag for variable: VTK_WRAP_TCL_EXE
+VTK_WRAP_TCL_EXE-ADVANCED:INTERNAL=1
+//Advanced flag for variable: VTK_WRAP_TCL_INIT_EXE
+VTK_WRAP_TCL_INIT_EXE-ADVANCED:INTERNAL=1
+//Have library /usr/X11R6/lib/libX11.so;/usr/X11R6/lib/libXext.so
+//
+X11_LIB_X11_SOLO:INTERNAL=1
+//Advanced flag for variable: X11_X11_INCLUDE_PATH
+X11_X11_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//Advanced flag for variable: X11_X11_LIB
+X11_X11_LIB-ADVANCED:INTERNAL=1
+//Advanced flag for variable: X11_Xext_LIB
+X11_Xext_LIB-ADVANCED:INTERNAL=1
+//Advanced flag for variable: X11_Xlib_INCLUDE_PATH
+X11_Xlib_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//Advanced flag for variable: X11_Xutil_INCLUDE_PATH
+X11_Xutil_INCLUDE_PATH-ADVANCED:INTERNAL=1
+//Path to an executable
+mkg3states_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtktiff
+//Path to a library
+vtkCommonPython_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Common
+//Whether a library is static, shared or module.
+vtkCommonPython_LIBRARY_TYPE:INTERNAL=MODULE
+//Path to a library
+vtkCommonTCL_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Common
+//Whether a library is static, shared or module.
+vtkCommonTCL_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkCommon_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Common
+//Whether a library is static, shared or module.
+vtkCommon_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkDICOMParser_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/DICOMParser
+//Whether a library is static, shared or module.
+vtkDICOMParser_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkFilteringPython_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Filtering
+//Whether a library is static, shared or module.
+vtkFilteringPython_LIBRARY_TYPE:INTERNAL=MODULE
+//Path to a library
+vtkFilteringTCL_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Filtering
+//Whether a library is static, shared or module.
+vtkFilteringTCL_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkFiltering_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Filtering
+//Whether a library is static, shared or module.
+vtkFiltering_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkGenericFilteringPython_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/GenericFiltering
+//Whether a library is static, shared or module.
+vtkGenericFilteringPython_LIBRARY_TYPE:INTERNAL=MODULE
+//Path to a library
+vtkGenericFilteringTCL_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/GenericFiltering
+//Whether a library is static, shared or module.
+vtkGenericFilteringTCL_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkGenericFiltering_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/GenericFiltering
+//Whether a library is static, shared or module.
+vtkGenericFiltering_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkGraphicsPython_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Graphics
+//Whether a library is static, shared or module.
+vtkGraphicsPython_LIBRARY_TYPE:INTERNAL=MODULE
+//Path to a library
+vtkGraphicsTCL_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Graphics
+//Whether a library is static, shared or module.
+vtkGraphicsTCL_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkGraphics_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Graphics
+//Whether a library is static, shared or module.
+vtkGraphics_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkHybridPython_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Hybrid
+//Whether a library is static, shared or module.
+vtkHybridPython_LIBRARY_TYPE:INTERNAL=MODULE
+//Path to a library
+vtkHybridTCL_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Hybrid
+//Whether a library is static, shared or module.
+vtkHybridTCL_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkHybrid_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Hybrid
+//Whether a library is static, shared or module.
+vtkHybrid_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkIOPython_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/IO
+//Whether a library is static, shared or module.
+vtkIOPython_LIBRARY_TYPE:INTERNAL=MODULE
+//Path to a library
+vtkIOTCL_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/IO
+//Whether a library is static, shared or module.
+vtkIOTCL_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkIO_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/IO
+//Whether a library is static, shared or module.
+vtkIO_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkImagingPython_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Imaging
+//Whether a library is static, shared or module.
+vtkImagingPython_LIBRARY_TYPE:INTERNAL=MODULE
+//Path to a library
+vtkImagingTCL_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Imaging
+//Whether a library is static, shared or module.
+vtkImagingTCL_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkImaging_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Imaging
+//Whether a library is static, shared or module.
+vtkImaging_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkRenderingPythonTkWidgets_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Rendering
+//Whether a library is static, shared or module.
+vtkRenderingPythonTkWidgets_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkRenderingPython_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Rendering
+//Whether a library is static, shared or module.
+vtkRenderingPython_LIBRARY_TYPE:INTERNAL=MODULE
+//Path to a library
+vtkRenderingTCL_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Rendering
+//Whether a library is static, shared or module.
+vtkRenderingTCL_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkRendering_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Rendering
+//Whether a library is static, shared or module.
+vtkRendering_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to an executable
+vtkWrapPython_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Wrapping
+//Path to an executable
+vtkWrapTclInit_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Wrapping
+//Path to an executable
+vtkWrapTcl_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Wrapping
+//Path to an executable
+vtk_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Wrapping/Tcl
+//Path to a library
+vtkexpat_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkexpat
+//Whether a library is static, shared or module.
+vtkexpat_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkfreetype_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/freetype
+//Whether a library is static, shared or module.
+vtkfreetype_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkftgl_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/ftgl
+//Whether a library is static, shared or module.
+vtkftgl_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkjpeg_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkjpeg
+//Whether a library is static, shared or module.
+vtkjpeg_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkpng_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkpng
+//Whether a library is static, shared or module.
+vtkpng_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to an executable
+vtkpython_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Wrapping/Python
+//Path to a library
+vtktiff_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtktiff
+//Whether a library is static, shared or module.
+vtktiff_LIBRARY_TYPE:INTERNAL=SHARED
+//Path to a library
+vtkzlib_CMAKE_PATH:INTERNAL=/home/rsz/pub/linux/vtk/vtk-4.5/src/Utilities/vtkzlib
+//Whether a library is static, shared or module.
+vtkzlib_LIBRARY_TYPE:INTERNAL=SHARED

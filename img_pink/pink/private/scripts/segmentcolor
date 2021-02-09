@@ -1,0 +1,23 @@
+#!/bin/sh
+
+param="moy"
+USAGE="Usage: $0 in lissage filtrage out"
+if [ $# -ne 3 ]
+then
+	echo $USAGE
+        exit
+fi
+
+#Calcul du gradient
+diZenzo $1 $2 _g
+
+#Segmentation
+minima _g 4 _m
+watershedwithoutline _g _m null null 4 _w
+
+#propagation des couleurs
+ppm2pgm.exe $1 _r _v _b
+propgeo.exe _r _w 4 $param _pr
+propgeo.exe _b _w 4 $param _pb
+propgeo.exe _v _w 4 $param _pv
+pgm2ppm.exe _pr _pv _pb $3

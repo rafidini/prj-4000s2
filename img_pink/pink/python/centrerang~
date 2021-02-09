@@ -1,0 +1,50 @@
+#!/usr/bin/python
+import sys
+import os
+import re
+
+# obtention d'un squelette sans point de jonction (si possible)
+
+name = "skelfilter"
+
+if (len(sys.argv) != 3) : 
+    print "usage: " + name + " in.pgm out.pgm"
+    sys.exit ()
+
+# reads a pgm image header
+# returns the image sizes in the form of a list : [rowsize, colsize] (in 2D)
+# or [rowsize, colsize, depth] in 3D
+#-----------------------------------
+def my_readpgmheader(filename) :
+  f = open(filename, 'r')
+  # read tag
+  s = f.readline()
+  # skip comment lines and reads one more line
+  l = f.readline().split()
+  while (l[0][0] == '#') or (len(l) == 0) :    
+    l = f.readline().split()
+  return l
+
+def my_exec_q(command, *args) :
+  s = command
+  for arg in args:
+    s = s+" "+str(arg)
+  os.system(s)
+
+infilename = sys.argv[1]
+outfilename = sys.argv[2]
+tmpprefix = "/tmp/_"+name
+
+sizes = my_readpgmheader(infilename)
+
+my_exec_q("frame", infilename, tmpprefix+"_0")
+my_exec_q("sub", infilename, tmpprefix+"_0", tmpprefix+"_0")
+
+if len(sizes) == 2:
+  my_exec_q("skel_NK2_pers", tmpprefix+"_0", tmpprefix+"_1")
+else:
+  my_exec_q("skel_ACK3_pers", tmpprefix+"_0", tmpprefix+"_1")
+
+my_exec_q("skel_CKG_map", tmpprefix+"_1", tmpprefix+"_0", tmpprefix+"_2")
+my_exec_q("skelcurvfilter", tmpprefix+"_2", outfilename)
+

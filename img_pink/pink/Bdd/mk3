@@ -1,0 +1,3 @@
+bdd bddsurfend.carrex.res > bddsurfend.carrex.bdd ; bdd2c bddsurfend.carrex.bdd > bddsurfend.carrex.c
+bdd bddsurfend.carrey.res > bddsurfend.carrey.bdd ; bdd2c bddsurfend.carrey.bdd > bddsurfend.carrey.c
+bdd bddsurfend.carrez.res > bddsurfend.carrez.bdd ; bdd2c bddsurfend.carrez.bdd > bddsurfend.carrez.c

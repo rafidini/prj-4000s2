@@ -1,0 +1,29 @@
+xv -geometry +0+0 gel.pgm &
+dyn2      gel.pgm          _a.testdyn2
+xv -geometry +265+0 _a.testdyn2 &
+printhisto _a.testdyn2
+echo "histogramme de la fonction dynamique des minima."
+echo "la seconde image montre en rouge les minima de dynamique >= 50."
+
+seuilbin  _a.testdyn2      50               _b.testdyn2
+inverse   _b.testdyn2      _c.testdyn2
+min       gel.pgm          _c.testdyn2      _d.testdyn2
+add       _b.testdyn2      _d.testdyn2      _e.testdyn2
+bw2rgb    _e.testdyn2      _d.testdyn2      _d.testdyn2        _f.testdyn2
+xv -geometry +530+0 _f.testdyn2 &
+
+echo -n "ok pour le menage des fichiers temporaires ? "
+read REP
+case $REP in
+      o|O|y|Y) rm _?.testdyn2
+esac
+
+echo -n "ok pour le menage des fenetres xv ? "
+read REP
+case $REP in
+      o|O|y|Y) echo 'kill -9 \' > clearscreen
+               ps -a|grep xv|awk '{printf(" %s", $1)}' >> clearscreen
+               chmod 755 clearscreen
+               clearscreen
+               rm clearscreen
+esac

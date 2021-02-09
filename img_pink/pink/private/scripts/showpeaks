@@ -1,0 +1,8 @@
+topotypes   $1           255            _$1.peaks
+selndg     _$1.peaks     1              1               _$1.peaks
+inverse    _$1.peaks     _$1.peaksinv
+min         $1           _$1.peaksinv   _$1.peaksmin
+add        _$1.peaksmin  _$1.peaks      _$1.peaks
+bw2rgb     _$1.peaks     _$1.peaksmin   _$1.peaksmin    _$1.peaks
+xv         _$1.peaks
+rm         _$1.peaks*

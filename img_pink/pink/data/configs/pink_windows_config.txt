@@ -1,0 +1,63 @@
+# -*- sh -*-
+
+## commandline to compile:
+# D:\Build\compilevars.bat
+## three times
+# "c:\Program Files (x86)\CMake 2.8\bin\cmake.exe" -G "NMake Makefiles" -C ..\pink_windows_config.txt ..\pink-hg
+
+SET( 64BIT ON CACHE BOOL "desc." )
+SET( BOOST_INCLUDEDIR "/usr/include" CACHE PATH "desc." )
+#SET( CFITSIO_DIR:PATH=CFITSIO_DIR-NOTFOUND )
+SET( CMAKE_BUILD_TYPE "Release" CACHE STRING "desc." )
+SET( CMAKE_COLOR_MAKEFILE ON CACHE BOOL "desc.")
+#SET( CMAKE_CXX_COMPILER "C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/bin/amd64/cl.exe" CACHE FILEPATH "desc." )
+#SET( CMAKE_C_COMPILER "C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/bin/amd64/cl.exe" CACHE FILEPATH "desc." )
+SET( CMAKE_INSTALL_PREFIX "install" CACHE PATH "desc." )
+#SET( CMAKE_LINKER "C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/bin/amd64/link.exe" CACHE FILEPATH "desc." )
+SET( CMAKE_MAKE_PROGRAM "nmake" CACHE STRING "desc." )
+SET( CMAKE_PROJECT_NAME "pink-image" CACHE STATIC "desc." )
+#SET( CMAKE_RC_COMPILER "C:/Program Files/Microsoft SDKs/Windows/v7.1/Bin/x64/RC.Exe" CACHE FILEPATH "desc." )
+SET( CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "desc." )
+SET( DEVELOPMENT ON CACHE BOOL "desc." )
+SET( GSLCBLAS_LIB "D:/Build/gsl-1.15/build.vc10/lib/x64/Release/cblas.lib" CACHE FILEPATH "desc." )
+SET( GSL_LIB "D:/Build/gsl-1.15/build.vc10/lib/x64/Release/gsl.lib" CACHE FILEPATH "desc." )
+SET( LAPACK_LIB "D:/Build/lapack/manual_build64/SRC/lapack.lib" CACHE FILEPATH "desc." )
+SET( BLAS_LIB "D:/Build/lapack/manual_build64/BLAS/SRC/blas.lib" CACHE FILEPATH "desc." )
+SET( LIBF2C_LIB "D:/Build/lapack/manual_build64/F2CLIBS/libf2c/libf2c.lib" CACHE FILEPATH "desc." )
+SET( NUMA OFF CACHE BOOL "desc." )
+SET( OPENCL OFF CACHE BOOL "desc." )
+SET( PYTHON_FRONT_END ON CACHE BOOL "desc." )
+SET( SIMD ON CACHE BOOL "desc." )
+SET( TIFF_INCLUDE_DIR "D:/Build/tiff-4.0.2/libtiff" CACHE PATH "desc." )
+SET( TIFF_LIBRARY "D:/Build/tiff-4.0.2/libtiff/libtiff.lib" CACHE FILEPATH "desc." )
+SET( GSL_INCLUDE "D:/Build/gsl-1.15/include" CACHE PATH "desc." )
+SET( EIGEN_INCLUDE "D:/Build/eigen-eigen-b23437e61a07" CACHE PATH "desc." )
+
+SET( NUMPY OFF CACHE BOOL "desc." )
+SET( CMAKE_INSTALL_PREFIX "install" CACHE PATH "desc." )
+SET( PINK_PACKAGE_TYPE "NSIS-WINDOWS" CACHE STRING "Generate a Windows(tm) installer." )
+SET( CPACK_MODULE_PATH "C:/Users/ujoimro/Pink/pink-hg" CACHE PATH "The path for the NSIS installer templates" )
+
+###########################################################################
+### Python 2.7
+###########################################################################
+SET( Boost_DIR "D:/Build/boost_1_49_0/boost_python27/boost_1_49_0" CACHE PATH "desc." )
+SET( Boost_INCLUDE_DIR "D:/Build/boost_1_49_0/boost_python27/boost_1_49_0" CACHE PATH "desc." )
+SET( Boost_PYTHON "D:/Build/boost_1_49_0/boost_python27/boost_1_49_0/stage/lib/libboost_python-vc100-mt-s-1_49.lib" CACHE FILEPATH "desc." )
+SET( Boost_PYTHON_LIBRARY "D:/Build/boost_1_49_0/boost_python27/boost_1_49_0/stage/lib/libboost_python-vc100-mt-s-1_49.lib" CACHE FILEPATH "The Boost PYTHON library." )
+SET( Boost_PYTHON_LIBRARY_DEBUG "D:/Build/boost_1_49_0/boost_python27/boost_1_49_0/stage/lib/libboost_python-vc100-mt-sgd-1_49.lib" CACHE FILEPATH "Boost python library (debug)" )
+#Boost_PYTHON_LIBRARY_DEBUG:FILEPATH=Boost_PYTHON_LIBRARY_DEBUG-NOTFOUND
+SET( Boost_PYTHON_LIBRARY_RELEASE "D:/Build/boost_1_49_0/boost_python27/boost_1_49_0/stage/lib/libboost_python-vc100-mt-s-1_49.lib" CACHE FILEPATH "desc." )
+SET( Boost_THREAD "D:/Build/boost_1_49_0/boost_python27/boost_1_49_0/stage/lib/libboost_thread-vc100-mt-s-1_49.lib" CACHE FILEPATH "desc." )
+#Boost_THREAD_LIBRARY_DEBUG:FILEPATH=Boost_THREAD_LIBRARY_DEBUG-NOTFOUND
+SET( Boost_THREAD_LIBRARY_RELEASE "D:/Build/boost_1_49_0/boost_python27/boost_1_49_0/stage/lib/libboost_thread-vc100-mt-s-1_49.lib" CACHE FILEPATH "desc." )
+#PYTHON_DEBUG_LIBRARY:FILEPATH=PYTHON_DEBUG_LIBRARY-NOTFOUND
+SET( PYTHON_EXECUTABLE "D:/Build/Python27_64/python.exe" CACHE FILEPATH "desc." )
+SET( PYTHON_INCLUDE "D:/Build/Python27_64/include" CACHE FILEPATH "desc." )
+SET( PYTHON_INCLUDE_DIR "D:/Build/Python27_64/include" CACHE FILEPATH "desc." )
+SET( PYTHON_LIBRARY "D:/Build/Python27_64/libs/python27.lib" CACHE FILEPATH "desc." )
+SET( PACKAGE_INSTALL_DIRECTORY "C:\\\\Program Files\\\\Python27\\\\Lib\\\\site-packages" CACHE STRING "The path of the Python installation." )
+###########################################################################
+### end of Python 2.7
+###########################################################################
+SET( CMAKE_REQUIRED_INCLUDES ${GSL_INCLUDE};${EIGEN_INCLUDE};${Boost_INCLUDE_DIR} CACHE PATH "desc." )

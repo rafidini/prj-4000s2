@@ -1,0 +1,10 @@
+topotypes   $1           255            _$1.destr
+sel        _$1.destr     6              8               _$1.destr68
+sel        _$1.destr     13             13              _$1.destr
+max        _$1.destr     _$1.destr68    _$1.destr
+inverse    _$1.destr     _$1.destrinv
+min         $1           _$1.destrinv   _$1.destrmin
+add        _$1.destrmin  _$1.destr      _$1.destr
+bw2rgb     _$1.destr     _$1.destrmin   _$1.destrmin    _$1.destr
+xv         _$1.destr
+rm         _$1.destr*

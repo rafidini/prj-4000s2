@@ -1,0 +1,15 @@
+#!/bin/sh
+USAGE="Usage: $0 in1.pgm in2.pgm"
+if [ $# -ne 2 ]
+then
+	echo $USAGE
+        exit
+fi
+mcube $1 0 1 0 vtk 6 _1.vtk
+mcube $2 0 1 0 vtk 6 _2.vtk
+if [ $# -eq 2 ]
+then
+    multirender _1.vtk _2.vtk &
+fi
+rm -f _1.vtk _2.vtk
+

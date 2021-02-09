@@ -1,0 +1,131 @@
+/*
+Copyright ESIEE (2009) 
+
+m.couprie@esiee.fr
+
+This software is an image processing library whose purpose is to be
+used primarily for research and teaching.
+
+This software is governed by the CeCILL  license under French law and
+abiding by the rules of distribution of free software. You can  use, 
+modify and/ or redistribute the software under the terms of the CeCILL
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info". 
+
+As a counterpart to the access to the source code and  rights to copy,
+modify and redistribute granted by the license, users are provided only
+with a limited warranty  and the software's author,  the holder of the
+economic rights,  and the successive licensors  have only  limited
+liability. 
+
+In this respect, the user's attention is drawn to the risks associated
+with loading,  using,  modifying and/or developing or reproducing the
+software by the user in light of its specific status of free software,
+that may mean  that it is complicated to manipulate,  and  that  also
+therefore means  that it is reserved for developers  and  experienced
+professionals having in-depth computer knowledge. Users are therefore
+encouraged to load and test the software's suitability as regards their
+requirements in conditions enabling the security of their systems and/or 
+data to be ensured and,  more generally, to use and operate it in the 
+same conditions as regards security. 
+
+The fact that you are presently reading this means that you have had
+knowledge of the CeCILL license and that you accept its terms.
+*/
+/*! \file projsphere.c
+
+\brief projection on a sphere
+
+<B>Usage:</B> projsphere in.pgm out.pgm
+
+<B>Description:</B> Projection on a sphere.
+
+<B>Types supported:</B> byte 2D, byte 3D
+
+<B>Category:</B> geo
+\ingroup  geo
+
+\author Michel Couprie
+*/
+
+/* Michel Couprie - décembre 2004 */
+
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <math.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <mccodimage.h>
+#include <mcimage.h>
+#include <mcutil.h>
+
+/* =============================================================== */
+int main(int argc, char **argv)
+/* =============================================================== */
+{
+  struct xvimage * result;
+  struct xvimage * image;
+  uint8_t *I;
+  uint8_t *R;
+  double zd;
+  int32_t x, y, z, xc, yc, r;
+  int32_t rs, cs, ds, ps, N;
+
+  if (argc != 3)
+  {
+    fprintf(stderr, "usage: %s in.pgm out.pgm \n", argv[0]);
+    exit(1);
+  }
+
+  image = readimage(argv[1]);
+
+  if (depth(image) != 1)
+  {
+    fprintf(stderr, "%s : input image must be 2D \n", argv[0]);
+    exit(1);
+  }
+
+  if (datatype(image) != VFF_TYP_1_BYTE)
+  {
+    fprintf(stderr, "%s : input image type must be byte \n", argv[0]);
+    exit(1);
+  }
+
+  rs = rowsize(image);   /* taille ligne */
+  cs = colsize(image);   /* taille colonne */
+  I = UCHARDATA(image);
+
+  xc = rs / 2;
+  yc = cs / 2;
+  r = mcmax(xc,yc);
+
+  ds = r+1;     /* nb plans */
+  ps = rs * cs; /* taille plan */
+  N = ps * ds;  /* taille image */
+
+  result = allocimage(NULL, rs, cs, ds, VFF_TYP_1_BYTE);
+  if (result == NULL)
+  {
+    fprintf(stderr, "%s : allocimage failed \n", argv[0]);
+    exit(1);
+  }
+  R = UCHARDATA(result);
+  memset(R, 0, N);
+
+  for (y = 0; y < cs; y++)
+    for (x = 0; x < rs; x++)
+      if (I[y*rs +x])
+      {
+	zd = sqrt(r*r - ((x-xc)*(x-xc) + (y-yc)*(y-yc)));
+	for (z = 0; z <= (int32_t)zd; z++)
+	  R[z*ps + y*rs +x] = NDG_MAX;
+      }
+
+  writeimage(result, argv[argc - 1]);
+  freeimage(image);
+  freeimage(result);
+
+  return 0;
+} /* main */
+

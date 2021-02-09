@@ -1,0 +1,9 @@
+1.
+Image : - 
+But : générer une image 2D de grains aléatoire et la découper en
+      sous-images, pour tester la procédure suivante
+
+2.
+Images : celles générées par la procédure précédente
+But : faire une statistique (nombre, taille...) des grains présents
+      dans un ensemble d'images 2D formant une mosaique

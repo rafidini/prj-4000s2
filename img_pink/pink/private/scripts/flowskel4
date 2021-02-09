@@ -1,0 +1,22 @@
+#!/bin/sh
+USAGE="Usage: $0 in out"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+2dkhalimskize $1 h _flsk4.k
+lambdamedialaxis _flsk4.k _flsk4_lam.k
+2dborder _flsk4.k _flsk4_func.k
+normalize _flsk4_func.k 0 1 _flsk4_func.k
+byte2float _flsk4_func.k _flsk4_func.k
+2dtopoflow _flsk4.k _flsk4_lam.k _flsk4_func.k _flsk4.graph
+
+
+
+graph2pgm _flsk4.graph _flsk4_lam.k $2

@@ -1,0 +1,17 @@
+#!/bin/sh
+# ouverture paramétrique
+USAGE="Usage: $0 in elstruct param out"
+if [ $# -gt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+rankfilter   $1  $2  $3 /tmp/_openpar.1
+dilation     /tmp/_openpar.1 $2 /tmp/_openpar.2
+min          /tmp/_openpar.2 $1 $4
+rm           /tmp/_openpar.?

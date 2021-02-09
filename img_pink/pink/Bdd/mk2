@@ -1,0 +1,30 @@
+rm -f bdd2.alpha.c
+rm -f bdd2.alpha.h
+echo ";" > __
+
+echo "int bddAlpha3SimpleCarreX(int a, int b, int c, int d, int e, int f, int g, int h)" > _
+cat _ __ >> bdd2.alpha.h ; cat _ bdd2.alphacarrex.c >> bdd2.alpha.c ; rm _ ;
+echo "int bddAlpha3SimpleCarreY(int a, int b, int c, int d, int e, int f, int g, int h)" > _
+cat _ __ >> bdd2.alpha.h ; cat _ bdd2.alphacarrey.c >> bdd2.alpha.c ; rm _ ;
+echo "int bddAlpha3SimpleCarreZ(int a, int b, int c, int d, int e, int f, int g, int h)" > _
+cat _ __ >> bdd2.alpha.h ; cat _ bdd2.alphacarrez.c >> bdd2.alpha.c ; rm _ ;
+echo "int bddAlpha3SimpleInterX(int a, int b)" > _
+cat _ __ >> bdd2.alpha.h ; cat _ bdd2.alphainterx.c >> bdd2.alpha.c ; rm _ ;
+echo "int bddAlpha3SimpleInterY(int a, int b)" > _
+cat _ __ >> bdd2.alpha.h ; cat _ bdd2.alphaintery.c >> bdd2.alpha.c ; rm _ ;
+echo "int bddAlpha3SimpleInterZ(int a, int b)" > _
+cat _ __ >> bdd2.alpha.h ; cat _ bdd2.alphainterz.c >> bdd2.alpha.c ; rm _ ;
+
+echo "int bddBeta3SimpleCarreX(int a, int b)" > _
+cat _ __ >> bdd2.beta.h ; cat _ bdd2.betacarrex.c >> bdd2.beta.c ; rm _ ;
+echo "int bddBeta3SimpleCarreY(int a, int b)" > _
+cat _ __ >> bdd2.beta.h ; cat _ bdd2.betacarrey.c >> bdd2.beta.c ; rm _ ;
+echo "int bddBeta3SimpleCarreZ(int a, int b)" > _
+cat _ __ >> bdd2.beta.h ; cat _ bdd2.betacarrez.c >> bdd2.beta.c ; rm _ ;
+echo "int bddBeta3SimpleInterX(int a, int b, int c, int d, int e, int f, int g, int h)" > _
+cat _ __ >> bdd2.beta.h ; cat _ bdd2.betainterx.c >> bdd2.beta.c ; rm _ ;
+echo "int bddBeta3SimpleInterY(int a, int b, int c, int d, int e, int f, int g, int h)" > _
+cat _ __ >> bdd2.beta.h ; cat _ bdd2.betaintery.c >> bdd2.beta.c ; rm _ ;
+echo "int bddBeta3SimpleInterZ(int a, int b, int c, int d, int e, int f, int g, int h)" > _
+cat _ __ >> bdd2.beta.h ; cat _ bdd2.betainterz.c >> bdd2.beta.c ; rm _ ;
+rm __

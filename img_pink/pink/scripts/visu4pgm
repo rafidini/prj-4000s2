@@ -1,0 +1,21 @@
+#!/bin/sh
+USAGE="Usage: $0 in1.pgm in2.pgm in3.pgm in4.pgm"
+if [ $# -ne 4 ]
+then
+	echo $USAGE
+        exit
+fi
+3dkhalimskize $1 h /tmp/visu4pgm_1
+3dborder /tmp/visu4pgm_1 /tmp/visu4pgm_1
+pgm2vtk /tmp/visu4pgm_1 1 /tmp/visu4pgm_1.vtk
+3dkhalimskize $2 h /tmp/visu4pgm_2
+3dborder /tmp/visu4pgm_2 /tmp/visu4pgm_2
+pgm2vtk /tmp/visu4pgm_2 1 /tmp/visu4pgm_2.vtk
+3dkhalimskize $3 h /tmp/visu4pgm_3
+3dborder /tmp/visu4pgm_3 /tmp/visu4pgm_3
+pgm2vtk /tmp/visu4pgm_3 1 /tmp/visu4pgm_3.vtk
+3dkhalimskize $4 h /tmp/visu4pgm_4
+3dborder /tmp/visu4pgm_4 /tmp/visu4pgm_4
+pgm2vtk /tmp/visu4pgm_4 1 /tmp/visu4pgm_4.vtk
+multirender /tmp/visu4pgm_1.vtk /tmp/visu4pgm_2.vtk /tmp/visu4pgm_3.vtk /tmp/visu4pgm_4.vtk
+rm -f /tmp/visu4pgm_*

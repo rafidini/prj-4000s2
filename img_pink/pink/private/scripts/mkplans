@@ -1,0 +1,29 @@
+#usage: $0 in.pgm zoffset out.pgm
+crop $1 0 0 $2 160 120 24 _
+explode _ _
+genimage 640 720 1 0 _ 
+insere _0000.pgm _ 000 000 0 _
+insere _0001.pgm _ 160 000 0 _
+insere _0002.pgm _ 320 000 0 _
+insere _0003.pgm _ 480 000 0 _
+insere _0004.pgm _ 000 120 0 _
+insere _0005.pgm _ 160 120 0 _
+insere _0006.pgm _ 320 120 0 _
+insere _0007.pgm _ 480 120 0 _
+insere _0008.pgm _ 000 240 0 _
+insere _0009.pgm _ 160 240 0 _
+insere _0010.pgm _ 320 240 0 _
+insere _0011.pgm _ 480 240 0 _
+insere _0012.pgm _ 000 360 0 _
+insere _0013.pgm _ 160 360 0 _
+insere _0014.pgm _ 320 360 0 _
+insere _0015.pgm _ 480 360 0 _
+insere _0016.pgm _ 000 480 0 _
+insere _0017.pgm _ 160 480 0 _
+insere _0018.pgm _ 320 480 0 _
+insere _0019.pgm _ 480 480 0 _
+insere _0020.pgm _ 000 600 0 _
+insere _0021.pgm _ 160 600 0 _
+insere _0022.pgm _ 320 600 0 _
+insere _0023.pgm _ 480 600 0 _
+mv _ $3

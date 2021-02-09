@@ -1,0 +1,23 @@
+#!/bin/sh
+USAGE="Usage: $0 in out"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+inverse   $1 $2
+erosion   $2 ~/Pink/masks/2d_east.pgm  /tmp/filtrepointes_1
+erosion   $2 ~/Pink/masks/2d_north.pgm /tmp/filtrepointes_2
+max       /tmp/filtrepointes_1 /tmp/filtrepointes_2 /tmp/filtrepointes_1
+erosion   $2 ~/Pink/masks/2d_west.pgm  /tmp/filtrepointes_2
+max       /tmp/filtrepointes_1 /tmp/filtrepointes_2 /tmp/filtrepointes_1
+erosion   $2 ~/Pink/masks/2d_south.pgm /tmp/filtrepointes_2
+max       /tmp/filtrepointes_1 /tmp/filtrepointes_2 /tmp/filtrepointes_1
+min       $1 /tmp/filtrepointes_1 $2
+sub       $1 $2 $2
+rm        /tmp/filtrepointes_?

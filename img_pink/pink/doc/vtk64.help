@@ -1,0 +1,43 @@
+# cd /usr/local/src
+# wget http://www.cmake.org/files/v2.6/cmake-2.6.1.tar.gz
+# tar xzvf cmake-2.6.1.tar.gz ; cd cmake-2.6.1
+# yum install ncurses-devel
+# ./bootstrap --prefix=/usr/local/cmake-2.6.1
+# make
+# make install
+# ln -s /usr/local/cmake-2.6.1 /usr/local/cmake
+# export PATH=/usr/local/cmake/bin:$PATH
+# export MANPATH=/usr/local/cmake/man:$MANPATH
+
+# cd /usr/local/src
+# wget http://www.vtk.org/files/release/5.2/vtk-5.2.0.tar.gz
+# wget http://www.vtk.org/files/release/5.2/vtkdata-5.2.0.tar.gz
+# wget http://www.vtk.org/doc/release/5.2/vtkDocHtml-5.2.0.tar.gz
+# tar xzvf vtk-5.2.0.tar.gz
+# mv VTK vtk-5.2.0 ; cd vtk-5.2.0
+# export CMAKE_LIBRARY_PATH=/lib64:/usr/lib64
+# ccmake .
+   hit c to do initial configure 
+   BUILD_SHARED_LIBS ON
+   CMAKE_INSTALL_PREFIX /usr/local/vtk-5.2.0
+   VTK_DATA_ROOT /usr/local/vtk-5.2.0/VTKData
+   VTK_WRAP_PYTHON ON
+   hit t for advanced view
+   change all lib references to lib64 versions
+   hit c to configure again
+   hit c again
+   hit g to generate makefiles
+# make
+    now go get a cup of coffee
+# mkdir -p /usr/local/vtk-5.2.0/lib/python2.4/site-packages/
+# make install
+# ln -s /usr/local/vtk-5.2.0 /usr/local/vtk
+# cd /usr/local/src
+# tar xzvf vtkdata-5.2.0.tar.gz
+# mv VTKData /usr/local/vtk/
+# tar xzvf vtkDocHtml-5.2.0.tar.gz
+# mv html /usr/local/vtk/
+# export PATH=/usr/local/vtk/bin:$PATH
+# export LD_LIBRARY_PATH=/usr/local/vtk/lib:$LD_LIBRARY_PATH
+# export PYTHONPATH=/usr/local/vtk/lib/python2.4/site-packages:$PYTHONPATH
+# export VTK_DATA_ROOT=/usr/global/vtk/VTKData

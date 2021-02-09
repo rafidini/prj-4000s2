@@ -1,0 +1,463 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ # 3D Viewer
+ # Michel couprie - aout 2002
+
+ # the current segmentation is stored in the file: /tmp/$SEG3D(name)_t
+ # the current displayed image is stored in the file: /tmp/$SEG3D(name)_d
+
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec wish $0 $1 $2
+
+ if {($argc != 1) && ($argc != 2)} { 
+   puts stderr "usage: 3dview1 gray \[bin\]"
+   exit 
+ }
+
+ wm title . "3D viewer"
+
+ set PINK "$env(PINK)"
+ source "$PINK/tcl/my_exec.tcl"
+ source "$PINK/tcl/my_dialog.tcl"
+ source "$PINK/tcl/my_feedback.tcl"
+
+ # ============================================================
+ # GLOBAL VARIABLES
+ # ============================================================
+
+ global SEG3D
+ # infilename  : input file name
+ # outfilename : output file name
+ # x  : pixel position in row
+ # y  : pixel position in column
+ # z  : plane position
+ # v  : pixel value
+ # tx  : transient pixel position in row
+ # ty  : transient pixel position in column
+ # tz  : transient plane position
+ # tv  : transient pixel value
+ # imxy : image structure for xy view
+ # cxy : canvas structure for xy view
+ # rs : row size
+ # cs : col size
+ # ds : depth
+ # name : command name
+ # xline, yline, zline : booleans 
+ # connex : adjacency relation (6, 18, 26)
+ # quit : boolean
+ # saved : boolean
+ # changed : boolean
+ # surimp : boolean
+ # surimplight : boolean
+ set SEG3D(name) "3dview1"
+ append SEG3D(name) [clock seconds]
+ set SEG3D(xline)       1
+ set SEG3D(yline)       1
+ set SEG3D(zline)       1
+ set SEG3D(connex)      26
+ set SEG3D(quit_auxwin) 0
+ set SEG3D(saved)       1
+ set SEG3D(changed)     0
+ set SEG3D(surimp)      0
+ set SEG3D(surimplight) 1
+ set SEG3D(par_seuil1)  128
+ set SEG3D(par_seuil2min) 128
+ set SEG3D(par_seuil2max) 256
+ set SEG3D(seuil) $SEG3D(par_seuil1)
+ set SEG3D(par_param)   0
+ set SEG3D(infilename) [lindex $argv 0]
+ if {$argc == 2} { 
+   set SEG3D(outfilename) [lindex $argv 1]
+   if [file exists $SEG3D(outfilename)] {
+     my_exec cp $SEG3D(outfilename) "/tmp/$SEG3D(name)_t" 
+   }
+ }
+ if ![file exists $SEG3D(infilename)] {
+   puts stderr "cannot find input file: $SEG3D(infilename)"
+   exit   
+ }
+ my_exec_f cp $SEG3D(infilename) "/tmp/$SEG3D(name)_d" 
+
+ # ============================================================
+ # MENU DEFINITION
+ # ============================================================
+
+ menu .menubar
+ . config -menu .menubar
+ foreach m {File Analyze Threshold Visualize} {
+   set $m [menu .menubar.m$m]
+   .menubar add cascade -label $m -menu .menubar.m$m
+ }
+
+ $File      add command -label "Quit"             -command view3d_quit
+
+ $Analyze   add command -label "Histogram"        -command view3d_histogram
+ $Analyze   add command -label "ROI Histogram"    -command view3d_roihistogram
+
+ $Threshold   add command -label "Threshold"        -command view3d_threshold
+ $Threshold   add command -label "Double Threshold" -command view3d_threshold2
+
+ $Visualize add command -label "Revert image"     -command view3d_revertima
+
+ $Visualize add check   -label "Surimp"           -command view3d_surimp \
+                        -variable SEG3D(surimp) 
+ $Visualize add check   -label "Light"            -command view3d_surimp \
+                        -variable SEG3D(surimplight) 
+ $Visualize add command -label "Render"           -command view3d_render
+ $Visualize add command -label "RenderSmooth"     -command view3d_rendersmooth
+
+ # ============================================================
+ # MAIN WINDOW DEFINITION
+ # ============================================================
+
+ # create the toplevel frame
+ frame .top -borderwidth 10
+ pack .top -side top -fill x
+
+ # create the three images and load contents from files 
+ my_exec_f extractplane "/tmp/$SEG3D(name)_d" 0 xy "/tmp/$SEG3D(name)_xy" 
+ my_exec_f pgmrawmode "/tmp/$SEG3D(name)_xy" 
+ set SEG3D(imxy) [image create photo imxyname -file "/tmp/$SEG3D(name)_xy"]
+ my_exec_f extractplane "/tmp/$SEG3D(name)_d" 0 xz "/tmp/$SEG3D(name)_xz" 
+ my_exec_f pgmrawmode "/tmp/$SEG3D(name)_xz" 
+ set SEG3D(imxz) [image create photo imxzname -file "/tmp/$SEG3D(name)_xz"]
+ my_exec_f extractplane "/tmp/$SEG3D(name)_d" 0 zy "/tmp/$SEG3D(name)_zy" 
+ my_exec_f pgmrawmode "/tmp/$SEG3D(name)_zy" 
+ set SEG3D(imzy) [image create photo imzyname -file "/tmp/$SEG3D(name)_zy"]
+
+ # get image size
+ set SEG3D(cs) [image height $SEG3D(imxy)]
+ set SEG3D(rs) [image width $SEG3D(imxy)]
+ set SEG3D(ds) [image width $SEG3D(imzy)]
+ set SEG3D(x) [expr $SEG3D(rs)/2]
+ set SEG3D(y) [expr $SEG3D(cs)/2]
+ set SEG3D(z) [expr $SEG3D(ds)/2]
+ set SEG3D(v) [lindex [$SEG3D(imxy) get $SEG3D(x) $SEG3D(y)] 0]
+ set SEG3D(tx) [expr $SEG3D(rs)/2]
+ set SEG3D(ty) [expr $SEG3D(cs)/2]
+ set SEG3D(tz) [expr $SEG3D(ds)/2]
+ set SEG3D(tv) [lindex [$SEG3D(imxy) get $SEG3D(x) $SEG3D(y)] 0]
+
+ # create frames for the images
+ frame .top.one
+ frame .top.one.imxyframe -borderwidth 10 -width $SEG3D(rs) -height $SEG3D(cs)
+ pack .top.one.imxyframe -side left
+ pack .top.one -side top
+
+ # create canvas with the right sizes
+ set SEG3D(cxy) [canvas .top.one.imxyframe.cxy -width $SEG3D(rs) -height $SEG3D(cs)]
+ pack .top.one.imxyframe.cxy -fill both -expand true
+
+ # put the images into the canvas
+ $SEG3D(cxy) create image 1 1 -anchor nw -image $SEG3D(imxy)
+
+ # create the x, y and z command lines
+ frame .top.xyz
+ frame .top.xyz.zbutton
+ label .top.xyz.zbutton.label -text "Z"
+ scale .top.xyz.zbutton.scale -from 0 -to [expr $SEG3D(ds)-1] -length 200 -variable SEG3D(z) \
+   -orient horizontal -tickinterval 0 -showvalue true -command view3d_zchange
+ pack .top.xyz.zbutton.label .top.xyz.zbutton.scale -side left
+ pack .top.xyz.zbutton -side top
+ pack .top.xyz -side left
+
+ #===========================================
+ # PROCEDURES
+ #===========================================
+
+ # action associated to quit menu 
+ #-----------------------------------
+ proc view3d_quit {} {
+   global SEG3D
+   foreach file [glob -nocomplain "/tmp/$SEG3D(name)_*"] {
+     exec rm $file
+   }
+   exit
+ }
+ wm protocol . WM_DELETE_WINDOW view3d_quit
+ bind . "q" view3d_quit
+
+ # actions associated to x, y and z change
+ #-----------------------------------
+ proc view3d_zchange {z} {
+   global SEG3D
+   my_exec_f extractplane "/tmp/$SEG3D(name)_d" $z xy "/tmp/$SEG3D(name)_xy" 
+   my_exec_f pgmrawmode "/tmp/$SEG3D(name)_xy" 
+   if {$SEG3D(surimp)} {
+     my_exec_f extractplane "/tmp/$SEG3D(name)_t" $z xy "/tmp/$SEG3D(name)_txy" 
+     my_exec_f pgmrawmode "/tmp/$SEG3D(name)_txy" 
+     my_exec border "/tmp/$SEG3D(name)_txy" 8 "/tmp/$SEG3D(name)__1"
+     if {$SEG3D(surimplight)} {
+       my_exec add "/tmp/$SEG3D(name)_xy" "/tmp/$SEG3D(name)__1" "/tmp/$SEG3D(name)__2"
+     } else {
+       my_exec sub "/tmp/$SEG3D(name)_xy" "/tmp/$SEG3D(name)__1" "/tmp/$SEG3D(name)__2"
+     }
+     my_exec pgm2ppm "/tmp/$SEG3D(name)_xy" "/tmp/$SEG3D(name)__2" "/tmp/$SEG3D(name)__2" "/tmp/$SEG3D(name)_xy"
+   }
+   $SEG3D(imxy) read "/tmp/$SEG3D(name)_xy"
+   set SEG3D(v) [lindex [$SEG3D(imxy) get $SEG3D(x) $SEG3D(y)] 0]
+ }
+
+ # thresholding procedure
+ #-----------------------------------
+ proc view3d_threshold {} {
+   global SEG3D
+   # create toplevel window for the thresholded image
+   toplevel .threshold -borderwidth 10
+   frame .threshold.one
+   frame .threshold.one.txyframe -borderwidth 10 -width $SEG3D(rs) -height $SEG3D(cs)
+   pack .threshold.one.txyframe -side left
+   pack .threshold.one -side top
+
+   set ctxy [canvas .threshold.one.txyframe.ctxy -width $SEG3D(rs) -height $SEG3D(cs)]
+
+   pack .threshold.one.txyframe.ctxy -fill both -expand true
+
+   set SEG3D(seuil) $SEG3D(par_seuil1)
+   frame .threshold.command
+   scale .threshold.command.scale -from 0 -to 256 -length 200 \
+     -variable SEG3D(seuil) -orient horizontal -tickinterval 0 -showvalue true \
+     -command threshold_change
+   button .threshold.command.button1 -text Done -command "set SEG3D(quit_auxwin) 1"
+   button .threshold.command.button2 -text Cancel -command "set SEG3D(quit_auxwin) 2"
+   pack .threshold.command.scale -side left
+   pack .threshold.command.button1 -side right
+   pack .threshold.command.button2 -side right
+   pack .threshold.command -side top -fill x
+
+   # operate the threshold 
+   my_exec seuil "/tmp/$SEG3D(name)_d" $SEG3D(seuil) "/tmp/$SEG3D(name)_t" 
+
+   # extract the 3 views
+   my_exec extractplane "/tmp/$SEG3D(name)_t" $SEG3D(z) xy "/tmp/$SEG3D(name)_txy" 
+   my_exec_f pgmrawmode "/tmp/$SEG3D(name)_txy" 
+
+   set SEG3D(imtxy) [image create photo timxyname -file "/tmp/$SEG3D(name)_txy"]
+   $ctxy create image 1 1 -anchor nw -image $SEG3D(imtxy)
+   set oldx $SEG3D(x)
+   set oldy $SEG3D(y)
+   set oldz $SEG3D(z)
+   while {$SEG3D(quit_auxwin) == 0} {
+     vwait SEG3D
+     if {$oldz != $SEG3D(z)} {
+       my_exec extractplane "/tmp/$SEG3D(name)_t" $SEG3D(z) xy "/tmp/$SEG3D(name)_txy"
+       my_exec pgmrawmode "/tmp/$SEG3D(name)_txy"
+       $SEG3D(imtxy) read "/tmp/$SEG3D(name)_txy"
+       set oldz $SEG3D(z)
+     }
+   }
+   if {$SEG3D(quit_auxwin) == 1} { set SEG3D(saved) 0 }
+   set SEG3D(quit_auxwin) 0
+   set SEG3D(par_seuil1) $SEG3D(seuil)
+   view3d_zchange $SEG3D(z)
+   destroy .threshold
+ }
+
+ proc threshold_change {t} {
+   global SEG3D
+   my_exec seuil "/tmp/$SEG3D(name)_d" $t "/tmp/$SEG3D(name)_t" 
+   my_exec extractplane "/tmp/$SEG3D(name)_t" $SEG3D(z) xy "/tmp/$SEG3D(name)_txy" 
+   my_exec pgmrawmode "/tmp/$SEG3D(name)_txy" 
+   $SEG3D(imtxy) read "/tmp/$SEG3D(name)_txy"    
+   if {$SEG3D(surimp)} {
+     view3d_zchange $SEG3D(z)
+   }
+ }
+
+ # double thresholding window
+ #-----------------------------------
+ proc view3d_threshold2 {} {
+   global SEG3D
+   # create toplevel window for the thresholded image
+   toplevel .threshold2 -borderwidth 10
+   frame .threshold2.one
+   frame .threshold2.one.txyframe -borderwidth 10 -width $SEG3D(rs) -height $SEG3D(cs)
+   pack .threshold2.one.txyframe -side left
+   pack .threshold2.one -side top
+
+   set ctxy [canvas .threshold2.one.txyframe.ctxy -width $SEG3D(rs) -height $SEG3D(cs)]
+
+   pack .threshold2.one.txyframe.ctxy -fill both -expand true
+
+   set SEG3D(seuilmin) $SEG3D(par_seuil2min)
+   set SEG3D(seuilmax) $SEG3D(par_seuil2max)
+   frame .threshold2.command
+   frame .threshold2.command.scales
+   scale .threshold2.command.scales.scalemin -from 0 -to 256 -length 200 \
+     -variable SEG3D(seuilmin) -orient horizontal -tickinterval 0 -showvalue true \
+     -command threshold2_change
+   scale .threshold2.command.scales.scalemax -from 0 -to 256 -length 200 \
+     -variable SEG3D(seuilmax) -orient horizontal -tickinterval 0 -showvalue true \
+     -command threshold2_change
+   pack .threshold2.command.scales.scalemin .threshold2.command.scales.scalemax \
+     -side top
+   button .threshold2.command.button1 -text Done -command "set SEG3D(quit_auxwin) 1"
+   button .threshold2.command.button2 -text Cancel -command "set SEG3D(quit_auxwin) 2"
+   pack .threshold2.command.scales -side left
+   pack .threshold2.command.button1 -side right
+   pack .threshold2.command.button2 -side right
+   pack .threshold2.command -side top -fill x
+
+   # operate the double threshold
+   my_exec seuil2 "/tmp/$SEG3D(name)_d" $SEG3D(seuilmin) $SEG3D(seuilmax) 0 0 "/tmp/$SEG3D(name)_t" 
+   my_exec seuil "/tmp/$SEG3D(name)_t" 1 "/tmp/$SEG3D(name)_t" 
+
+   # extract the 3 views
+   my_exec extractplane "/tmp/$SEG3D(name)_t" $SEG3D(z) xy "/tmp/$SEG3D(name)_txy" 
+   my_exec pgmrawmode "/tmp/$SEG3D(name)_txy" 
+
+   set SEG3D(imtxy) [image create photo timxyname -file "/tmp/$SEG3D(name)_txy"]
+   $ctxy create image 1 1 -anchor nw -image $SEG3D(imtxy)
+   set oldx $SEG3D(x)
+   set oldy $SEG3D(y)
+   set oldz $SEG3D(z)
+   while {$SEG3D(quit_auxwin) == 0} {
+     vwait SEG3D
+     if {$oldz != $SEG3D(z)} {
+       my_exec extractplane "/tmp/$SEG3D(name)_t" $SEG3D(z) xy "/tmp/$SEG3D(name)_txy"
+       my_exec pgmrawmode "/tmp/$SEG3D(name)_txy"
+       $SEG3D(imtxy) read "/tmp/$SEG3D(name)_txy"
+       set oldz $SEG3D(z)
+     }
+   }
+   if {$SEG3D(quit_auxwin) == 1} { set SEG3D(saved) 0 }
+   set SEG3D(quit_auxwin) 0
+   set SEG3D(par_seuil2min) $SEG3D(seuilmin)
+   set SEG3D(par_seuil2max) $SEG3D(seuilmax)
+   view3d_zchange $SEG3D(z)
+   destroy .threshold2
+ }
+
+ proc threshold2_change {t} {
+   global SEG3D
+   if {$SEG3D(seuilmin) > $SEG3D(seuilmax)} {
+     set SEG3D(seuilmin) $SEG3D(seuilmax)
+   }
+   my_exec seuil "/tmp/$SEG3D(name)_d" $SEG3D(seuilmin) "/tmp/$SEG3D(name)_t" 
+   my_exec seuil "/tmp/$SEG3D(name)_d" $SEG3D(seuilmax) "/tmp/$SEG3D(name)_u" 
+   my_exec sub "/tmp/$SEG3D(name)_t" "/tmp/$SEG3D(name)_u" "/tmp/$SEG3D(name)_t" 
+   my_exec extractplane "/tmp/$SEG3D(name)_t" $SEG3D(z) xy "/tmp/$SEG3D(name)_txy" 
+   my_exec pgmrawmode "/tmp/$SEG3D(name)_txy" 
+   $SEG3D(imtxy) read "/tmp/$SEG3D(name)_txy"    
+   if {$SEG3D(surimp)} {
+     view3d_zchange $SEG3D(z)
+   }
+ }
+
+ # histogram
+ #-----------------------------------
+ proc view3d_histogram {} {
+   global SEG3D
+   my_exec histopgm "/tmp/$SEG3D(name)_d" "/tmp/$SEG3D(name)_h"
+   exec 2dview "/tmp/$SEG3D(name)_h" &
+ }
+
+ # histogram on ROI
+ #-----------------------------------
+ proc view3d_roihistogram {} {
+   global SEG3D
+   my_exec histopgm "/tmp/$SEG3D(name)_d" "/tmp/$SEG3D(name)_t" "/tmp/$SEG3D(name)_h"
+   exec 2dview "/tmp/$SEG3D(name)_h" &
+ }
+
+ # revert image
+ #-----------------------------------
+ proc view3d_revertima {} {
+   global SEG3D
+   my_exec inverse "/tmp/$SEG3D(name)_d" "/tmp/$SEG3D(name)_d"
+   view3d_zchange $SEG3D(z)
+ }
+
+ # rendering (needs VTK)
+ #-----------------------------------
+ proc view3d_render {} {
+   global SEG3D
+   global PINK
+   if ![file exists "/tmp/$SEG3D(name)_t"] {
+     # operate the threshold 
+     my_exec seuil "/tmp/$SEG3D(name)_d" $SEG3D(seuil) "/tmp/$SEG3D(name)_t" 
+   }
+   . config -cursor watch
+   update 
+   toplevel .waitmess -borderwidth 10
+   entry .waitmess.entry
+   pack .waitmess.entry -side top
+   update
+   my_feedback "marching cubes..."
+   my_exec mcube "/tmp/$SEG3D(name)_t" 0 0 0 vtk "/tmp/$SEG3D(name)_v"
+#   my_feedback "decimating..."
+#   my_exec decimate.tcl "/tmp/$SEG3D(name)_v" 0.9 "/tmp/$SEG3D(name)_v"
+   exec "$PINK/tcl/multirender" "/tmp/$SEG3D(name)_v" &
+   . config -cursor left_ptr
+   destroy .waitmess
+ }
+
+ # rendering (needs VTK)
+ #-----------------------------------
+ proc view3d_rendersmooth {} {
+   global SEG3D
+   global PINK
+   if ![file exists "/tmp/$SEG3D(name)_t"] {
+     # operate the threshold 
+     my_exec seuil "/tmp/$SEG3D(name)_d" $SEG3D(seuil) "/tmp/$SEG3D(name)_t" 
+   }
+   . config -cursor watch
+   update 
+   toplevel .waitmess -borderwidth 10
+   entry .waitmess.entry
+   pack .waitmess.entry -side top
+   update
+   my_feedback "marching cubes..."
+   my_exec mcube "/tmp/$SEG3D(name)_t" 0 0 0 vtk "/tmp/$SEG3D(name)_v.vtk"
+   my_feedback "decimating..."
+   my_exec decimate.tcl "/tmp/$SEG3D(name)_v.vtk" 0.9 "/tmp/$SEG3D(name)_v.vtk"
+   my_feedback "smoothing..."
+   my_exec meshregul "/tmp/$SEG3D(name)_v.vtk" 1 "/tmp/$SEG3D(name)_v.vtk"
+   exec "$PINK/tcl/multirender" "/tmp/$SEG3D(name)_v.vtk" &
+   . config -cursor left_ptr
+   destroy .waitmess
+ }
+
+ # superimposes viewation contours to the grayscale image
+ #-----------------------------------
+ proc view3d_surimp {} {
+   global SEG3D
+   if ![file exists "/tmp/$SEG3D(name)_t"] {
+     # operate the threshold 
+     my_exec seuil "/tmp/$SEG3D(name)_d" $SEG3D(seuil) "/tmp/$SEG3D(name)_t" 
+     return
+   }
+   view3d_zchange $SEG3D(z)
+ }

@@ -1,0 +1,5 @@
+#!/bin/csh
+foreach file ($PINK/tcl/*)
+  sed -e 's/create image 0 0/create image 1 1/g' $file > toto
+  mv toto $file
+end

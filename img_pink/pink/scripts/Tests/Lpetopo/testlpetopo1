@@ -1,0 +1,25 @@
+stretch chapeaumex.pgm _a.testlpetopo1
+zoom _a.testlpetopo1 8 _az.testlpetopo1
+xv -geometry +0+0 _az.testlpetopo1 &
+lpetopo _a.testlpetopo1 1 _b.testlpetopo1
+zoom _b.testlpetopo1 8 _bz.testlpetopo1
+xv -geometry +110+0 _bz.testlpetopo1 &
+lpetopo _b.testlpetopo1 256 _c.testlpetopo1
+zoom _c.testlpetopo1 8 _cz.testlpetopo1
+xv -geometry +220+0 _cz.testlpetopo1 &
+
+echo -n "ok pour le menage des fichiers temporaires ? "
+read REP
+case $REP in
+      o|O|y|Y) rm _*.testlpetopo1
+esac
+
+echo -n "ok pour le menage des fenetres xv ? "
+read REP
+case $REP in
+      o|O|y|Y) echo 'kill -9 \' > clearscreen
+               ps -a|grep xv|awk '{printf(" %s", $1)}' >> clearscreen
+               chmod 755 clearscreen
+               clearscreen
+               rm clearscreen
+esac

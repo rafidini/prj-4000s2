@@ -1,0 +1,18 @@
+#!/bin/sh
+USAGE="Usage: $0 in const"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+convert         $1  $1.ppm
+ppm2pgm         $1.ppm _r _g _b
+addconst        _r $2 _r
+addconst        _g $2 _g
+addconst        _b $2 _b
+pgm2ppm         _r _g _b $1.ppm

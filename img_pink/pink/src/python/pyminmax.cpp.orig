@@ -1,0 +1,38 @@
+/*
+  This software is licensed under 
+  CeCILL FREE SOFTWARE LICENSE AGREEMENT
+
+  This software comes in hope that it will be useful but 
+  without any warranty to the extent permitted by applicable law.
+  
+  (C) UjoImro, 2009
+  Université Paris-Est, Laboratoire d'Informatique Gaspard-Monge, Equipe A3SI, ESIEE Paris, 93162, Noisy le Grand CEDEX
+  ujoimro@gmail.com
+*/
+
+
+#include <pink_python.h>
+
+#define error(msg) {std::stringstream fullmessage; fullmessage << "in pyminmax.cpp: " << msg; call_error(fullmessage.str());}
+
+using namespace boost::python;
+
+using namespace pink;
+
+//CANNOT COMPILE
+
+UJ_GENERATE_WRAPPER( 
+  minmaxval,
+  "This function returns the maximum and minimum value of the image.\n"
+  "If you need both values, you should call this function, because\n"
+  "it uses only 3/2 n comparisons instead of 2n and it does not move\n"
+  "the elements.",
+  ("source image")
+  )
+
+
+
+
+
+
+// LuM end of file

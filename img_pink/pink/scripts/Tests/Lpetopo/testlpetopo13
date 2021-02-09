@@ -1,0 +1,28 @@
+stretch imbriqchateau3.pgm _a.testlpetopo13
+zoom _a.testlpetopo13  8  _az.testlpetopo13
+xv -geometry +0+0 _az.testlpetopo13 &
+lpetopo _a.testlpetopo13 1 _b.testlpetopo13
+zoom _b.testlpetopo13  8  _bz.testlpetopo13
+xv -geometry +175+0 _bz.testlpetopo13 &
+lpetopo _b.testlpetopo13 1 _c.testlpetopo13
+zoom _c.testlpetopo13  8  _cz.testlpetopo13
+xv -geometry +350+0 _cz.testlpetopo13 &
+lpetopo _c.testlpetopo13 256 _d.testlpetopo13
+zoom _d.testlpetopo13  8  _dz.testlpetopo13
+xv -geometry +525+0 _dz.testlpetopo13 &
+
+echo -n "ok pour le menage des fichiers temporaires ? "
+read REP
+case $REP in
+      o|O|y|Y) rm _*.testlpetopo13
+esac
+
+echo -n "ok pour le menage des fenetres xv ? "
+read REP
+case $REP in
+      o|O|y|Y) echo 'kill -9 \' > clearscreen
+               ps -a|grep xv|grep testlpetopo13|awk '{printf(" %s", $1)}' >> clearscreen
+               chmod 755 clearscreen
+               clearscreen
+               rm clearscreen
+esac

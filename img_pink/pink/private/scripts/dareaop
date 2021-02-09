@@ -1,0 +1,16 @@
+#!/bin/sh
+USAGE="Usage: $0 in connex area out"
+if [ $# -gt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+areaopening  $1  $2  $3  $4
+inverse      $4  $4
+areaopening  $4  $2  $3  $4
+inverse      $4  $4

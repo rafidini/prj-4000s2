@@ -1,0 +1,201 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ # 3D Viewer for a labels image (with a look-up table)
+ # Michel couprie - aout 2002
+
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec wish $0 $1 $2
+
+ if {($argc != 2)} { 
+   puts stderr "usage: 3dviewlab labels.pgm lut.ppm"
+   exit 
+ }
+
+ wm title . "3D viewer"
+
+ set PINK "$env(PINK)"
+ source "$PINK/tcl/my_exec.tcl"
+ source "$PINK/tcl/my_dialog.tcl"
+ source "$PINK/tcl/my_feedback.tcl"
+
+ # ============================================================
+ # GLOBAL VARIABLES
+ # ============================================================
+
+ global SEG3D
+ # infilename  : input file name
+ # lutfilename : file name for the LUT
+ # x  : pixel position in row
+ # y  : pixel position in column
+ # z  : plane position
+ # v  : pixel value
+ # tx  : transient pixel position in row
+ # ty  : transient pixel position in column
+ # tz  : transient plane position
+ # tv  : transient pixel value
+ # imxy : image structure for xy view
+ # cxy : canvas structure for xy view
+ # rs : row size
+ # cs : col size
+ # ds : depth
+ # name : command name
+ # xline, yline, zline : booleans 
+ # connex : adjacency relation (6, 18, 26)
+ # quit : boolean
+ # saved : boolean
+ # changed : boolean
+ set SEG3D(name) "3dviewlab"
+ append SEG3D(name) [clock seconds]
+ set SEG3D(xline)       1
+ set SEG3D(yline)       1
+ set SEG3D(zline)       1
+ set SEG3D(connex)      26
+ set SEG3D(quit_auxwin) 0
+ set SEG3D(saved)       1
+ set SEG3D(changed)     0
+ set SEG3D(par_seuil1)  128
+ set SEG3D(par_seuil2min) 128
+ set SEG3D(par_seuil2max) 256
+ set SEG3D(seuil) $SEG3D(par_seuil1)
+ set SEG3D(par_param)   0
+ set SEG3D(infilename) [lindex $argv 0]
+ set SEG3D(lutfilename) [lindex $argv 1]
+ if ![file exists $SEG3D(infilename)] {
+   puts stderr "cannot find input file: $SEG3D(infilename)"
+   exit   
+ }
+ if ![file exists $SEG3D(lutfilename)] {
+   puts stderr "cannot find LUT file: $SEG3D(lutfilename)"
+   exit   
+ }
+ my_exec_f cp $SEG3D(infilename) "/tmp/$SEG3D(name)_d" 
+
+ # ============================================================
+ # MENU DEFINITION
+ # ============================================================
+
+ menu .menubar
+ . config -menu .menubar
+ foreach m {File Analyze Threshold Visualize} {
+   set $m [menu .menubar.m$m]
+   .menubar add cascade -label $m -menu .menubar.m$m
+ }
+
+ $File      add command -label "Quit"             -command view3d_quit
+
+ # ============================================================
+ # MAIN WINDOW DEFINITION
+ # ============================================================
+
+ # create the toplevel frame
+ frame .top -borderwidth 10
+ pack .top -side top -fill x
+
+ # create the three images and load contents from files 
+ my_exec_f extractplane "/tmp/$SEG3D(name)_d" 0 xy "/tmp/$SEG3D(name)_xy" 
+ my_exec_f pgmrawmode "/tmp/$SEG3D(name)_xy" 
+ my_exec_f colorize "/tmp/$SEG3D(name)_xy" "$SEG3D(lutfilename)" "/tmp/$SEG3D(name)_xy" 
+ set SEG3D(imxy) [image create photo imxyname -file "/tmp/$SEG3D(name)_xy"]
+ my_exec_f extractplane "/tmp/$SEG3D(name)_d" 0 xz "/tmp/$SEG3D(name)_xz" 
+ my_exec_f pgmrawmode "/tmp/$SEG3D(name)_xz" 
+ my_exec_f colorize "/tmp/$SEG3D(name)_xz" "$SEG3D(lutfilename)" "/tmp/$SEG3D(name)_xz" 
+ set SEG3D(imxz) [image create photo imxzname -file "/tmp/$SEG3D(name)_xz"]
+ my_exec_f extractplane "/tmp/$SEG3D(name)_d" 0 zy "/tmp/$SEG3D(name)_zy" 
+ my_exec_f pgmrawmode "/tmp/$SEG3D(name)_zy" 
+ my_exec_f colorize "/tmp/$SEG3D(name)_zy" "$SEG3D(lutfilename)" "/tmp/$SEG3D(name)_zy" 
+ set SEG3D(imzy) [image create photo imzyname -file "/tmp/$SEG3D(name)_zy"]
+
+ # get image size
+ set SEG3D(cs) [image height $SEG3D(imxy)]
+ set SEG3D(rs) [image width $SEG3D(imxy)]
+ set SEG3D(ds) [image width $SEG3D(imzy)]
+ set SEG3D(x) [expr $SEG3D(rs)/2]
+ set SEG3D(y) [expr $SEG3D(cs)/2]
+ set SEG3D(z) [expr $SEG3D(ds)/2]
+ set SEG3D(v) [lindex [$SEG3D(imxy) get $SEG3D(x) $SEG3D(y)] 0]
+ set SEG3D(tx) [expr $SEG3D(rs)/2]
+ set SEG3D(ty) [expr $SEG3D(cs)/2]
+ set SEG3D(tz) [expr $SEG3D(ds)/2]
+ set SEG3D(tv) [lindex [$SEG3D(imxy) get $SEG3D(x) $SEG3D(y)] 0]
+
+ # create frames for the images
+ frame .top.one
+ frame .top.one.imxyframe -borderwidth 10 -width $SEG3D(rs) -height $SEG3D(cs)
+ pack .top.one.imxyframe -side left
+ pack .top.one -side top
+
+ # create canvas with the right sizes
+ set SEG3D(cxy) [canvas .top.one.imxyframe.cxy -width $SEG3D(rs) -height $SEG3D(cs)]
+ pack .top.one.imxyframe.cxy -fill both -expand true
+
+ # put the images into the canvas
+ $SEG3D(cxy) create image 1 1 -anchor nw -image $SEG3D(imxy)
+
+ # create the x, y and z command lines
+ frame .top.xyz
+ frame .top.xyz.zbutton
+ label .top.xyz.zbutton.label -text "Z"
+ scale .top.xyz.zbutton.scale -from 0 -to [expr $SEG3D(ds)-1] -length 200 -variable SEG3D(z) \
+   -orient horizontal -tickinterval 0 -showvalue true -command view3d_zchange
+ pack .top.xyz.zbutton.label .top.xyz.zbutton.scale -side left
+ pack .top.xyz.zbutton -side top
+ pack .top.xyz -side left
+
+ #===========================================
+ # PROCEDURES
+ #===========================================
+
+ # action associated to quit menu 
+ #-----------------------------------
+ proc view3d_quit {} {
+   global SEG3D
+   foreach file [glob -nocomplain "/tmp/$SEG3D(name)_*"] {
+     exec rm $file
+   }
+   exit
+ }
+ wm protocol . WM_DELETE_WINDOW view3d_quit
+ bind . "q" view3d_quit
+
+ # actions associated to x, y and z change
+ #-----------------------------------
+ proc view3d_zchange {z} {
+   global SEG3D
+   my_exec_f extractplane "/tmp/$SEG3D(name)_d" $z xy "/tmp/$SEG3D(name)_xy" 
+   my_exec_f pgmrawmode "/tmp/$SEG3D(name)_xy" 
+   my_exec_f colorize "/tmp/$SEG3D(name)_xy" "$SEG3D(lutfilename)" "/tmp/$SEG3D(name)_xy" 
+   $SEG3D(imxy) read "/tmp/$SEG3D(name)_xy"
+   set SEG3D(v) [lindex [$SEG3D(imxy) get $SEG3D(x) $SEG3D(y)] 0]
+ }

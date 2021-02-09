@@ -1,0 +1,12 @@
+inverse _m _mi
+min _r _mi _r1
+add _r _m _r2
+reconsdilat _r1 _r2 $1 _r3
+min _g _mi _g1
+add _g _m _g2
+reconsdilat _g1 _g2 $1 _g3
+min _b _mi _b1
+add _b _m _b2
+reconsdilat _b1 _b2 $1 _b3
+bw2rgb _r3 _g3 _b3 out.ppm
+xv out.ppm&

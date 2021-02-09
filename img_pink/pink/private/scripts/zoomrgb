@@ -1,0 +1,19 @@
+#!/bin/sh
+USAGE="Usage: $0 in.ppm zoom-factor out.ppm"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+bw2rgb     $1 _$1.r _$1.g _$1.b
+zoom      _$1.r $2 _$1.r
+zoom      _$1.g $2 _$1.g
+zoom      _$1.b $2 _$1.b
+rgb2bw    _$1.r _$1.g _$1.b $3
+rm        _$1.?
+

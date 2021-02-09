@@ -1,0 +1,15 @@
+#!/bin/sh
+USAGE="Usage: $0 in1.pgm in2.pgm"
+if [ $# -ne 2 ]
+then
+	echo $USAGE
+        exit
+fi
+3dkhalimskize $1 h /tmp/visu2pgm_1
+3dborder /tmp/visu2pgm_1 /tmp/visu2pgm_1
+pgm2vtk /tmp/visu2pgm_1 1 /tmp/visu2pgm_1.vtk
+3dkhalimskize $2 h /tmp/visu2pgm_2
+3dborder /tmp/visu2pgm_2 /tmp/visu2pgm_2
+pgm2vtk /tmp/visu2pgm_2 1 /tmp/visu2pgm_2.vtk
+multirender /tmp/visu2pgm_1.vtk /tmp/visu2pgm_2.vtk
+rm -f /tmp/visu2pgm_*

@@ -1,0 +1,5 @@
+minima      $1            4 _$1.showmingrid
+inverse    _$1.showmingrid  _$1.showmingrid
+grid       _$1.showmingrid  10         _$1.showmingrid
+xv         _$1.showmingrid
+rm         _$1.showmingrid

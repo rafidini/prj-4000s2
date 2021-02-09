@@ -1,0 +1,17 @@
+#!/bin/sh
+#-------------------------------------------------------
+# Seuillage avec hysteresis (connexite 8)
+# Michel Couprie - juin 1999 
+#-------------------------------------------------------
+USAGE="Usage: $0 in smax smin out"
+if [ $# -ne 4 ]
+then
+	echo $USAGE
+        exit
+fi
+
+seuilbin    $1 $2 _smax
+seuilbin    $1 $3 _smin
+reconsdilat _smax _smin vois8 $4
+rm          _smax
+rm          _smin

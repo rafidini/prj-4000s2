@@ -1,0 +1,37 @@
+#!/bin/sh
+USAGE="Usage: $0 in.skel"
+if [ $# -ne 1 ]
+then
+	echo $USAGE
+        exit
+fi
+skel2pgm $1 /tmp/visuskel_0
+
+selndg /tmp/visuskel_0 1 1 /tmp/visuskel_1
+selndg /tmp/visuskel_0 2 2 /tmp/visuskel_2
+selndg /tmp/visuskel_0 3 3 /tmp/visuskel_3
+selndg /tmp/visuskel_0 4 4 /tmp/visuskel_4
+
+3dkhalimskize /tmp/visuskel_0 h /tmp/visuskel_0
+3dborder /tmp/visuskel_0 /tmp/visuskel_0
+pgm2vtk /tmp/visuskel_0 1 /tmp/visuskel_0.vtk
+
+3dkhalimskize /tmp/visuskel_1 h /tmp/visuskel_1
+3dborder /tmp/visuskel_1 /tmp/visuskel_1
+pgm2vtk /tmp/visuskel_1 1 /tmp/visuskel_1.vtk
+
+3dkhalimskize /tmp/visuskel_2 h /tmp/visuskel_2
+3dborder /tmp/visuskel_2 /tmp/visuskel_2
+pgm2vtk /tmp/visuskel_2 1 /tmp/visuskel_2.vtk
+
+3dkhalimskize /tmp/visuskel_3 h /tmp/visuskel_3
+3dborder /tmp/visuskel_3 /tmp/visuskel_3
+pgm2vtk /tmp/visuskel_3 1 /tmp/visuskel_3.vtk
+
+3dkhalimskize /tmp/visuskel_4 h /tmp/visuskel_4
+3dborder /tmp/visuskel_4 /tmp/visuskel_4
+pgm2vtk /tmp/visuskel_4 1 /tmp/visuskel_4.vtk
+
+multirender /tmp/visuskel_0.vtk /tmp/visuskel_1.vtk /tmp/visuskel_2.vtk /tmp/visuskel_3.vtk /tmp/visuskel_4.vtk
+
+rm -f /tmp/visuskel_*
