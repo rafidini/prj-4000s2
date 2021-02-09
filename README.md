@@ -9,7 +9,11 @@ This challenge focusses on prediction of colour attribute of products from a lar
 Blablabla
 
 # Avancement
-Blablabla
+## Mardi 19 Février 2021
+Répartition du travail en 3 tâches avec un binôme par tâche:
+- **Exploration des données**: Loïc, Itokiana
+- **Images**: Thomas, Romain
+- **Texte**: Benjamin, Maxime
 
 # Notebooks
 - [introduction](notebooks/introduction.md) : Aperçu des données pour le challenge
