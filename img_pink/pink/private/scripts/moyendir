@@ -1,0 +1,43 @@
+#!/bin/sh
+USAGE="Usage: $0 in outmin outmax"
+if [ $# -ne 3 ]
+then
+	echo $USAGE
+        exit
+fi
+
+convol $1 $PINK/masks/dir0_13x13.pgm _md
+cp _md _mdmin
+mv _md _mdmax
+
+convol $1 $PINK/masks/dir1_13x13.pgm _md
+min _md _mdmin _mdmin
+max _md _mdmax _mdmax
+
+convol $1 $PINK/masks/dir2_13x13.pgm _md
+min _md _mdmin _mdmin
+max _md _mdmax _mdmax
+
+convol $1 $PINK/masks/dir3_13x13.pgm _md
+min _md _mdmin _mdmin
+max _md _mdmax _mdmax
+
+convol $1 $PINK/masks/dir4_13x13.pgm _md
+min _md _mdmin _mdmin
+max _md _mdmax _mdmax
+
+convol $1 $PINK/masks/dir5_13x13.pgm _md
+min _md _mdmin _mdmin
+max _md _mdmax _mdmax
+
+convol $1 $PINK/masks/dir6_13x13.pgm _md
+min _md _mdmin _mdmin
+max _md _mdmax _mdmax
+
+convol $1 $PINK/masks/dir7_13x13.pgm _md
+min _md _mdmin $2
+max _md _mdmax $3
+
+rm _md
+rm _mdmin
+rm _mdmax

@@ -1,0 +1,65 @@
+/* $Id: taf.c.sav,v 1.1.1.1 2008-11-25 08:01:39 mcouprie Exp $ */
+/*! \file taf.c
+
+\brief topological alternating filter
+
+<B>Usage:</B> taf in.pgm connexmin rayon out.pgm
+
+<B>Description:</B>
+Topological alternating filter (cf. CB04: to appear)
+
+<B>Types supported:</B> byte 2d
+
+<B>Category:</B> topo
+\ingroup  topo
+
+\author Michel Couprie
+*/
+/* 
+   Filtre topologique alterne 
+
+   Michel Couprie - janvier 2000
+*/
+
+#include <stdio.h>
+#include <string.h>
+#include <mccodimage.h>
+#include <mcimage.h>
+#include <lfiltrestopo.h>
+
+/* =============================================================== */
+int main(argc, argv) 
+/* =============================================================== */
+  int argc; char **argv; 
+{
+  struct xvimage * image;
+  int rayon;
+  int connexmin;
+
+  if (argc != 5)
+  {
+    fprintf(stderr, "usage: %s in.pgm connexmin rayon out.pgm \n", argv[0]);
+    exit(1);
+  }
+
+  image = readimage(argv[1]);
+  if (image == NULL)
+  {
+    fprintf(stderr, "%s: readimage failed\n", argv[0]);
+    exit(1);
+  }
+
+  connexmin = atoi(argv[2]);
+  rayon = atoi(argv[3]);
+
+  if (! ltaf(image, connexmin, rayon))
+  {
+    fprintf(stderr, "%s: function ltaf failed\n", argv[0]);
+    exit(1);
+  }
+
+  writeimage(image, argv[argc-1]);
+  freeimage(image);
+
+  return 0;
+} /* main */

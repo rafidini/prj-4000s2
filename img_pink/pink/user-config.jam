@@ -1,0 +1,11 @@
+# -*- sh -*-
+# UjoImro, 2011
+
+#  MSVC configuration
+using msvc : 10.0 ;
+
+#  Python configuration
+using python : 2.7 : 'C:\\Python27' ;
+
+
+# LuM end of file

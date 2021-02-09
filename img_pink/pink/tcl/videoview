@@ -1,0 +1,353 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ # Video sequence viewer
+ # Michel couprie - fevrier 2005
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec wish $0 $1 $2
+
+ if {($argc != 1) && ($argc != 2)} { 
+   puts stderr "usage: videoview sequence \[nframes\]"
+   exit 
+ }
+
+ wm title . "Video viewer"
+
+ set PINK "$env(PINK)"
+ source "$PINK/tcl/my_exec.tcl"
+ source "$PINK/tcl/my_dialog.tcl"
+ source "$PINK/tcl/my_feedback.tcl"
+ source "$PINK/tcl/my_write.tcl"
+
+ # ============================================================
+ # Global VARIABLES
+ # ============================================================
+
+ global VV
+ # infilename  : input file name
+ # im : image structure
+ # c : canvas structure
+ # rs : row size
+ # cs : col size
+ # ds : depth (number of frames)
+ # z : current view
+ # name : command name
+ # ecount : counter for extracted images
+ # beg : beginning of extracted sequence 
+ # end : beginning of extracted sequence 
+ set VV(z) 0
+ set VV(beg) 0
+ set VV(end) 10
+ set VV(name) "vv"
+ append VV(name) [clock seconds]
+ set VV(infilename) [lindex $argv 0]
+ if ![file exists $VV(infilename)] {
+   puts stderr "cannot find input file: $VV(infilename)"
+   exit
+ }
+ if {($argc == 2)} { 
+   set VV(ds) [lindex $argv 1]
+ } else {
+   set VV(ds) 1000000000
+ }
+ set VV(ecount) 0
+
+proc tmpfile {tmpname} {
+  global VV
+  return [file join "/tmp" "$VV(name)_$tmpname"]
+}
+
+ # ============================================================
+ # MENU DEFINITION
+ # ============================================================
+
+ menu .menubar
+ . config -menu .menubar
+ foreach m {File Action} {
+   set $m [menu .menubar.m$m]
+   .menubar add cascade -label $m -menu .menubar.m$m
+ }
+
+ $File      add command -label "Quit"             -command vv_quit
+
+ $Action      add command -label "Play"           -command vv_play
+ $Action      add command -label "Rhythm"         -command vv_rhythm
+ $Action      add command -label "Cuts"           -command vv_cuts
+ $Action      add command -label "Extract view"   -command vv_extractview
+ $Action      add command -label "Extract sequence" -command vv_extractseq
+
+ # ============================================================
+ # VIDEO to IMAGE CONVERSION
+ # ============================================================
+
+ if {($argc == 2)} { 
+   my_exec_q mplayer -nosound -vo pnm -frames $VV(ds) $VV(infilename)
+#   my_exec_q mpeg2decode -b $VV(infilename) -f -r -a$VV(ds) -o3 00%06d
+ } else {
+   my_exec_q mplayer -nosound -vo pnm $VV(infilename)
+#   my_exec_q mpeg2decode -b $VV(infilename) -f -r -o3 00%06d
+ }
+
+ set i 1
+ while {$i < $VV(ds)} {
+  set filecount [format "%08d" $i]
+  if {![file exists "$filecount.ppm"]} {
+    set VV(ds) $i
+  } else {
+    incr i
+  }
+ }
+ incr VV(ds) -1
+
+ # ============================================================
+ # MAIN WINDOW DEFINITION
+ # ============================================================
+
+ # create the toplevel frame
+ frame .top -borderwidth 10
+ pack .top -side top -fill x
+ set VV(im) [image create photo imname -file "00000001.ppm"]
+
+ # get image size
+ set VV(cs) [image height $VV(im)]
+ set VV(rs) [image width $VV(im)]
+
+ # create frames for the images
+ frame .top.one
+ frame .top.one.imframe -borderwidth 10 -width $VV(rs) -height $VV(cs)
+ pack .top.one.imframe -side left
+
+ # create canvas with the right sizes
+ set VV(c) [canvas .top.one.imframe.c -width $VV(rs) -height $VV(cs)]
+ pack .top.one.imframe.c -fill both -expand true
+
+ # put the images into the canvas
+ $VV(c) create image 1 1 -anchor nw -image $VV(im)
+
+ # create the x, y and z command lines
+ frame .top.two
+ frame .top.two.timebutton
+ label .top.two.timebutton.label -text "Time"
+ scale .top.two.timebutton.scale -from 1 -to $VV(ds) -length 300 -variable VV(z) \
+   -orient horizontal -tickinterval 0 -showvalue true -command vv_change
+ pack .top.two.timebutton.label .top.two.timebutton.scale -side left
+ pack .top.two.timebutton -side top
+ pack .top.one .top.two -side top
+
+ #===========================================
+ # PROCEDURES
+ #===========================================
+
+ # action associated to quit menu 
+ #-----------------------------------
+ proc vv_quit {} {
+   global VV
+   puts "deleting temp files - please wait..."
+   foreach file [glob -nocomplain [tmpfile "*"]] {
+     catch {exec rm $file} result
+   }
+   set i 1
+   while {$i <= $VV(ds)} {
+     set filecount [format "%08d" $i]
+     catch {exec rm "$filecount.ppm"} result
+     incr i
+   }
+   exit
+ }
+ wm protocol . WM_DELETE_WINDOW vv_quit
+ bind . "q" vv_quit
+
+ proc vv_change {z} {
+   global VV
+   set filecount [format "%08d" $z]
+   $VV(im) read "$filecount.ppm"
+ }
+
+ proc vv_play {} {
+   global VV
+   my_exec_q mplayer -nosound -frames $VV(ds) $VV(infilename)
+ }
+
+ proc vv_rhythm {} {
+   global VV
+   set rs $VV(rs)
+   set cs $VV(cs)
+   . config -cursor watch
+
+   puts "extracting lines"
+   #---------------------------
+   set i 1
+   while {$i <= $VV(ds)} {
+     set mod [expr $VV(ds) / 10]
+     if {($i % $mod == [expr $mod - 1])} {
+       set i10 [expr (($i / $mod) + 1) * 10]
+       puts "$i10 %"
+     }
+     set filecount [format "%04d" $i]
+     my_exec ppm2pgm "0000$filecount.ppm" [tmpfile r] [tmpfile g] [tmpfile b]
+     my_exec extractline [tmpfile r] 0 0 [expr $rs - 1] [expr $cs - 1] "r0000$filecount.pgm"
+     my_exec extractline [tmpfile g] 0 0 [expr $rs - 1] [expr $cs - 1] "g0000$filecount.pgm"
+     my_exec extractline [tmpfile b] 0 0 [expr $rs - 1] [expr $cs - 1] "b0000$filecount.pgm"
+     incr i    
+   }
+
+   puts "catenating $VV(ds) lines"
+   #---------------------------
+   my_exec catpgm "r0000" 1 $VV(ds) [tmpfile r]
+   my_exec catpgm "g0000" 1 $VV(ds) [tmpfile g]
+   my_exec catpgm "b0000" 1 $VV(ds) [tmpfile b]
+   my_exec isometry [tmpfile r] yxz [tmpfile r]
+   my_exec isometry [tmpfile g] yxz [tmpfile g]
+   my_exec isometry [tmpfile b] yxz [tmpfile b]
+   my_exec pgm2ppm [tmpfile r] [tmpfile g] [tmpfile b] "$VV(infilename).vr"
+   foreach file [glob -nocomplain "?0000????.pgm"] {
+     catch {exec rm $file} result
+   }
+   . config -cursor left_ptr
+ }
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%d %g" v1 v2
+  close $input
+  return $v2
+}
+
+# computes dissimilarity between two images
+#-----------------------------------
+proc compute_diss {i j} {
+  set file1 [format "%08d" $i]
+  set file2 [format "%08d" $j]
+  my_exec_q diffimages "_$file1.pgm" "_$file2.pgm" [tmpfile 1]
+  my_exec_q volume [tmpfile 1] [tmpfile 2]
+  set diss [my_read_val [tmpfile 2]]
+  return $diss
+}
+
+ proc vv_cuts {} {
+   global VV
+   . config -cursor watch
+
+   puts "converting to grayscale"
+   #---------------------------
+   set i 1
+     while {$i <= $VV(ds)} {
+       set mod [expr $VV(ds) / 10]
+       if {($i % $mod == [expr $mod - 1])} {
+         set i10 [expr (($i / $mod) + 1) * 10]
+         puts "$i10 %"
+       }
+       set filecount [format "%08d" $i]
+       my_exec_q rgb2hls "$filecount.ppm" "/dev/null" "_$filecount.pgm" "/dev/null"
+       incr i
+     }
+
+     puts "reducing resolution"
+     #---------------------------
+     for {set i 1} {$i <= $VV(ds)} {incr i} {
+       set mod [expr $VV(ds) / 10]
+       if {($i % $mod == [expr $mod - 1])} {
+         set i10 [expr (($i / $mod) + 1) * 10]
+         puts "$i10 %"
+       }
+       set filecount [format "%08d" $i]
+#       my_exec_q zoom "_$filecount.pgm" 0.125 "_$filecount.pgm"
+     }
+
+     puts "computing dissimilarities"
+     #---------------------------
+     set data [list]
+     for {set i 1} {$i < $VV(ds)} {incr i} {
+       set j [expr $i + 1]
+       set diss [compute_diss $i $j]
+       set data [concat $data $diss]
+     }
+
+     set i 1
+     while {$i <= $VV(ds)} {
+       set filecount [format "%08d" $i]
+       catch {exec rm "_$filecount.pgm"} result
+       incr i
+     }
+
+     puts "normalizing list"
+     #---------------------------
+     set max [lindex $data 0]
+     for {set i 1} {$i < [expr $VV(ds) - 1]} {incr i} {
+       set d [lindex $data $i]
+       if {$d > $max} {
+         set max $d
+       }
+     }
+     set newdata [list]
+     for {set i 0} {$i < [expr $VV(ds) - 1]} {incr i} {
+       set d [lindex $data $i]
+       set newdata [concat $newdata [expr 255 * [expr $d / $max]]]  
+     }
+
+     puts "writing file"
+     #---------------------------
+     my_write_pgm1d_list "$VV(infilename).cuts" $newdata
+     my_exec_q float2byte "$VV(infilename).cuts" 0 "$VV(infilename).cuts"
+     my_exec_q ombre "$VV(infilename).cuts" "$VV(infilename).cuts"
+   . config -cursor left_ptr
+ }
+
+ proc vv_extractview {} {
+   global VV
+   set f "extr$VV(ecount).ppm"
+   set filename [Dialog_Prompt "Enter Filename" $f]
+   set filecount [format "%08d" $VV(z)]
+   my_exec_q cp "$filecount.ppm" $filename
+   incr VV(ecount)
+   incr VV(z)
+   vv_change $VV(z)
+ }
+
+ proc vv_extractseq {} {
+   global VV
+   set f "x.mpg"
+   set filename [Dialog_Prompt "Enter Filename" $f]
+   set VV(beg) [Dialog_Prompt "Enter Begin" $VV(beg)]
+   set VV(end) [Dialog_Prompt "Enter Begin" $VV(end)]
+   for {set i $VV(beg)} {$i <= $VV(end)} {incr i} {
+      set filecount [format "%08d" $i]
+      my_exec_q convert "$filecount.ppm" "_$filecount.jpg" 
+   }
+   my_exec_v mencoder "mf://_*.jpg -mf w=$VV(rs):h=$VV(cs):fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o $f"
+ }

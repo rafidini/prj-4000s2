@@ -1,0 +1,160 @@
+/* Extraction de contours */
+/* Michel Couprie -  avril 1998 */
+/*
+   Methode : l'image d'entree F est un noyau homotopique par abaissement, obtenu typiquement a partir
+   d'une image de gradient.
+
+   Cette image est seuillee (seuilhaut), ce qui donne l'image binaire S. 
+
+   Dans S on elimine les points isoles, 
+     et on repere les points extremites, qui sont empiles dans une LIFO.
+
+   Pour chaque point extremite x : 
+     selectionne un point y dans ((vois. de x) - S) qui maximise F[y]
+     rajoute y a S
+     si y extremite, empile y dans LIFO
+*/
+#include <stdio.h>
+#include <mccodimage.h>
+#include <mcimage.h>
+#include <mclifo.h>
+#include <mctopo.h>
+#include <mcindic.h>
+#include <llabelextrema.h>
+#include <lcontours.h>
+
+#define PARANO
+/*
+#define DEBUG
+*/
+
+/* ==================================== */
+int lcontours(struct xvimage *image, int seuilhaut, int seuilbas)
+/* ==================================== */
+{ 
+  int i;
+  int n;
+  int x;                       /* index muet de pixel */
+  int y;                       /* index muet (generalement un voisin de x) */
+  int z;                       /* index muet (generalement un voisin de y) */
+  int k;                       /* index muet */
+  int rs = rowsize(image);     /* taille ligne */
+  int cs = colsize(image);     /* taille colonne */
+  int N = rs * cs;             /* taille image */
+  unsigned char *F = UCHARDATA(image);      /* l'image de depart */
+  unsigned char *S;
+  Lifo * LIFO;
+  int t, tb;
+  char *name1, *name;          /* pour les noms des images originale et resultat */
+  char buf[64];
+  int prem;
+
+  if (depth(image) != 1) 
+  {
+    fprintf(stderr, "lcontours: cette version ne traite pas les images volumiques\n");
+    return 0;
+  }
+
+  LIFO = CreeLifoVide(N);
+
+  S = (unsigned char *)malloc(N * sizeof(char));
+  if (S == NULL)
+  {
+    fprintf(stderr, "lcontours: malloc failed\n");
+    return 0;
+  }
+
+  /* ================================================ */
+  /*                  DEBUT ALGO                      */
+  /* ================================================ */
+
+  /* ========================================================= */
+  /* seuil de l'image originale */
+  /* ========================================================= */
+
+  for (x = 0; x < N; x++) 
+    if (F[x] >= seuilhaut) S[x] = NDG_MAX; else S[x] = 0;
+
+  /* ========================================================= */
+  /* selection des points extremite et elimination des points isoles */
+  /* ========================================================= */
+
+  for (x = 0; x < N; x++) 
+    if (S[x]) 
+    {
+      n = nbvois8(S, x, rs, N);
+      if (n == 1) LifoPush(LIFO, x); 
+      else if (n == 0) S[x] = 0;
+    }
+
+  /* ========================================================= */
+  /* traitement des points extremite */
+  /* ========================================================= */
+
+  while (!LifoVide(LIFO))
+  {
+    x = LifoPop(LIFO);
+    prem = 1; z = x;
+#ifdef DEBUG
+printf("POP x = %d,%d\n", x%rs, x/rs);
+#endif
+    for (k = 1; k < 8; k += 1)
+    {
+      y = voisin(x, k, rs, N);
+      if ((y != -1) && (!S[y]) && (!bord(y, rs, N)))
+      {
+        top8(S, y, rs, N, &t, &tb); 
+        n = nbvois8(S, y, rs, N); 
+#ifdef DEBUG
+printf("y = %d,%d ; t = %d ; n = %d ; F[y] = %d\n", y%rs, y/rs, t, n, F[y]);
+#endif
+        if ((n == 1) || ((n > 1) && (t > 1)))
+        {
+          if (prem) { z = y; prem = 0; }
+          else if (F[y] > F[z]) z = y;
+        }
+      }
+    } /* for k */
+    
+    if ((z != x) && (F[z] >= seuilbas))
+    {
+      S[z] = NDG_MAX;
+      if (extremite8(S, z, rs, N)) LifoPush(LIFO, z); 
+    }
+  } /* for x */
+
+  /* ================================================ */
+  /*                  DEBUT SATURATION                */
+  /* ================================================ */
+
+  for (x = 0; x < N; x++) F[x] = S[x];
+
+  /* ================================================ */
+  /* UN PEU DE MENAGE                                 */
+  /* ================================================ */
+
+  LifoTermine(LIFO);
+
+  /* ---------------------------------------------------------- */
+  /* fabrique le nom de l'image resultat */
+  /* ---------------------------------------------------------- */
+
+  name1 = image->name; 
+  if (name1 == NULL) name1 = "?";
+  sprintf(buf, ",%d,%d", seuilhaut, seuilbas);
+  name = (char *)malloc(strlen(name1) + strlen(buf) + strlen("contours()") + 1);
+  if (name == NULL)
+  {   fprintf(stderr,"lcontours() : malloc failed for name\n");
+      return 0;
+  }
+  strcpy(name, "contours(");
+  strcat(name, name1);
+  strcat(name, buf);
+  strcat(name, ")");
+
+  if (name1 != NULL) free(image->name);
+  image->name = name;
+
+  return(1);
+}
+/* -library_code_end */

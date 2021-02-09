@@ -1,0 +1,47 @@
+# Script to detct bifurcations
+# input has to be an skeleton-image with a 8-neighbourhood
+
+# First Element
+erosion $1 ~/Pink/masks/bifurcation8v1_0.pgm out.pgm
+
+# Turn around and continue
+erosion $1 ~/Pink/masks/bifurcation8v1_90.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+erosion $1 ~/Pink/masks/bifurcation8v1_180.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+erosion $1 ~/Pink/masks/bifurcation8v1_240.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+# Second Element
+erosion $1 ~/Pink/masks/bifurcation8v2_0.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+# Turn around and continue
+erosion $1 ~/Pink/masks/bifurcation8v2_90.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+erosion $1 ~/Pink/masks/bifurcation8v2_180.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+erosion $1 ~/Pink/masks/bifurcation8v2_240.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+# Third Element
+erosion $1 ~/Pink/masks/bifurcation8v3_0.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+# Turn around and continue
+erosion $1 ~/Pink/masks/bifurcation8v3_90.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+erosion $1 ~/Pink/masks/bifurcation8v3_180.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+erosion $1 ~/Pink/masks/bifurcation8v3_240.pgm help.pgm
+max help.pgm out.pgm out.pgm
+
+#and the intersection
+erosion $1 ~/Pink/masks/intersection_1.pgm help.pgm
+max help.pgm out.pgm out.pgm

@@ -1,0 +1,128 @@
+#!/usr/bin/python
+import sys
+import os
+import re
+import numpy as np
+
+# print 'Number of arguments:', len(sys.argv), 'arguments.'
+# print 'Argument List:', str(sys.argv)
+
+if (len(sys.argv) != 3) : 
+    print "usage: ell_fitting in.pgm out.pgm"
+    sys.exit ()
+
+name = sys.argv[0]
+infilename = sys.argv[1]
+outfilename = sys.argv[2]
+tmpprefix = "/tmp/"
+
+# PROCEDURES UTILES
+#-----------------------------------
+
+# reads a list of data from a file
+#-----------------------------------
+def my_readlistdata(filename) :
+  f = open(filename, 'r')
+  l = f.readline().split()
+  tag = l[0]
+  n = l[1]
+  r = []
+  for i in range(1,int(n)+1):
+    l = f.readline().split()
+    l2 = list(map(lambda x: float(x), l))
+    r.append(l2)
+  return r
+
+# reads a pgm image header
+# returns the image sizes in the form of a list : [rowsize, colsize] (in 2D)
+# or [rowsize, colsize, depth] in 3D
+#-----------------------------------
+def my_readpgmheader(filename) :
+  f = open(filename, 'r')
+  # read tag
+  s = f.readline()
+  # skip comment lines and reads one more line
+  l = f.readline().split()
+  while (l[0][0] == '#') or (len(l) == 0) :    
+    l = f.readline().split()
+  return l
+
+# reads a pgm image header
+# returns the origin coordinates in the form of a list : [xc, yc]
+#-----------------------------------
+def my_readpgmorigin(filename) :
+  f = open(filename, 'r')
+  # read tag
+  s = f.readline()
+  # skip other comment lines and reads origin specs
+  l = f.readline().split()
+  while (l[0] != '#origin') or (len(l) == 0) :    
+    l = f.readline().split()
+  l.pop(0)
+  return l
+
+# executes a shell command (quiet version)
+#-----------------------------------
+def my_exec_q(command, *args) :
+  s = command
+  for arg in args:
+    s = s+" "+str(arg)
+  os.system(s)
+
+# executes a shell command (verbose version)
+#-----------------------------------
+def my_exec_v(command, *args) :
+  s = command
+  for arg in args:
+    s = s+" "+str(arg)
+  print s
+  os.system(s)
+
+# DEBUT PROGRAMME
+#-----------------------------------
+
+my_exec_q("pgm2list", infilename, "b", tmpprefix+"_ptlist")
+my_exec_q("pca", tmpprefix+"_ptlist",  tmpprefix+"_pca")
+lp = my_readlistdata(tmpprefix+"_ptlist")
+pca = my_readlistdata(tmpprefix+"_pca")
+
+# barycentre
+c = np.array(pca[0])
+# direction principale
+d1 = np.array(pca[1])
+# normalisation
+d1 = d1 / np.sqrt(np.dot(d1,d1))
+# matrices de changement de base
+B = np.array([[d1[0], d1[1]],[d1[1], -d1[0]]])
+Binv =  np.linalg.inv(B)
+# liste des points dans la nouvelle base
+lpn = []
+for p in lp:
+    lpn.append(np.dot(B,p-c))
+# extremites des axes de l'ellipse
+xmin = lpn[0][0]
+xmax = lpn[0][0]
+ymin = lpn[0][1]
+ymax = lpn[0][1]
+for p in lpn:
+    if (p[0] < xmin):
+        xmin = p[0]
+    if (p[0] > xmax):
+        xmax = p[0]
+    if (p[1] < ymin):
+        ymin = p[1]
+    if (p[1] > ymax):
+        ymax = p[1]
+g1 = np.array([xmin,0])
+g2 = np.array([xmax,0])
+p1 = np.array([0,ymin])
+p2 = np.array([0,ymax])
+
+go1 = np.dot(Binv,g1)+c
+go2 = np.dot(Binv,g2)+c
+po1 = np.dot(Binv,p1)+c
+po2 = np.dot(Binv,p2)+c
+
+my_exec_q("genimage", infilename, 0, tmpprefix+"_empty")
+my_exec_q("drawellipse", tmpprefix+"_empty", round(po1[0]), round(po1[1]), round(po2[0]), round(po2[1]), round(go1[0]), round(go1[1]), round(go2[0]), round(go2[1]), outfilename)
+

@@ -1,0 +1,22 @@
+#!/bin/sh
+USAGE="Usage: $0 in connex n out"
+if [ $# -gt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+medialaxis  $1 0 0 /tmp/_squel1_1
+seuil       /tmp/_squel1_1 1 /tmp/_squel1_1
+inverse     $1 /tmp/_squel1_2
+dist        /tmp/_squel1_2 0 /tmp/_squel1_2
+byte2long   /tmp/_squel1_1 /tmp/_squel1_1
+max         /tmp/_squel1_1 /tmp/_squel1_2 /tmp/_squel1_2
+squelubp    $1 /tmp/_squel1_2 $2 255 $4
+htkern3dbin $4 $2 $3 $4
+rm          /tmp/_squel1_?
+

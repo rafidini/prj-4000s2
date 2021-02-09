@@ -1,0 +1,19 @@
+#!/bin/sh
+USAGE="Usage: $0 in out"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+ppm2pgm      $1 _$1.r _$1.g _$1.b
+convol       _$1.r $PINK/masks/vois8.pgm _$1.r
+convol       _$1.g $PINK/masks/vois8.pgm _$1.g
+convol       _$1.b $PINK/masks/vois8.pgm _$1.b
+pgm2ppm      _$1.r _$1.g _$1.b $2
+rm          _$1.r _$1.g _$1.b
+

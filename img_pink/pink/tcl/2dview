@@ -1,0 +1,125 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+#sh
+# The next line is executed by /bin/sh, but not Tcl \
+exec wish $0 $1 $2
+
+# set window title
+wm title . "2Dview"
+
+set PINK "$env(PINK)"
+source [file join "$PINK" "tcl" "my_exec.tcl"]
+
+# globals
+#   2DVIEW(infilename)
+#   2DVIEW(im)
+#   2DVIEW(im_rs)
+#   2DVIEW(im_cs)
+set 2DVIEW(name) 2dview
+
+if {$argc != 1} { 
+  puts stderr "usage: 2dview in"
+  exit 
+}
+
+proc tmpfile {tmpname} {
+  global 2DVIEW
+  return [file join "/tmp" "$2DVIEW(name)_$tmpname"]
+}
+
+# get input image file name as first argument
+set 2DVIEW(infilename) [lindex $argv 0]
+
+# create a frame for buttons
+frame .top -borderwidth 10
+pack .top -side top -fill x
+
+# create the quit button
+button .top.quit -text Quit -command 2dview_quit
+pack .top.quit -side right
+
+my_exec convert $2DVIEW(infilename) [tmpfile in.ppm]
+
+# create an image and load contents from file 
+set 2DVIEW(im) [image create photo imname -file [tmpfile in.ppm]]
+
+# get image size
+set 2DVIEW(im_cs) [image height $2DVIEW(im)]
+set 2DVIEW(im_rs) [image width $2DVIEW(im)]
+
+set 2DVIEW(x) [expr $2DVIEW(im_rs)/2]
+set 2DVIEW(y) [expr $2DVIEW(im_cs)/2]
+set 2DVIEW(tx) [expr $2DVIEW(im_rs)/2]
+set 2DVIEW(ty) [expr $2DVIEW(im_cs)/2]
+set 2DVIEW(tv) [lindex [$2DVIEW(im) get $2DVIEW(x) $2DVIEW(y)] 0]
+
+# create a frame for the image
+frame .imframe -borderwidth 10 -width $2DVIEW(im_rs) -height $2DVIEW(im_cs)
+pack .imframe -side top
+
+# create canvas with the right sizes
+set c [canvas .imframe.c -width [expr $2DVIEW(im_rs) - 2] -height [expr $2DVIEW(im_cs) - 2]]
+pack .imframe.c -fill both -expand true
+
+# put the image into the canvas
+$c create image 1 1 -anchor nw  -image $2DVIEW(im)
+
+# create the label for pixel value
+label .top.pixval
+label .top.pixval.xlab -textvariable 2DVIEW(tx) -width 5
+label .top.pixval.ylab -textvariable 2DVIEW(ty) -width 5
+label .top.pixval.vlab -textvariable 2DVIEW(tv) -width 5
+label .top.pixval.text -text " : "
+pack .top.pixval.xlab -side left
+pack .top.pixval.ylab -side left
+pack .top.pixval.text -side left
+pack .top.pixval.vlab -side left
+pack .top.pixval -side top
+
+bind $c <Motion> { 
+  if {(%x < $2DVIEW(im_rs)) && (%y < $2DVIEW(im_cs))} {
+    set 2DVIEW(tx) %x 
+    set 2DVIEW(ty) %y
+    set 2DVIEW(tv) [lindex [$2DVIEW(im) get %x %y] 0]
+  }
+}
+
+# action associated to quit widget
+proc 2dview_quit {} {
+  global 2DVIEW
+  catch {exec rm [tmpfile in.ppm]} result
+  exit
+}
+wm protocol . WM_DELETE_WINDOW 2dview_quit
+bind . "q" 2dview_quit

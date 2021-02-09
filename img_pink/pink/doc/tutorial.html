@@ -1,0 +1,313 @@
+  <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+           "http://www.w3.org/TR/REC-html40/loose.dtd"><HTML>
+<META NAME="GENERATOR" CONTENT="TtH 1.95">
+<BODY bgcolor="#ffffff">
+                                                                 
+<title> Pinkdev,
+Kit de d\'eveloppement d'op\'erateurs pour le traitement d'images
+</title>
+ 
+<H1 align=center>Pinkdev<br>
+Kit de d&#233;veloppement d'op&#233;rateurs pour le traitement d'images
+ </H1>
+ 
+<H2 align=center>Michel Couprie
+ </H2>
+
+<p>
+        <H2><A NAME="tth_sEc1">
+1</A>&nbsp;&nbsp;Introduction</H2>
+
+<p>
+Cet environnement a pour but de faciliter le d&#233;veloppement
+de vos premiers op&#233;rateurs de traitement d'image. Il inclut 
+notamment des fonctions d'entr&#233;e/sortie permettant de lire
+et d'&#233;crire des fichiers images en niveaux de gris au format 
+<b>pgm</b> (Portable Gray Map, un format standard). Il propose &#233;galement
+une structure de donn&#233;es permettant la manipulation des pixels
+de l'image, une fois celle-ci charg&#233;e en m&#233;moire.
+
+<p>
+Pour la visualisation des images, n'importe quel outil standard
+peut &#234;tre utilis&#233;. Nous recommandons 
+particuli&#232;rement <b>xv</b>, qui permet en outre la conversion 
+de formats de fichiers.
+
+<p>
+        <H2><A NAME="tth_sEc2">
+2</A>&nbsp;&nbsp;La structure xvimage</H2>
+
+<p>
+Une image est vue comme un tableau rectangulaire &#224; deux 
+dimensions de <i>pixels</i> ou picture elements, 
+l'intensit&#233; de chaque pixel (son niveau de gris) est cod&#233;
+sur un octet (unsigned char - valeur entre 0 et 255).
+
+<p>
+<IMG SRC="xvimage1.gif" ALIGN=CENTER>
+
+
+<p>
+En m&#233;moire centrale, une image est stock&#233;e dans une structure
+de type <b>xvimage</b>:
+
+<p>
+
+<pre>
+struct xvimage {
+  char *name;
+  uint32_t row_size;                    /* Size of a row (number of columns) */
+  uint32_t col_size;                    /* Size of a column (number of rows) */
+  uint32_t depth_size;                  /* Number of planes (for 3d images) */
+  uint32_t time_size;                   /* Number of (2d or 3d) images */
+  uint32_t num_data_bands;	        /* Number of bands per data pixel,
+					   or number of bands per image, or
+					   dimension of vector data, or
+					   number of elements in a vector */
+  uint32_t data_storage_type;           /* storage type for disk data */
+  double xdim, ydim, zdim;              /* voxel dimensions in real world */
+  void * image_data;                    /* pointer on raw data */
+};
+</pre>
+
+<p>
+Les pixels sont rang&#233;s dans ce tableau dans l'ordre
+suivant:
+
+<p>
+
+<pre>
+pixel 0 de la ligne 1
+pixel 1 de la ligne 1
+...
+pixel row_size-1 de la ligne 1
+pixel 0 de la ligne 2
+...
+</pre>
+
+<p>
+        <H2><A NAME="tth_sEc3">
+3</A>&nbsp;&nbsp;L'acc&#232;s &#224; un pixel</H2>
+
+<p>
+Il faut d'abord r&#233;cuperer l'adresse du tableau contenant les pixels&nbsp;:
+
+<p>
+
+<pre>
+  ptrimage = (unsigned char *)(image-&#62;image_data);
+</pre>
+
+<p>
+Puis, pour acc&#233;der au i<sup>&#232;me</sup> pixel de la
+j<sup>&#232;me</sup> ligne&nbsp;:
+
+<p>
+
+<pre>
+  ptrimage[j * rs + i]
+</pre>
+
+<p>
+        <H2><A NAME="tth_sEc4">
+4</A>&nbsp;&nbsp;Un exemple</H2>
+
+<p>
+Voici pour r&#233;capituler une fonction <b>laddconst</b> qui 
+r&#233;hausse d'une valeur constante (sauf en cas de d&#233;passement
+de la valeur 255) le niveau de gris de tous les pixels d'une
+image (source&nbsp;: <tt>src/lib/laddconst.c</tt>, prototypes&nbsp;: 
+<tt>include/laddconst.h</tt>):
+
+<p>
+
+<pre>
+/* ajoute une constante a une image  - seuil si depassement */
+
+#include &lt;stdio.h&#62;
+#include &lt;stdlib.h&#62;
+#include &lt;laddconst.h&#62;
+#include &lt;mcimage.h&#62;
+
+/* ==================================== */
+int laddconst(struct xvimage * image, /* entree: l'image a traiter */
+                                      /* sortie: l'image modifiee  */
+              int constante           /* entree: la valeur a ajouter */
+             )
+/* ==================================== */
+{
+  int indexpixel;
+  unsigned char *ptrimage;
+  unsigned long newval;
+  int rs, cs, N;
+
+  rs = image-&#62;row_size;
+  cs = image-&#62;col_size;
+  N = rs * cs;
+  
+  /* ---------------------------------------------------------- */
+  /* calcul du resultat */
+  /* ---------------------------------------------------------- */
+  ptrimage = (unsigned char *)(image-&#62;image_data);
+  for (indexpixel = 0; indexpixel &lt; N; indexpixel++)
+  {
+    newval = (int)(ptrimage[indexpixel]) + constante;
+    if (newval &lt; NDG_MIN) newval = NDG_MIN;
+    if (newval &#62; NDG_MAX) newval = NDG_MAX;
+    ptrimage[indexpixel] = (unsigned char)newval;
+  }
+
+  return 1; /* tout s'est bien passe */
+}
+</pre>
+
+<p>
+Il faut bien s&#251;r un programme principal qui appelle cette fonction.
+Le r&#244;le de ce programme principal peut se limiter &#224; lire
+une image dans un fichier, appeler la fonction <b>laddconst</b>, et 
+stocker le r&#233;sultat dans un autre fichier.
+
+<p>
+        <H2><A NAME="tth_sEc5">
+5</A>&nbsp;&nbsp;La lecture de fichiers image</H2>
+
+<p>
+La lecture d'une image dans un fichier au format pgm se fait 
+par un appel &#224; la fonction <b>readimage</b>&nbsp;:
+
+<p>
+
+<pre>
+  struct xvimage * image;
+  char *filename;
+  ...
+  image = readimage(filename);  
+</pre>
+
+<p>
+Cette fonction retourne un pointeur NULL si la lecture ne s'est
+pas d&#233;roul&#233;e normalement. La fonction <b>readimage</b> est d&#233;finie
+dans <tt>src/lib/mcimage.c</tt> (prototype dans <tt>include/mcimage.h</tt>).
+
+<p>
+        <H2><A NAME="tth_sEc6">
+6</A>&nbsp;&nbsp;L'&#233;criture de fichiers image</H2>
+
+<p>
+L'&#233;criture d'une image dans un fichier au format <b>pgm</b> se fait 
+par un appel &#224; la fonction <b>writeimage</b>&nbsp;:
+
+<p>
+
+<pre>
+  struct xvimage * image;
+  char *filename;
+  ...
+  writeimage(image, filename);
+</pre>
+
+<p>
+La fonction <b>writeimage</b> est d&#233;finie
+dans <tt>src/lib/mcimage.c</tt> (prototype dans <tt>include/mcimage.h</tt>).
+
+<p>
+        <H2><A NAME="tth_sEc7">
+7</A>&nbsp;&nbsp;L'allocation d'une structure <b>xvimage</b></H2>
+
+<p>
+Lors d'un appel &#224; <b>readimage</b>, une structure <b>xvimage</b> est 
+automatiquement allou&#233;e. Pour allouer une structure
+<b>xvimage</b> sans appeler <b>readimage</b>, on peut utiliser la fonction
+<b>allocimage</b>&nbsp;:
+
+<p>
+
+<pre>
+  struct xvimage * image;
+  int rs, cs;
+  ...  
+  image = allocimage(NULL, rs, cs, 1, VFF_TYP_1_BYTE);
+</pre>
+
+<p>
+Pour lib&#233;rer la place allou&#233;e, on peut utiliser la fonction
+<b>freeimage</b>&nbsp;:
+
+<p>
+
+<pre>
+  freeimage(image);
+</pre>
+
+<p>
+Les fonctions <b>allocimage</b> et <b>freeimage</b> sont d&#233;finies
+dans <tt>src/lib/mcimage.c</tt> (prototypes dans <tt>include/mcimage.h</tt>).
+
+<p>
+        <H2><A NAME="tth_sEc8">
+8</A>&nbsp;&nbsp;Un exemple</H2>
+
+<p>
+Voici pour terminer un programme principal qui permet 
+d'appeler la fonction <b>laddconst</b> (source&nbsp;: <tt>src/com/addconst.c</tt>)&nbsp;:
+
+<p>
+
+<pre>
+/* appel de laddconst */
+
+#include &lt;stdio.h&#62;
+#include &lt;mcimage.h&#62;
+#include &lt;laddconst.h&#62;
+
+/* =============================================================== */
+int main(int argc, char **argv) 
+/* =============================================================== */
+{
+  struct xvimage * image1;
+  int constante;
+
+  if (argc != 4)
+  {
+    fprintf(stderr, "usage: %s in1.pgm constante out.pgm \n", argv[0]);
+    exit(0);
+  }
+
+  image1 = readimage(argv[1]);  
+  if (image1 == NULL)
+  {
+    fprintf(stderr, "addconst: readimage failed\n");
+    exit(0);
+  }
+  constante = atoi(argv[2]);
+
+  if (! laddconst(image1, constante))
+  {
+    fprintf(stderr, "addconst: function laddconst failed\n");
+    exit(0);
+  }
+
+  writeimage(image1, argv[3]);
+  freeimage(image1);
+
+} /* main */
+</pre>
+
+<p>
+        <H2><A NAME="tth_sEc9">
+9</A>&nbsp;&nbsp;Les repertoires</H2>
+
+<p>
+doc      : documentation<br>
+include  : les fichiers entete (.h)<br>
+obj      : les fichiers objet (.o)<br>
+bin      : les executables<br>
+src/com  : les sources des programmes destines a etre lances du shell<br>
+src/lib  : les sources des fonctions de base (mcimage) et de traitement
+
+<p>
+
+<p><hr><small>File translated from T<sub><font size="-1">E</font></sub>X by <a href="http://hutchinson.belmont.ma.us/tth/">T<sub><font size="-1">T</font></sub>H</a>, version 1.95.<br>On  5 Feb 1999, 16:49.</small>
+
+</BODY>
+</HTML>

@@ -1,0 +1,5 @@
+#!/bin/csh
+foreach file ($PINK/src/com/*.c $PINK/src/lib/*.c $PINK/include/*.h)
+  $PINK/tools/changetypes < $file > tmpfile
+  mv tmpfile $file
+end

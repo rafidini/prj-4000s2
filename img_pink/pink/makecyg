@@ -1,0 +1,9 @@
+#!/bin/sh
+cat cygwin.make general.make > makefile
+if ! test -d linux 
+then
+  mkdir linux
+  mkdir linux/bin
+  mkdir linux/obj
+fi
+make

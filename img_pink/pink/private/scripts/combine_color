@@ -1,0 +1,21 @@
+#!/bin/sh
+USAGE="Usage: $0 i1 i2 mask out"
+if [ $# -gt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+
+ppm2pgm $1 /tmp/_combine_color_r1 /tmp/_combine_color_g1 /tmp/_combine_color_b1
+ppm2pgm $2 /tmp/_combine_color_r2 /tmp/_combine_color_g2 /tmp/_combine_color_b2
+combine  /tmp/_combine_color_r1 /tmp/_combine_color_r2 $3 /tmp/_combine_color_r3
+combine  /tmp/_combine_color_g1 /tmp/_combine_color_g2 $3 /tmp/_combine_color_g3
+combine  /tmp/_combine_color_b1 /tmp/_combine_color_b2 $3 /tmp/_combine_color_b3
+pgm2ppm /tmp/_combine_color_r3 /tmp/_combine_color_g3 /tmp/_combine_color_b3 $4
+
+rm /tmp/_combine_color_??

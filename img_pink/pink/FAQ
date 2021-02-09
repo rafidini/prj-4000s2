@@ -1,0 +1,55 @@
+MC 11/01/2011
+system: linux mandriva 2010.2
+PB: install fltk 1.1.9: erreur compil
+SOL: install fltk 1.1.10: OK
+PB: install imview: pbs avec ImageMagick
+SOL: ./configure --without-magick
+
+MC 13/01/2011
+system: linux mandriva 2008.1
+PB: PYTHON_INCLUDE_DIR-NOTFOUND when running ccmake
+SOL: install package libpythonXXX-devel
+
+MC 17/01/2011
+system: linux ubuntu/wubi 10.10
+PB: (generic) missing XXX
+SOL: apt-file search XXX
+       YYY
+     sudo apt-get install YYY
+
+MC 11/02/2011
+system: linux ubuntu
+Liste des installations nécessaires :
+
+Pour vtk-tcl :
+sudo apt-get install doxygen
+sudo apt-get install tcl-dev
+sudo apt-get install tk-dev
+sudo apt-get install cmake-curses-gui
+sudo apt-get install libgl1-mesa-dev
+sudo apt-get install libosmesa6-dev
+
+Pour vtk-python :
+sudo apt-get install python-dev
+sudo apt-get install python-vtk
+sudo apt-get install python-numpy
+sudo apt-get install python-matplotlib
+sudo apt-get install libboost-python-dev
+sudo apt-get install libncurses-dev
+
+Pour imview :
+sudo apt-get install libxext-dev
+sudo apt-get install libjpeg-dev
+sudo apt-get install libtiff-dev
+sudo apt-get install libmagick-dev
+sudo apt-get install libxpm-dev
+sudo apt-get install autoconf
+
+MC 25/02/2011
+system:  linux mandriva 2010.2
+PB: lost operators (compiled ok but not accessible under Python)
+SOL: install boost 1.40 instead of 1.36
+download version from http://www.boost.org/users/history/
+cmake .
+make
+make install

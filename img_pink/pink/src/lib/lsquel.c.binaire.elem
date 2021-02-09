@@ -1,0 +1,141 @@
+/* operateur de calcul du squelette 2D binaire */
+/* simule 2 fifos avec une */
+/* Michel Couprie -  mars 1998 */
+
+#include <stdio.h>
+#include <mccodimage.h>
+#include <mcimage.h>
+#include <mcfifo.h>
+#include <mctopo.h>
+#include <mcindic.h>
+#include <lsquelbin.h>
+
+#define EN_FIFO       0
+#define PARANO
+/*
+#define DEBUG
+*/
+
+/* ==================================== */
+int lsquelbin(struct xvimage *image, int connex, int niseuil)
+/* ==================================== */
+{ 
+  int i;
+  int x;                       /* index muet de pixel */
+  int y;                       /* index muet (generalement un voisin de x) */
+  int z;                       /* index muet (generalement un voisin de y) */
+  int k;                       /* index muet */
+  int rs = rowsize(image);     /* taille ligne */
+  int cs = colsize(image);     /* taille colonne */
+  int N = rs * cs;             /* taille image */
+  unsigned char *F = UCHARDATA(image);      /* l'image de depart */
+  Fifo * FIFO;
+  int t, tb;
+  int iter;
+
+  if (depth(image) != 1) 
+  {
+    fprintf(stderr, "lsquelbin: cette version ne traite pas les images volumiques\n");
+    return 0;
+  }
+
+  IndicsInit(N);
+
+  FIFO = CreeFifoVide(N);
+
+  /* ================================================ */
+  /*                  DEBUT ALGO                      */
+  /* ================================================ */
+
+  /* ========================================================= */
+  /*   INITIALISATION FIFO: empile tous les points bord de l'objet non bord d'image */
+  /* ========================================================= */
+
+  for (x = 0; x < N; x++)
+  {
+    if ((F[x] != 0) && nonbord(x,rs,N) && nbvoisc8(F, x, rs, N))
+    {
+      FifoPush(FIFO, x); 
+      Set(x, EN_FIFO); 
+    }
+  } /* for x */
+  FifoPush(FIFO, -1); // marqueur de fin d'iteration 
+
+  /* ================================================ */
+  /*                  DEBUT SATURATION                */
+  /* ================================================ */
+
+  iter = 0;
+  if (connex == 4)
+  {
+    while (! (FifoVide(FIFO)))
+    {
+      x = FifoPop(FIFO);
+      if (x == -1)
+      {
+        iter ++;
+        FifoPush(FIFO, -1);
+        break; // sort du while
+      } // else
+      UnSet(x, EN_FIFO);
+      top4(F, x, rs, N, &t, &tb); 
+      if ((t == 1) && (tb == 1) && ((iter < niseuil) || !extremite4(F, x, rs, N)))
+      {
+        F[x] = 0;
+        for (k = 0; k < 8; k += 1)  /* parcourt les 8 voisins */
+        {
+          y = voisin(x, k, rs, N);
+          if ((y != -1) && (F[y]) && (!IsSet(y, EN_FIFO)) && nonbord(y,rs,N))
+          {
+            FifoPush(FIFO, y); 
+            Set(y, EN_FIFO); 
+          }
+        } /* for k */
+      } /* if ((t == 1) && (tb == 1) && !extremite8(F, x, rs, N)) */
+    } /* while (! (FifoVide(FIFO))) */
+  }
+  else
+  if (connex == 8)
+  {
+    while (! (FifoVide(FIFO)))
+    {
+      x = FifoPop(FIFO);
+      if (x == -1)
+      {
+        iter ++;
+        FifoPush(FIFO, -1);
+        break; // sort du while
+      } // else
+      UnSet(x, EN_FIFO);
+      top8(F, x, rs, N, &t, &tb); 
+      if ((t == 1) && (tb == 1) && ((iter < niseuil) || !extremite8(F, x, rs, N)))
+      {
+        F[x] = 0;
+        for (k = 0; k < 8; k += 1)  /* parcourt les 8 voisins */
+        {
+          y = voisin(x, k, rs, N);
+          if ((y != -1) && (F[y]) && (!IsSet(y, EN_FIFO)) && nonbord(y,rs,N))
+          {
+            FifoPush(FIFO, y); 
+            Set(y, EN_FIFO); 
+          }
+        } /* for k */
+      } /* if ((t == 1) && (tb == 1) && !extremite8(F, x, rs, N)) */
+    } /* while (! (FifoVide(FIFO))) */
+  }
+  else
+  {
+    fprintf(stderr, "lsquelbin: bad connexity: %d\n", connex);
+    return 0;
+  }
+
+
+  /* ================================================ */
+  /* UN PEU DE MENAGE                                 */
+  /* ================================================ */
+
+  IndicsTermine();
+  FifoTermine(FIFO);
+  return(1);
+}
+/* -library_code_end */

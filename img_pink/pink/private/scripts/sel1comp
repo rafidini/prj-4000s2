@@ -1,0 +1,17 @@
+#!/bin/sh
+USAGE="Usage: $0 in connex out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+label $1 $2 max /tmp/_$1.1
+long2byte /tmp/_$1.1 3 2 $3
+seuil $3 1 $3
+rm /tmp/_$1.1
+

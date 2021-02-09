@@ -1,0 +1,4 @@
+stretch     $1           _$1.show
+xv         _$1.show
+rm         _$1.show
+

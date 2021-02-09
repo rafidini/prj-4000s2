@@ -1,0 +1,4 @@
+cc filefilter2.c -o filefilter
+flex changetypes.lex
+cc lex.yy.c -lfl -o changetypes
+modfiles3

@@ -1,0 +1,12 @@
+bdd bdd2.alphacarrex.res > bdd2.alphacarrex.bdd ; bdd2c bdd2.alphacarrex.bdd > bdd2.alphacarrex.c
+bdd bdd2.alphacarrey.res > bdd2.alphacarrey.bdd ; bdd2c bdd2.alphacarrey.bdd > bdd2.alphacarrey.c
+bdd bdd2.alphacarrez.res > bdd2.alphacarrez.bdd ; bdd2c bdd2.alphacarrez.bdd > bdd2.alphacarrez.c
+bdd bdd2.alphainterx.res > bdd2.alphainterx.bdd ; bdd2c bdd2.alphainterx.bdd > bdd2.alphainterx.c
+bdd bdd2.alphaintery.res > bdd2.alphaintery.bdd ; bdd2c bdd2.alphaintery.bdd > bdd2.alphaintery.c
+bdd bdd2.alphainterz.res > bdd2.alphainterz.bdd ; bdd2c bdd2.alphainterz.bdd > bdd2.alphainterz.c
+bdd bdd2.betacarrex.res > bdd2.betacarrex.bdd ; bdd2c bdd2.betacarrex.bdd > bdd2.betacarrex.c
+bdd bdd2.betacarrey.res > bdd2.betacarrey.bdd ; bdd2c bdd2.betacarrey.bdd > bdd2.betacarrey.c
+bdd bdd2.betacarrez.res > bdd2.betacarrez.bdd ; bdd2c bdd2.betacarrez.bdd > bdd2.betacarrez.c
+bdd bdd2.betainterx.res > bdd2.betainterx.bdd ; bdd2c bdd2.betainterx.bdd > bdd2.betainterx.c
+bdd bdd2.betaintery.res > bdd2.betaintery.bdd ; bdd2c bdd2.betaintery.bdd > bdd2.betaintery.c
+bdd bdd2.betainterz.res > bdd2.betainterz.bdd ; bdd2c bdd2.betainterz.bdd > bdd2.betainterz.c

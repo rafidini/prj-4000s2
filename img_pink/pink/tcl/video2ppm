@@ -1,0 +1,90 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ # Video sequence converter
+ # Michel couprie - décembre 2005
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec tclsh $0 $1 $2 $3 $4
+
+ if {($argc != 1) && ($argc != 4)} { 
+   puts stderr "usage: video2ppm sequence \[skip nframes step\]"
+   exit 
+ }
+
+ set PINK "$env(PINK)"
+ source "$PINK/tcl/my_exec.tcl"
+ source "$PINK/tcl/my_write.tcl"
+
+ # ============================================================
+ # Global VARIABLES
+ # ============================================================
+
+ global VV
+ # infilename  : input file name
+ # skip : number of seconds skipped at the beginning
+ # ds : depth (number of frames)
+ # step : interval (in sec.) between saved frames
+
+ set VV(infilename) [lindex $argv 0]
+ if ![file exists $VV(infilename)] {
+   puts stderr "cannot find input file: $VV(infilename)"
+   exit
+ }
+ if {($argc == 4)} { 
+   set VV(skip) [lindex $argv 1]
+   set VV(ds) [lindex $argv 2]
+   set VV(step) [lindex $argv 3]
+ } else {
+   set VV(skip) 0
+   set VV(ds) 0
+   set VV(step) 0
+ }
+ set VV(ecount) 0
+
+ # ============================================================
+ # VIDEO to IMAGE CONVERSION
+ # ============================================================
+
+ if {($argc == 4)} { 
+   if {$VV(ds) <= 0} {
+     my_exec_q mplayer -nosound -vo pnm -ss $VV(skip) -sstep $VV(step) $VV(infilename)
+   } else {
+     my_exec_q mplayer -nosound -vo pnm -ss $VV(skip) -frames $VV(ds) -sstep $VV(step) $VV(infilename)
+   }
+ } else {
+   my_exec_q mplayer -nosound -vo pnm $VV(infilename)
+ }
+
+#option intéressante :
+#-vo gif89a

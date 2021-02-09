@@ -1,0 +1,19 @@
+#!/bin/sh
+USAGE="Usage: $0 in.pgm [out.vtk]"
+if [ $# -lt 1 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+mcube $1 0 1 0 vtk 6 _.vtk
+if [ $# -eq 2 ]
+then
+    render _.vtk &
+fi
+rm -f _.vtk
+

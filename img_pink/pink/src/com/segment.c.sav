@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <mccodimage.h>
+#include <mcimage.h>
+#include <lsegment.h>
+
+/* =============================================================== */
+int main(argc, argv) 
+/* =============================================================== */
+  int argc; char **argv; 
+{
+  struct xvimage * image;
+  int connex;
+  int mesure;
+  int seuil;
+  int maximise;
+  int trace;
+
+  if ((argc < 7) || (argc > 8) || ((argc == 8) && (strcmp(argv[6], "trace") != 0)))
+  {
+    fprintf(stderr, 
+    "usage: %s filein.pgm connex <surf|prof|vol> seuil <min|max> [trace] fileout.pgm\n", argv[0]);
+    exit(1);
+  }
+
+  if (strcmp(argv[3], "surf") == 0) mesure = SURFACE;
+  else if (strcmp(argv[3], "prof") == 0) mesure = PROFONDEUR;
+  else if (strcmp(argv[3], "vol") == 0) mesure = VOLUME;
+  else 
+  {
+    fprintf(stderr, 
+    "usage: %s filein.pgm connex <surf|prof|vol> seuil <min|max> [trace] fileout.pgm\n", argv[0]);
+    exit(1);
+  }
+
+  if (strcmp(argv[5], "min") == 0) maximise = 0;
+  else if (strcmp(argv[5], "max") == 0) maximise = 1;
+  else
+  {
+    fprintf(stderr, 
+    "usage: %s filein.pgm connex <surf|prof|vol> seuil <min|max> [trace] fileout.pgm\n", argv[0]);
+    exit(1);
+  }
+
+  connex = atoi(argv[2]);
+  seuil = atoi(argv[4]);
+
+  if (argc == 7)
+    trace = 0;
+  else
+    trace = 1;
+
+  image = readimage(argv[1]);
+  if (image == NULL)
+  {
+    fprintf(stderr, "segment: readimage failed\n");
+    exit(1);
+  }
+  
+  if (! lsegment(image, connex, mesure, seuil, maximise, trace))
+  {
+    fprintf(stderr, "segment: lsegment failed\n");
+    exit(1);
+  }
+  
+  if (argc == 7)
+    writeimage(image, argv[6]);
+  else
+    writeimage(image, argv[7]);
+
+  freeimage(image);
+
+  return 0;
+} /* main */
+
+
+

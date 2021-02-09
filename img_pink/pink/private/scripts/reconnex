@@ -1,0 +1,22 @@
+#!/bin/sh
+# $1 : image binaire (contours deconnectes = 255)
+# $2 : parametre pour le filtrage de distance (typiquement 5)
+# $3 : image resultat
+USAGE="Usage: $0 in.bin h out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+dist        $1         0        _$1.dist
+hmaxima     _$1.dist   $2       _$1.dist
+inverse     _$1.dist   _$1.dist
+minima      _$1.dist   8        _$1.min
+lpemeyer    _$1.dist   _$1.min  $3
+rm          _$1.dist
+rm          _$1.min

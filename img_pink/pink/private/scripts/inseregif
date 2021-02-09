@@ -1,0 +1,21 @@
+#!/bin/sh
+USAGE="Usage: $0 in1.gif in2.pgm x y out.gif"
+if [ $# -gt 5 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 5 ]
+then
+	echo $USAGE
+        exit
+fi
+convert     $1 _$1.ppm
+ppm2pgm     _$1.ppm _$1.r _$1.g _$1.b
+insere     _$1.r  $2  $3  $4  0 _$1.r
+insere     _$1.g  $2  $3  $4  0 _$1.g
+insere     _$1.b  $2  $3  $4  0 _$1.b
+pgm2ppm    _$1.r _$1.g _$1.b _$1.ppm
+convert    _$1.ppm $5
+rm         _$1.r _$1.g _$1.b _$1.ppm
+

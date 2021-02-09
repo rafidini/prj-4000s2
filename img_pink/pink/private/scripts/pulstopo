@@ -1,0 +1,45 @@
+#!/bin/sh
+USAGE="Usage: $0 in out"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+filtrepuits4    $1        2      asft_tmp
+filtrepics8    asft_tmp   2      _$1.res1
+
+filtrepuits4   _$1.res1   4      asft_tmp
+filtrepics8    asft_tmp   4      _$1.res2
+
+filtrepuits4   _$1.res2   6      asft_tmp
+filtrepics8    asft_tmp   6      _$1.res3
+
+filtrepuits4   _$1.res3   8      asft_tmp
+filtrepics8    asft_tmp   8      _$1.res4
+
+filtrepuits4   _$1.res4   10      asft_tmp
+filtrepics8    asft_tmp   10      _$1.res5
+
+filtrepuits4   _$1.res5   15      asft_tmp
+filtrepics8    asft_tmp   15      _$1.res6
+
+filtrepuits4   _$1.res6   20      asft_tmp
+filtrepics8    asft_tmp   20      _$1.res7
+
+filtrepuits4   _$1.res7   25      asft_tmp
+filtrepics8    asft_tmp   25      _$1.res8
+
+filtrepuits4   _$1.res8   30      asft_tmp
+filtrepics8    asft_tmp   30      _$1.res9
+
+filtrepuits4   _$1.res9   40      asft_tmp
+filtrepics8    asft_tmp   40      _$1.res10
+
+mv _$1.res10 $2
+
+

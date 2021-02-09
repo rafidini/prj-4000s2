@@ -1,0 +1,62 @@
+#!/bin/sh
+#-------------------------------------------------------
+# Experimentation d'une chaine de segmentation 
+# et de compression selective de documents
+# Michel Couprie - avril 1999 
+#-------------------------------------------------------
+USAGE="Usage: $0 in"
+if [ $# -gt 1 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 1 ]
+then
+	echo $USAGE
+        exit
+fi
+#-------------------------------------------------------
+# segmentation du texte
+#-------------------------------------------------------
+segment     $1 4 prof 80 max _seg
+recons      $1 _seg 4 _segr
+inverse     _segr _segri
+#-------------------------------------------------------
+# extraction des frontieres interne et externe 
+# et des points interieurs et exterieurs
+#-------------------------------------------------------
+border      _segr 4 _bordint
+border      _segri 8 _bordext
+min         _segr _bordint _int
+inverse     _bordext _bordexti
+min         _segri _bordexti _ext
+#-------------------------------------------------------
+# extraction du fond
+#-------------------------------------------------------
+max        _segr _bordext _maskbg
+propgeo    $1 _maskbg 4 randb _bg
+inverse    _maskbg _maskbg
+min        $1 _maskbg _maskbg
+max        _bg _maskbg _bg
+#-------------------------------------------------------
+# extraction des valeurs de gris des frontieres
+#-------------------------------------------------------
+max        _bordint _bordext _bordmask
+min        $1 _bordmask _bord
+#-------------------------------------------------------
+# compression sur 4, 8 ou 16 niveaux de gris
+#-------------------------------------------------------
+scale      _bord 0.0625 _bordc16
+scale      _bordc16 16 _bordc16
+scale      _bord 0.03125 _bordc8
+scale      _bordc8 32 _bordc8
+scale      _bord 0.015625 _bordc4
+scale      _bordc4 64 _bordc4
+#-------------------------------------------------------
+# reconstruction
+#-------------------------------------------------------
+min        _bg _ext _
+max        _ _bordc16 _recons16
+max        _ _bordc8 _recons8
+max        _ _bordc4 _recons4
+min        _bg _segri _recons

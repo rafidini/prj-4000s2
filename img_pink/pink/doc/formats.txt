@@ -1,0 +1,227 @@
+Pink file formats
+
+/* P4: raw binary ; P1: ascii binary (2D: standard ; 3D: extension Pink) NOT YET SUPPORTED */
+/* P5: raw byte ; P2: ascii gray (2D: standard ; 3D: extension Pink) */
+/* P6: raw byte rgb ; P3: ascii rgb (2D: standard ; 3D: NOT YET SUPPORTED) */
+/* P8: raw long 2d-3d (extension Pink) */
+/* P9: raw float 2d-3d (extension Pink) */
+/* PA: ascii float 2d-3d (extension Pink) */
+/* PB: ascii long 2d-3d (extension Pink) */
+/* PC: raw double 2d-3d (extension Pink) */
+/* PD: ascii double 2d-3d (extension Pink) */
+/* PE: raw single precision complex 2d-3d (extension Pink) */
+/* PF: ascii single precision complex 2d-3d (extension Pink) */
+
+Images
+
+FILE ::= 'P2' <COMMENT>* <DIMENSIONS> <VALMAX> <PIXEL>*
+COMMENT ::= '#' char* newline 
+DIMENSIONS ::= <RS> <CS> | <RS> <CS> <DS>
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+VALMAX ::= ascii_coded_integer
+PIXEL ::= ascii_coded_integer8
+
+FILE ::= 'P5' <COMMENT>* <DIMENSIONS> <VALMAX> <PIXEL>*
+COMMENT ::= '#' char* newline 
+DIMENSIONS ::= <RS> <CS> | <RS> <CS> <DS>
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+VALMAX ::= ascii_coded_integer
+PIXEL ::= binary_coded_integer8
+
+FILE ::= 'P8' <COMMENT>* <DIMENSIONS> <VALMAX> <PIXEL>*
+COMMENT ::= '#' char* newline 
+DIMENSIONS ::= <RS> <CS> | <RS> <CS> <DS>
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+VALMAX ::= ascii_coded_integer [unused]
+PIXEL ::= binary_coded_integer32
+
+FILE ::= 'P9' <COMMENT>* <DIMENSIONS> <VALMAX> <PIXEL>*
+COMMENT ::= '#' char* newline 
+DIMENSIONS ::= <RS> <CS> | <RS> <CS> <DS>
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+VALMAX ::= ascii_coded_integer [unused]
+PIXEL ::= binary_coded_float
+
+FILE ::= 'PA' <COMMENT>* <DIMENSIONS> <VALMAX> <PIXEL>*
+COMMENT ::= '#' char* newline 
+DIMENSIONS ::= <RS> <CS> | <RS> <CS> <DS>
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+VALMAX ::= ascii_coded_integer [unused]
+PIXEL ::= ascii_coded_float
+
+FILE ::= PB <COMMENT>* <DIMENSIONS> <VALMAX> <PIXEL>*
+COMMENT ::= '#' char* newline 
+DIMENSIONS ::= <RS> <CS> | <RS> <CS> <DS>
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+VALMAX ::= ascii_coded_integer [unused]
+PIXEL ::= ascii_coded_integer32
+
+FILE ::= 'PC' <COMMENT>* <DIMENSIONS> <VALMAX> <PIXEL>*
+COMMENT ::= '#' char* newline 
+DIMENSIONS ::= <RS> <CS> | <RS> <CS> <DS>
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+VALMAX ::= ascii_coded_integer [unused]
+PIXEL ::= binary_coded_double
+
+FILE ::= 'PD' <COMMENT>* <DIMENSIONS> <VALMAX> <PIXEL>*
+COMMENT ::= '#' char* newline 
+DIMENSIONS ::= <RS> <CS> | <RS> <CS> <DS>
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+VALMAX ::= ascii_coded_integer [unused]
+PIXEL ::= ascii_coded_double
+
+FILE ::= 'PE' <COMMENT>* <DIMENSIONS> <VALMAX> (<RE> <IM>)*
+COMMENT ::= '#' char* newline 
+DIMENSIONS ::= <RS> <CS> | <RS> <CS> <DS>
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+VALMAX ::= ascii_coded_integer [unused]
+RE ::= binary_coded_float
+IM ::= binary_coded_float
+
+FILE ::= 'PF' <COMMENT>* <DIMENSIONS> <VALMAX> (<RE> <IM>)*
+COMMENT ::= '#' char* newline 
+DIMENSIONS ::= <RS> <CS> | <RS> <CS> <DS>
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+VALMAX ::= ascii_coded_integer [unused]
+RE ::= ascii_coded_float
+IM ::= ascii_coded_float
+
+=======================================================
+
+Summary of list formats:
+<pre>  
+  e <n>       s <n>         b <n>         n <n>            B <n>            N <n>    
+  x1          x1 v1         x1 y1         x1 y1 v1         x1 y1 z1         x1 y1 z1 v1
+  x2    or    x2 v2   or    x2 y2   or    x2 y2 v2   or    x2 y2 z2   or    z2 x2 y2 v2
+  ...         ...           ...           ...              ...              ...
+  xn          xn vn         xn yn         xn yn vn         xn yn zn         z3 xn yn vn
+</pre>
+
+=======================================================
+
+Discrete curves
+
+=======================================================
+
+Splines
+
+2D case:
+
+c n+1 (where n+1 denotes the number of control points)
+x1 y1
+...
+xn+1 yn+1
+C0X1 C0Y1 C1X1 C1Y1 C2X1 C2Y1 C3X1 C3Y1
+...
+C0Xn C0Yn C1Xn C1Yn C2Xn C2Yn C3Xn C3Yn
+
+3D case:
+
+C n+1 (where n+1 denotes the number of control points)
+x1 y1 z1
+...
+xn+1 yn+1 zn+1
+C0X1 C0Y1 C0Z1 C1X1 C1Y1 C1Z1 C2X1 C2Y1 C2Z1 C3X1 C3Y1 C3Z1
+...
+C0Xn C0Yn C0Zn C1Xn C1Yn C1Zn C2Xn C2Yn C2Zn C3Xn C3Yn C3Zn
+
+The xi yi zi are the coordinates of the control points.
+The C?Xi C?Yi C?Zi are the coefficient of the polynoms of the ith cubic spline.
+The ith segment (starting with i=0) of the parametric curve P is then defined by:
+x(t) = C3Xi * t^3 + C2Xi * t^2 + C1Xi * t + C0Xi
+y(t) = C3Yi * t^3 + C2Yi * t^2 + C1Yi * t + C0Yi
+z(t) = C3Zi * t^3 + C2Zi * t^2 + C1Zi * t + C0Zi
+with t in [i,i+1]
+
+=======================================================
+
+Multiple splines in one file 
+
+2D case:
+
+d nb_splines
+nb_points_spline_1  x11 y11  x12 y12 ...
+nb_points_spline_2  x21 y21  x22 y22 ...
+nb_points_spline_3  x31 y31  x32 y32 ...
+...
+
+3D case:
+
+D nb_splines
+nb_points_spline_1  x11 y11 z11  x12 y12 z12 ...
+nb_points_spline_2  x21 y21 z21  x22 y22 z22 ...
+nb_points_spline_3  x31 y31 z31  x32 y32 z32 ...
+...
+
+=======================================================
+
+3D Scenes
+
+FILE ::= '3Dscene' <N> <OBJ>*
+OBJ ::= <LINE> | <CLOSEDLINE> | <SPLINE> | <CLOSEDSPLINE> | <POLYGON>
+LINE ::= 'line' <N> <POINT>*
+CLOSEDLINE ::= 'closedline' <N> <POINT>*
+SPLINE ::= 'spline' <N> <POINT>*
+CLOSEDSPLINE ::= 'closedspline' <N> <POINT>*
+POLYGON ::= 'polygon' <N> <POINT>*
+N ::= ascii_coded_integer
+POINT ::= ascii_coded_float ascii_coded_float ascii_coded_float
+
+=======================================================
+
+Curvilinear skeletons
+
+FILE ::= '2Dskel' | '3Dskel' <CONNEX> <NVERTEX> <NCELL> <RS> <CS> <DS> <ISOL> <END> <CURV> <JUNC>
+ISOL ::= 'isol' <N> <VERTEX>*
+END  ::= 'end'  <N> <VERTEX>*
+CURV ::= 'curv' <N> <VERTEX>*
+JUNC ::= 'junc' <N> <VERTEX>*
+VERTEX ::= 'vertex' <I> 'adj' <N> <I>* 'pts' <N> <POINT>*
+CONNEX ::= '4' | '8' | '6' | '18' | '26'
+NVERTEX ::= ascii_coded_integer
+NCELL ::= ascii_coded_integer
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+N ::= ascii_coded_integer
+I ::= ascii_coded_integer
+POINT ::= ascii_coded_integer
+
+Weighted curvilinear skeletons
+
+FILE ::= '2Dvskel' | '3Dvskel' <CONNEX> <NVERTEX> <NCELL> <RS> <CS> <DS> <ISOL> <END> <CURV> <JUNC>
+ISOL ::= 'isol' <N> <VERTEX>*
+END  ::= 'end'  <N> <VERTEX>*
+CURV ::= 'curv' <N> <VERTEX>*
+JUNC ::= 'junc' <N> <VERTEX>*
+VERTEX ::= 'vertex' <I> <VAL> 'adj' <N> <I>* 'pts' <N> <VPOINT>*
+CONNEX ::= '4' | '8' | '6' | '18' | '26'
+NVERTEX ::= ascii_coded_integer
+NCELL ::= ascii_coded_integer
+RS ::= ascii_coded_integer
+CS ::= ascii_coded_integer
+DS ::= ascii_coded_integer
+N ::= ascii_coded_integer
+I ::= ascii_coded_integer
+VPOINT ::= ascii_coded_integer ascii_coded_float
+VAL ::= ascii_coded_float

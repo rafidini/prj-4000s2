@@ -1,0 +1,74 @@
+#!/bin/sh
+USAGE="Usage: $0 in out"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+
+dilat $1 $PINK/masks/dir0_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir0_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+mv _hdf $2
+
+dilat $1 $PINK/masks/dir1_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir1_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+dilat $1 $PINK/masks/dir2_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir2_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+dilat $1 $PINK/masks/dir3_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir3_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+dilat $1 $PINK/masks/dir4_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir4_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+dilat $1 $PINK/masks/dir5_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir5_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+dilat $1 $PINK/masks/dir6_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir6_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+dilat $1 $PINK/masks/dir7_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir7_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+dilat $1 $PINK/masks/dir8_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir8_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+dilat $1 $PINK/masks/dir9_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir9_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+dilat $1 $PINK/masks/dir10_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir10_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+dilat $1 $PINK/masks/dir11_7x7.pgm 3 3 _hdf
+eros _hdf $PINK/masks/dir11_7x7.pgm 3 3 _hdf
+sub _hdf $1 _hdf
+max _hdf $2 $2
+
+rm _hdf

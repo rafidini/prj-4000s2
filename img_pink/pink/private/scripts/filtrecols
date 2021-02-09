@@ -1,0 +1,27 @@
+#!/bin/sh
+USAGE="Usage: $0 in taillemin taillecretes taillecols out"
+if [ $# -gt 5 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 5 ]
+then
+	echo $USAGE
+        exit
+fi
+# =========================================================
+# elimine les regions minimales de petite taille
+# =========================================================
+lthick        $1       null     4         $2      delta     _$1.tmp1 
+htkern       _$1.tmp1  $1       4         _$1.tmp2
+# =========================================================
+# amincit les cretes
+# =========================================================
+lthin        _$1.tmp2  null     4         $3      delta     _$1.tmp3 
+# =========================================================
+# releve les cols
+# =========================================================
+montecols    _$1.tmp3  4        $4        $5
+
+

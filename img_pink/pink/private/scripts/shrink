@@ -1,0 +1,21 @@
+#!/bin/sh
+USAGE="Usage: $0 in n out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+inverse $1 /tmp/_1 
+dist /tmp/_1 0 /tmp/_1 
+medialaxis $1 /tmp/_1 0 /tmp/_1 
+seuil /tmp/_1 1 /tmp/_2
+hthin $1 /tmp/_2 4 -1 delta /tmp/_2
+hthin /tmp/_2 null 4 $2 delta /tmp/_2
+min /tmp/_2 /tmp/_1 /tmp/_2
+medialaxis /tmp/_2 0 1 $3
+seuil $3 1 $3

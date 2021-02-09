@@ -1,0 +1,12 @@
+minima      $1         4 _$1.minima
+inverse    _$1.minima    _$1.minimainv
+min         $1           _$1.minimainv   _$1.minimamin
+add        _$1.minimamin _$1.minima      _$1.minima
+bw2rgb     _$1.minima    _$1.minimamin   _$1.minimamin    _$1.minima
+if [ $# -gt 1 ]
+then
+	xv   -geometry +$2+$3 -fixed      _$1.minima
+else
+	xv         _$1.minima
+fi
+rm         _$1.minima*

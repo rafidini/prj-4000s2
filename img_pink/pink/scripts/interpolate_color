@@ -1,0 +1,23 @@
+#!/bin/sh
+USAGE="Usage: $0 in1 in2 out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+
+ppm2pgm $1 /tmp/_r1 /tmp/_g1 /tmp/_b1
+ppm2pgm $2 /tmp/_r2 /tmp/_g2 /tmp/_b2
+interpolate_gray /tmp/_r1 /tmp/_r2 /tmp/_r3
+interpolate_gray /tmp/_g1 /tmp/_g2 /tmp/_g3
+interpolate_gray /tmp/_b1 /tmp/_b2 /tmp/_b3
+pgm2ppm /tmp/_r3 /tmp/_g3 /tmp/_b3 $3
+
+rm /tmp/_??
+
+

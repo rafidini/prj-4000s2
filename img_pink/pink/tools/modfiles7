@@ -1,0 +1,13 @@
+#!/bin/csh
+foreach file ($PINK/src/com/*.c)
+  filefilter7 $file toto
+  cat ../CeCill_header.txt toto > $file
+end
+foreach file ($PINK/src/lib/*.c)
+  filefilter7 $file toto
+  cat ../CeCill_header.txt toto > $file
+end
+foreach file ($PINK/src/lib/*.cxx)
+  filefilter7 $file toto
+  cat ../CeCill_header.txt toto > $file
+end

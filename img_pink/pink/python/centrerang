@@ -1,0 +1,36 @@
+#!/usr/bin/python
+import sys
+import os
+import re
+
+# centrerang[vois,r](X) = (X inter rang[vois,r](X)) union *rang[vois,r](X)
+#                       = (X inter rang[vois,r](X)) union rang[vois,1.0-r](X)
+
+# WARNING : *rang[vois,r](X) is not stricly equal to rang[vois,1.0-r](X)
+
+name = "centrerang"
+
+if (len(sys.argv) != 6) : 
+    print "usage: " + name + " in.pgm vois r1 r2 out.pgm"
+    sys.exit ()
+
+def my_exec_q(command, *args) :
+  s = command
+  for arg in args:
+    s = s+" "+str(arg)
+  os.system(s)
+
+infilename = sys.argv[1]
+vois = sys.argv[2]
+rank1 = int(sys.argv[3])
+rank2 = int(sys.argv[4])
+outfilename = sys.argv[5]
+tmpprefix = "/tmp/_"+name
+
+print(rank1," ",rank2)
+
+my_exec_q("filtrerang", infilename, vois, rank1, tmpprefix+"_0")
+my_exec_q("min", infilename, tmpprefix+"_0", tmpprefix+"_1")
+my_exec_q("filtrerang", infilename, vois, rank2, tmpprefix+"_2")
+my_exec_q("max", tmpprefix+"_1", tmpprefix+"_2", outfilename)
+#my_exec_q("rm", tmpprefix+"*")

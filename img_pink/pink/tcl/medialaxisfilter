@@ -1,0 +1,148 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+# 1. finds the parameter value to yield a given residual, 
+# expressed in proportion of the object's area
+# 2. launches the chosen medial axis method with this parameter value 
+
+#sh
+# The next line is executed by /bin/sh, but not Tcl \
+exec tclsh $0 $1 $2 $3 $4 $5
+
+set PINK "$env(PINK)"
+source [file join "$PINK" "tcl" "my_exec.tcl"]
+source [file join "$PINK" "tcl" "my_read.tcl"]
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%g" v1
+  close $input
+  return $v1
+}
+
+if {$argc != 4} { 
+  puts stderr "usage: medialaxisfilter.tcl in method residu out"
+  exit 
+}
+
+# globals
+set MEDIALAXISFILTER(infilename) [lindex $argv 0]
+set MEDIALAXISFILTER(method) [string index [lindex $argv 1] 0]
+set MEDIALAXISFILTER(residu) [lindex $argv 2]
+set MEDIALAXISFILTER(outfilename) [lindex $argv [expr $argc-1]]
+set MEDIALAXISFILTER(name) medialaxisfilter
+
+proc tmpfile {tmpname} {
+  global MEDIALAXISFILTER
+  return [file join "/tmp" "$MEDIALAXISFILTER(name)_$tmpname"]
+}
+
+foreach file [glob -nocomplain [tmpfile "*"]] {
+  catch {exec rm $file} result
+}
+
+my_exec cp $MEDIALAXISFILTER(infilename) [tmpfile k]
+
+if {($MEDIALAXISFILTER(method) != "i") &&
+    ($MEDIALAXISFILTER(method) != "l") &&
+    ($MEDIALAXISFILTER(method) != "o") &&
+    ($MEDIALAXISFILTER(method) != "m")
+   } {
+  puts stderr "bad value for parameter method: i|l|o|m expected"
+  exit 
+}
+
+proc evalparam {p} {
+  global MEDIALAXISFILTER
+  global PINK
+
+  if {$MEDIALAXISFILTER(method) == "i"} { 
+    my_exec $PINK/linux/bin/integermedialaxis [tmpfile k] $p [tmpfile m]
+  } elseif {$MEDIALAXISFILTER(method) == "l"} { 
+    if {![file exists [tmpfile ml] ]} {
+      my_exec_q $PINK/linux/bin/lambdamedialaxis [tmpfile k] [tmpfile ml] 
+    }
+    my_exec $PINK/linux/bin/seuil [tmpfile ml] $p [tmpfile m] 
+  } elseif {$MEDIALAXISFILTER(method) == "o"} { 
+    my_exec $PINK/scripts/ogniewicz1 [tmpfile k] $p
+    my_exec $PINK/linux/bin/drawlines [tmpfile v] /tmp/ogniewicz_temp [tmpfile m]
+  } elseif {$MEDIALAXISFILTER(method) == "m"} { 
+    my_exec_q falcaoskel [tmpfile k] $p 1
+    my_exec mv skel.pgm [tmpfile m]
+  } 
+  
+  my_exec $PINK/linux/bin/distc [tmpfile k] 3 [tmpfile "_d"]
+  my_exec $PINK/linux/bin/normalize [tmpfile m] 0 1 [tmpfile "_1"]
+  my_exec $PINK/linux/bin/mult [tmpfile "_1"] [tmpfile "_d"] [tmpfile "_d1"]
+  my_exec $PINK/linux/bin/redt [tmpfile "_d1"] [tmpfile "_rec"] 
+  my_exec $PINK/linux/bin/sub [tmpfile k] [tmpfile "_rec"] [tmpfile "_res"]
+  my_exec $PINK/linux/bin/area [tmpfile "_res"] [tmpfile "_res"]
+  set res [my_read_val [tmpfile  "_res"]]
+
+  return $res
+}
+
+my_exec $PINK/linux/bin/area [tmpfile k] [tmpfile "_res"]
+set objarea [my_read_val [tmpfile  "_res"]]
+set MEDIALAXISFILTER(residu) [expr $MEDIALAXISFILTER(residu) * $objarea]
+#puts "but residu = $MEDIALAXISFILTER(residu)"
+
+set param_min 1.0
+set res_min [evalparam $param_min]
+set param_maj 600.0
+set res_maj [evalparam $param_maj]
+set epsilon 0.0001
+
+while {([expr ($res_maj - $res_min)] > 1) && [expr ($param_maj - $param_min)] > $epsilon} {
+#  puts "$param_min $param_maj"
+  set param [expr ($param_min + $param_maj) / 2]
+
+  set res [evalparam $param]
+
+#  puts "residu = $res"
+  if {$res < $MEDIALAXISFILTER(residu)} {
+    set param_min $param
+    set res_min $res
+  } else {
+    set param_maj $param
+    set res_maj $res
+  }
+}
+
+#puts "param = $param"
+
+my_exec cp [tmpfile m] $MEDIALAXISFILTER(outfilename)

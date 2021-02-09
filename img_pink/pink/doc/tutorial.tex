@@ -1,0 +1,241 @@
+\documentstyle[]{article}
+
+\begin{document}
+
+\title{Pinkdev\\
+Kit de d\'eveloppement d'op\'erateurs pour le traitement d'images
+}
+
+\section{Introduction}
+
+Cet environnement a pour but de faciliter le d\'eveloppement
+de vos premiers op\'erateurs de traitement d'image. Il inclut 
+notamment des fonctions d'entr\'ee/sortie permettant de lire
+et d'\'ecrire des fichiers images en niveaux de gris au format 
+{\bf pgm} (Portable Gray Map, un format standard). Il propose \'egalement
+une structure de donn\'ees permettant la manipulation des pixels
+de l'image, une fois celle-ci charg\'ee en m\'emoire.
+
+Pour la visualisation des images, n'importe quel outil standard
+peut \^etre utilis\'e. Nous recommandons 
+particuli\`erement {\bf xv}, qui permet en outre la conversion 
+de formats de fichiers.
+
+\section{La structure xvimage}
+
+Une image est vue comme un tableau rectangulaire \`a deux 
+dimensions de {\it pixels} ou picture elements, 
+l'intensit\'e de chaque pixel (son niveau de gris) est cod\'e
+sur un octet (unsigned char - valeur entre 0 et 255).
+
+En m\'emoire centrale, une image est stock\'ee dans une structure
+de type {\bf xvimage}:
+
+\begin{verbatim}
+struct xvimage {
+  char *name;
+  uint32_t row_size;                    /* Size of a row (number of columns) */
+  uint32_t col_size;                    /* Size of a column (number of rows) */
+  uint32_t depth_size;                  /* Number of planes (for 3d images) */
+  uint32_t time_size;                   /* Number of (2d or 3d) images */
+  uint32_t num_data_bands;	        /* Number of bands per data pixel,
+					   or number of bands per image, or
+					   dimension of vector data, or
+					   number of elements in a vector */
+  uint32_t data_storage_type;           /* storage type for disk data */
+  double xdim, ydim, zdim;              /* voxel dimensions in real world */
+  void * image_data;                    /* pointer on raw data */
+};
+\end{verbatim}
+
+Les pixels sont rang\'es dans ce tableau dans l'ordre
+suivant:
+
+\begin{verbatim}
+pixel 0 de la ligne 1
+pixel 1 de la ligne 1
+...
+pixel row_size-1 de la ligne 1
+pixel 0 de la ligne 2
+...
+\end{verbatim}
+
+\section{L'acc\`es \`a un pixel}
+
+Il faut d'abord r\'ecuperer l'adresse du tableau contenant les pixels~:
+
+\begin{verbatim}
+  ptrimage = (unsigned char *)(image->image_data);
+\end{verbatim}
+
+Puis, pour acc\'eder au $i^{\mbox{\`eme}}$ pixel de la
+$j^{\mbox{\`eme}}$ ligne~:
+
+\begin{verbatim}
+  ptrimage[j * rs + i]
+\end{verbatim}
+
+\section{Un exemple}
+
+Voici pour r\'ecapituler une fonction {\bf laddconst} qui 
+r\'ehausse d'une valeur constante (sauf en cas de d\'epassement
+de la valeur 255) le niveau de gris de tous les pixels d'une
+image (source~: \verb|src/lib/laddconst.c|, prototypes~: 
+\verb|include/laddconst.h|):
+
+\begin{verbatim}
+/* ajoute une constante a une image  - seuil si depassement */
+/* Michel Couprie - janvier 1999 */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <laddconst.h>
+#include <mcimage.h>
+
+/* ==================================== */
+int laddconst(struct xvimage * image, /* entree: l'image a traiter */
+                                      /* sortie: l'image modifiee  */
+              int constante           /* entree: la valeur a ajouter */
+             )
+/* ==================================== */
+{
+  int indexpixel;
+  unsigned char *ptrimage;
+  unsigned long newval;
+  int rs, cs, N;
+
+  rs = image->row_size;
+  cs = image->col_size;
+  N = rs * cs;
+  
+  /* ---------------------------------------------------------- */
+  /* calcul du resultat */
+  /* ---------------------------------------------------------- */
+  ptrimage = (unsigned char *)(image->image_data);
+  for (indexpixel = 0; indexpixel < N; indexpixel++)
+  {
+    newval = (int)(ptrimage[indexpixel]) + constante;
+    if (newval < NDG_MIN) newval = NDG_MIN;
+    if (newval > NDG_MAX) newval = NDG_MAX;
+    ptrimage[indexpixel] = (unsigned char)newval;
+  }
+
+  return 1; /* tout s'est bien passe */
+}
+\end{verbatim}
+
+Il faut bien s\^ur un programme principal qui appelle cette fonction.
+Le r\^ole de ce programme principal peut se limiter \`a lire
+une image dans un fichier, appeler la fonction {\bf laddconst}, et 
+stocker le r\'esultat dans un autre fichier.
+
+\section{La lecture de fichiers image}
+
+La lecture d'une image dans un fichier au format pgm se fait 
+par un appel \`a la fonction {\bf readimage}~:
+
+\begin{verbatim}
+  struct xvimage * image;
+  char *filename;
+  ...
+  image = readimage(filename);  
+\end{verbatim}
+
+Cette fonction retourne un pointeur NULL si la lecture ne s'est
+pas d\'eroul\'ee normalement. La fonction {\bf readimage} est d\'efinie
+dans \verb|src/lib/mcimage.c| (prototype dans \verb|include/mcimage.h|).
+
+\section{L'\'ecriture de fichiers image}
+
+L'\'ecriture d'une image dans un fichier au format {\bf pgm} se fait 
+par un appel \`a la fonction {\bf writeimage}~:
+
+\begin{verbatim}
+  struct xvimage * image;
+  char *filename;
+  ...
+  writeimage(image, filename);
+\end{verbatim}
+
+La fonction {\bf writeimage} est d\'efinie
+dans \verb|src/lib/mcimage.c| (prototype dans \verb|include/mcimage.h|).
+
+\section{L'allocation d'une structure {\bf xvimage}}
+
+Lors d'un appel \`a {\bf readimage}, une structure {\bf xvimage} est 
+automatiquement allou\'ee. Pour allouer une structure
+{\bf xvimage} sans appeler {\bf readimage}, on peut utiliser la fonction
+{\bf allocimage}~:
+
+\begin{verbatim}
+  struct xvimage * image;
+  int rs, cs;
+  ...  
+  image = allocimage(NULL, rs, cs, 1, VFF_TYP_1_BYTE);
+\end{verbatim}
+
+Pour lib\'erer la place allou\'ee, on peut utiliser la fonction
+{\bf freeimage}~:
+
+\begin{verbatim}
+  freeimage(image);
+\end{verbatim}
+
+Les fonctions {\bf allocimage} et {\bf freeimage} sont d\'efinies
+dans \verb|src/lib/mcimage.c| (prototypes dans \verb|include/mcimage.h|).
+
+\section{Un exemple}
+
+Voici pour terminer un programme principal qui permet 
+d'appeler la fonction {\bf laddconst} (source~: \verb|src/com/addconst.c|)~:
+
+\begin{verbatim}
+/* appel de laddconst */
+
+#include <stdio.h>
+#include <mcimage.h>
+#include <laddconst.h>
+
+/* =============================================================== */
+int main(int argc, char **argv) 
+/* =============================================================== */
+{
+  struct xvimage * image1;
+  int constante;
+
+  if (argc != 4)
+  {
+    fprintf(stderr, "usage: %s in1.pgm constante out.pgm \n", argv[0]);
+    exit(0);
+  }
+
+  image1 = readimage(argv[1]);  
+  if (image1 == NULL)
+  {
+    fprintf(stderr, "addconst: readimage failed\n");
+    exit(0);
+  }
+  constante = atoi(argv[2]);
+
+  if (! laddconst(image1, constante))
+  {
+    fprintf(stderr, "addconst: function laddconst failed\n");
+    exit(0);
+  }
+
+  writeimage(image1, argv[3]);
+  freeimage(image1);
+
+} /* main */
+\end{verbatim}
+
+\section{Les repertoires}
+
+doc      : documentation\\
+include  : les fichiers entete (.h)\\
+obj      : les fichiers objet (.o)\\
+bin      : les executables\\
+src/com  : les sources des programmes destines a etre lances du shell\\
+src/lib  : les sources des fonctions de base (mcimage) et de traitement
+
+\end{document}

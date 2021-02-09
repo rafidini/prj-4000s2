@@ -1,0 +1,303 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec tclsh $0 $1 $2 $3
+
+ if {($argc != 3)} { 
+   puts stderr "usage: choy in nsteps out"
+   exit 
+ }
+
+set PINK "$env(PINK)"
+set MASKS "$env(PINK)/masks"
+source "$PINK/tcl/my_exec.tcl"
+
+global CHOY
+set CHOY(name) "choy"
+set CHOY(infilename) [lindex $argv 0]
+set CHOY(nsteps) [lindex $argv 1]
+set CHOY(outfilename) [lindex $argv 2]
+my_exec_q cp $CHOY(infilename) "/tmp/$CHOY(name)_t0" 
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%d %d" v1 v2
+  close $input
+  return $v2
+}
+
+# expanding templates
+#-----------------------------------
+# codage des templates : 
+# 0 = don't care
+# 1 = hit
+# 2 = miss
+
+my_exec_q rotse "$MASKS/CHOY1.pgm" 90 "/tmp/CHOY2"
+my_exec_q rotse "$MASKS/CHOY1.pgm" 180 "/tmp/CHOY3"
+my_exec_q rotse "$MASKS/CHOY1.pgm" 270 "/tmp/CHOY4"
+
+my_exec_q seuil "$MASKS/CHOY1.pgm" 1 2 "/tmp/CHOY1_h" 
+my_exec_q setorigin "/tmp/CHOY1_h" "$MASKS/CHOY1.pgm"
+my_exec_q seuil "$MASKS/CHOY1.pgm" 2 3 "/tmp/CHOY1_m" 
+my_exec_q setorigin "/tmp/CHOY1_m" "$MASKS/CHOY1.pgm"
+
+my_exec_q seuil "/tmp/CHOY2" 1 2 "/tmp/CHOY2_h" 
+my_exec_q setorigin "/tmp/CHOY2_h" "/tmp/CHOY2"
+my_exec_q seuil "/tmp/CHOY2" 2 3 "/tmp/CHOY2_m" 
+my_exec_q setorigin "/tmp/CHOY2_m" "/tmp/CHOY2"
+
+my_exec_q seuil "/tmp/CHOY3" 1 2 "/tmp/CHOY3_h" 
+my_exec_q setorigin "/tmp/CHOY3_h" "/tmp/CHOY3"
+my_exec_q seuil "/tmp/CHOY3" 2 3 "/tmp/CHOY3_m" 
+my_exec_q setorigin "/tmp/CHOY3_m" "/tmp/CHOY3"
+
+my_exec_q seuil "/tmp/CHOY4" 1 2 "/tmp/CHOY4_h" 
+my_exec_q setorigin "/tmp/CHOY4_h" "/tmp/CHOY4"
+my_exec_q seuil "/tmp/CHOY4" 2 3 "/tmp/CHOY4_m" 
+my_exec_q setorigin "/tmp/CHOY4_m" "/tmp/CHOY4"
+
+my_exec_q rotse "$MASKS/CHOY5.pgm" 90 "/tmp/CHOY6"
+my_exec_q rotse "$MASKS/CHOY5.pgm" 180 "/tmp/CHOY7"
+my_exec_q rotse "$MASKS/CHOY5.pgm" 270 "/tmp/CHOY8"
+
+my_exec_q seuil "$MASKS/CHOY5.pgm" 1 2 "/tmp/CHOY5_h" 
+my_exec_q setorigin "/tmp/CHOY5_h" "$MASKS/CHOY5.pgm"
+my_exec_q seuil "$MASKS/CHOY5.pgm" 2 3 "/tmp/CHOY5_m" 
+my_exec_q setorigin "/tmp/CHOY5_m" "$MASKS/CHOY5.pgm"
+
+my_exec_q seuil "/tmp/CHOY6" 1 2 "/tmp/CHOY6_h" 
+my_exec_q setorigin "/tmp/CHOY6_h" "/tmp/CHOY6"
+my_exec_q seuil "/tmp/CHOY6" 2 3 "/tmp/CHOY6_m" 
+my_exec_q setorigin "/tmp/CHOY6_m" "/tmp/CHOY6"
+
+my_exec_q seuil "/tmp/CHOY7" 1 2 "/tmp/CHOY7_h" 
+my_exec_q setorigin "/tmp/CHOY7_h" "/tmp/CHOY7"
+my_exec_q seuil "/tmp/CHOY7" 2 3 "/tmp/CHOY7_m" 
+my_exec_q setorigin "/tmp/CHOY7_m" "/tmp/CHOY7"
+
+my_exec_q seuil "/tmp/CHOY8" 1 2 "/tmp/CHOY8_h" 
+my_exec_q setorigin "/tmp/CHOY8_h" "/tmp/CHOY8"
+my_exec_q seuil "/tmp/CHOY8" 2 3 "/tmp/CHOY8_m" 
+my_exec_q setorigin "/tmp/CHOY8_m" "/tmp/CHOY8"
+
+my_exec_q rotse "$MASKS/CHOY9.pgm" 90 "/tmp/CHOY10"
+my_exec_q rotse "$MASKS/CHOY9.pgm" 180 "/tmp/CHOY11"
+my_exec_q rotse "$MASKS/CHOY9.pgm" 270 "/tmp/CHOY12"
+
+my_exec_q seuil "$MASKS/CHOY9.pgm" 1 2 "/tmp/CHOY9_h" 
+my_exec_q setorigin "/tmp/CHOY9_h" "$MASKS/CHOY9.pgm"
+my_exec_q seuil "$MASKS/CHOY9.pgm" 2 3 "/tmp/CHOY9_m" 
+my_exec_q setorigin "/tmp/CHOY9_m" "$MASKS/CHOY9.pgm"
+
+my_exec_q seuil "/tmp/CHOY10" 1 2 "/tmp/CHOY10_h" 
+my_exec_q setorigin "/tmp/CHOY10_h" "/tmp/CHOY10"
+my_exec_q seuil "/tmp/CHOY10" 2 3 "/tmp/CHOY10_m" 
+my_exec_q setorigin "/tmp/CHOY10_m" "/tmp/CHOY10"
+
+my_exec_q seuil "/tmp/CHOY11" 1 2 "/tmp/CHOY11_h" 
+my_exec_q setorigin "/tmp/CHOY11_h" "/tmp/CHOY11"
+my_exec_q seuil "/tmp/CHOY11" 2 3 "/tmp/CHOY11_m" 
+my_exec_q setorigin "/tmp/CHOY11_m" "/tmp/CHOY11"
+
+my_exec_q seuil "/tmp/CHOY12" 1 2 "/tmp/CHOY12_h" 
+my_exec_q setorigin "/tmp/CHOY12_h" "/tmp/CHOY12"
+my_exec_q seuil "/tmp/CHOY12" 2 3 "/tmp/CHOY12_m" 
+my_exec_q setorigin "/tmp/CHOY12_m" "/tmp/CHOY12"
+
+my_exec_q rotse "$MASKS/CHOY13.pgm" 90 "/tmp/CHOY14"
+my_exec_q rotse "$MASKS/CHOY13.pgm" 180 "/tmp/CHOY15"
+my_exec_q rotse "$MASKS/CHOY13.pgm" 270 "/tmp/CHOY16"
+
+my_exec_q seuil "$MASKS/CHOY13.pgm" 1 2 "/tmp/CHOY13_h" 
+my_exec_q setorigin "/tmp/CHOY13_h" "$MASKS/CHOY13.pgm"
+my_exec_q seuil "$MASKS/CHOY13.pgm" 2 3 "/tmp/CHOY13_m" 
+my_exec_q setorigin "/tmp/CHOY13_m" "$MASKS/CHOY13.pgm"
+
+my_exec_q seuil "/tmp/CHOY14" 1 2 "/tmp/CHOY14_h" 
+my_exec_q setorigin "/tmp/CHOY14_h" "/tmp/CHOY14"
+my_exec_q seuil "/tmp/CHOY14" 2 3 "/tmp/CHOY14_m" 
+my_exec_q setorigin "/tmp/CHOY14_m" "/tmp/CHOY14"
+
+my_exec_q seuil "/tmp/CHOY15" 1 2 "/tmp/CHOY15_h" 
+my_exec_q setorigin "/tmp/CHOY15_h" "/tmp/CHOY15"
+my_exec_q seuil "/tmp/CHOY15" 2 3 "/tmp/CHOY15_m" 
+my_exec_q setorigin "/tmp/CHOY15_m" "/tmp/CHOY15"
+
+my_exec_q seuil "/tmp/CHOY16" 1 2 "/tmp/CHOY16_h" 
+my_exec_q setorigin "/tmp/CHOY16_h" "/tmp/CHOY16"
+my_exec_q seuil "/tmp/CHOY16" 2 3 "/tmp/CHOY16_m" 
+my_exec_q setorigin "/tmp/CHOY16_m" "/tmp/CHOY16"
+
+
+my_exec_q seuil   "$MASKS/CHOYb1.pgm" 1 2 "/tmp/CHOYb1_h" 
+my_exec_q setorigin "/tmp/CHOYb1_h"     "$MASKS/CHOYb1.pgm"
+my_exec_q seuil   "$MASKS/CHOYb1.pgm" 2 3 "/tmp/CHOYb1_m" 
+my_exec_q setorigin "/tmp/CHOYb1_m"     "$MASKS/CHOYb1.pgm"
+
+my_exec_q seuil   "$MASKS/CHOYb2.pgm" 1 2 "/tmp/CHOYb2_h" 
+my_exec_q setorigin "/tmp/CHOYb2_h"     "$MASKS/CHOYb2.pgm"
+my_exec_q seuil   "$MASKS/CHOYb2.pgm" 2 3 "/tmp/CHOYb2_m" 
+my_exec_q setorigin "/tmp/CHOYb2_m"     "$MASKS/CHOYb2.pgm"
+
+my_exec_q seuil   "$MASKS/CHOYb3.pgm" 1 2 "/tmp/CHOYb3_h" 
+my_exec_q setorigin "/tmp/CHOYb3_h"     "$MASKS/CHOYb3.pgm"
+my_exec_q seuil   "$MASKS/CHOYb3.pgm" 2 3 "/tmp/CHOYb3_m" 
+my_exec_q setorigin "/tmp/CHOYb3_m"     "$MASKS/CHOYb3.pgm"
+
+my_exec_q seuil   "$MASKS/CHOYb7.pgm" 1 2 "/tmp/CHOYb7_h" 
+my_exec_q setorigin "/tmp/CHOYb7_h"     "$MASKS/CHOYb7.pgm"
+my_exec_q seuil   "$MASKS/CHOYb7.pgm" 2 3 "/tmp/CHOYb7_m" 
+my_exec_q setorigin "/tmp/CHOYb7_m"     "$MASKS/CHOYb7.pgm"
+
+my_exec_q seuil   "$MASKS/CHOYb8.pgm" 1 2 "/tmp/CHOYb8_h" 
+my_exec_q setorigin "/tmp/CHOYb8_h"     "$MASKS/CHOYb8.pgm"
+my_exec_q seuil   "$MASKS/CHOYb8.pgm" 2 3 "/tmp/CHOYb8_m" 
+my_exec_q setorigin "/tmp/CHOYb8_m"     "$MASKS/CHOYb8.pgm"
+
+my_exec_q seuil   "$MASKS/CHOYb11.pgm" 1 2 "/tmp/CHOYb11_h" 
+my_exec_q setorigin "/tmp/CHOYb11_h"     "$MASKS/CHOYb11.pgm"
+my_exec_q seuil   "$MASKS/CHOYb11.pgm" 2 3 "/tmp/CHOYb11_m" 
+my_exec_q setorigin "/tmp/CHOYb11_m"     "$MASKS/CHOYb11.pgm"
+
+my_exec_q seuil   "$MASKS/CHOYb21.pgm" 1 2 "/tmp/CHOYb21_h" 
+my_exec_q setorigin "/tmp/CHOYb21_h"     "$MASKS/CHOYb21.pgm"
+my_exec_q seuil   "$MASKS/CHOYb21.pgm" 2 3 "/tmp/CHOYb21_m" 
+my_exec_q setorigin "/tmp/CHOYb21_m"     "$MASKS/CHOYb21.pgm"
+
+my_exec_q seuil   "$MASKS/CHOYb22.pgm" 1 2 "/tmp/CHOYb22_h" 
+my_exec_q setorigin "/tmp/CHOYb22_h"     "$MASKS/CHOYb22.pgm"
+my_exec_q seuil   "$MASKS/CHOYb22.pgm" 2 3 "/tmp/CHOYb22_m" 
+my_exec_q setorigin "/tmp/CHOYb22_m"     "$MASKS/CHOYb22.pgm"
+
+my_exec_q seuil   "$MASKS/CHOYb23.pgm" 1 2 "/tmp/CHOYb23_h" 
+my_exec_q setorigin "/tmp/CHOYb23_h"     "$MASKS/CHOYb23.pgm"
+my_exec_q seuil   "$MASKS/CHOYb23.pgm" 2 3 "/tmp/CHOYb23_m" 
+my_exec_q setorigin "/tmp/CHOYb23_m"     "$MASKS/CHOYb23.pgm"
+
+my_exec_q seuil   "$MASKS/CHOYb24.pgm" 1 2 "/tmp/CHOYb24_h" 
+my_exec_q setorigin "/tmp/CHOYb24_h"     "$MASKS/CHOYb24.pgm"
+my_exec_q seuil   "$MASKS/CHOYb24.pgm" 2 3 "/tmp/CHOYb24_m" 
+my_exec_q setorigin "/tmp/CHOYb24_m"     "$MASKS/CHOYb24.pgm"
+
+# One thinning step
+#-----------------------------------
+proc one_step {} {
+    global CHOY
+    global MASKS
+    my_exec_q cp "/tmp/$CHOY(name)_t0" "/tmp/$CHOY(name)_t0_sav" 
+
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY1_h" "/tmp/CHOY1_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q mv "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY2_h" "/tmp/CHOY2_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY3_h" "/tmp/CHOY3_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY4_h" "/tmp/CHOY4_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY5_h" "/tmp/CHOY5_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY6_h" "/tmp/CHOY6_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY7_h" "/tmp/CHOY7_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY8_h" "/tmp/CHOY8_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY9_h" "/tmp/CHOY9_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY10_h" "/tmp/CHOY10_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY11_h" "/tmp/CHOY11_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY12_h" "/tmp/CHOY12_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY13_h" "/tmp/CHOY13_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY14_h" "/tmp/CHOY14_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY15_h" "/tmp/CHOY15_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOY16_h" "/tmp/CHOY16_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t1"
+
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOYb1_h" "/tmp/CHOYb1_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q mv "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t2"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOYb2_h" "/tmp/CHOYb2_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t2" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t2"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOYb3_h" "/tmp/CHOYb3_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t2" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t2"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOYb7_h" "/tmp/CHOYb7_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t2" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t2"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOYb8_h" "/tmp/CHOYb8_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t2" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t2"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOYb11_h" "/tmp/CHOYb11_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t2" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t2"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOYb21_h" "/tmp/CHOYb21_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t2" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t2"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOYb22_h" "/tmp/CHOYb22_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t2" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t2"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOYb23_h" "/tmp/CHOYb23_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t2" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t2"
+    my_exec_q hitormiss "/tmp/$CHOY(name)_t0" "/tmp/CHOYb24_h" "/tmp/CHOYb24_m" "/tmp/$CHOY(name)_t01"
+    my_exec_q max "/tmp/$CHOY(name)_t2" "/tmp/$CHOY(name)_t01" "/tmp/$CHOY(name)_t2"
+    
+    my_exec_q sub "/tmp/$CHOY(name)_t1" "/tmp/$CHOY(name)_t2" "/tmp/$CHOY(name)_t3"
+    my_exec_q sub "/tmp/$CHOY(name)_t0" "/tmp/$CHOY(name)_t3" "/tmp/$CHOY(name)_t0"
+
+    my_exec_q sub "/tmp/$CHOY(name)_t0_sav" "/tmp/$CHOY(name)_t0" "/tmp/$CHOY(name)_t0_sav"
+    my_exec_q area "/tmp/$CHOY(name)_t0_sav" "/tmp/$CHOY(name)_area"
+    set delta [my_read_val "/tmp/$CHOY(name)_area"]
+    return $delta
+}
+
+if {$CHOY(nsteps) != -1} {
+    for {set j 1} {$j<=$CHOY(nsteps)} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }
+} else {
+    set delta 1
+    for {set j 1} {$delta != 0} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }    
+}
+
+my_exec_q cp "/tmp/$CHOY(name)_t0" $CHOY(outfilename) 
+#my_exec_q rm "/tmp/$CHOY(name)_*" "/tmp/CHOY*" 

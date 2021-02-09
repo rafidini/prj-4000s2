@@ -1,0 +1,290 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+#sh
+# The next line is executed by /bin/sh, but not Tcl \
+exec vtk $0 $1
+
+# A renderer for label images - Michel Couprie 2011
+package require vtk
+package require vtkinteraction
+
+# set window title
+wm title . "Renderer for label images"
+
+# get input image file name as first argument
+if {$argc != 1} { 
+  puts stderr "usage: labelrender in.pgm"
+  exit 
+}
+
+set PINK "$env(PINK)"
+source "$PINK/tcl/my_exec.tcl"
+source "$PINK/tcl/my_write.tcl"
+source "$PINK/tcl/my_read.tcl"
+source "$PINK/tcl/my_dialog.tcl"
+
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%g" v1
+  close $input
+  return $v1
+}
+
+# ============================================================
+# GLOBAL VARIABLES
+# ============================================================
+
+ global RENDER
+ # infilename  : input file name
+ # rs : row size
+ # cs : col size
+ set RENDER(name) "labelrender"
+ set RENDER(infilename) [lindex $argv 0]
+ set RENDER(rs) 600
+ set RENDER(cs) 600
+ set RENDER(active) 0
+ set RENDER(opacity) 1.0
+ set RENDER(oldlabel) 0
+ set RENDER(label) 0
+ set RENDER(wireframe) 0
+ set RENDER(indexframe) 0
+ set RENDER(nblab) 1
+ set RENDER(nbmaxlab) 40
+ set RENDER(coordfilename) "_multirender_coord_camera"
+
+# white (for any label)
+ set RENDER_COL0 "1.0 1.0 1.0"
+# red (for highlighted label)
+ set RENDER_COL1 "1.0 0.0 0.0"
+
+# create renderer and window
+vtkRenderer ren1
+    ren1 SetViewport 0 0 1 1
+# fond gris clair:
+#    ren1 SetBackground 0.8 0.8 0.8
+# fond gris blanc:
+    ren1 SetBackground 1.0 1.0 1.0
+# pour un gradient: nouvelle version VTK ?
+#    ren1 SetBackground2 1 1 1
+# fond blanc:
+#    ren1 SetBackground 1 1 1
+# fond bleu:
+#    ren1 SetBackground 0 0 0.7
+vtkRenderWindow renWin
+    renWin AddRenderer ren1 
+vtkRenderWindowInteractor iren
+    iren SetRenderWindow renWin
+vtkInteractorStyleTrackballCamera style
+    iren SetInteractorStyle style
+
+# global image (all labels)
+my_exec_f threshold $RENDER(infilename) 1 /tmp/$RENDER(name)_0
+my_exec_f 3dkhalimskize /tmp/$RENDER(name)_0 h /tmp/$RENDER(name)_0.k
+my_exec_f 3dborder /tmp/$RENDER(name)_0.k /tmp/$RENDER(name)_0.k
+my_exec_f pgm2vtk /tmp/$RENDER(name)_0.k 1 /tmp/$RENDER(name)_0.vtk
+
+# counts the number of labels
+my_exec_f max1 $RENDER(infilename) "/tmp/$RENDER(name)_max1"
+set RENDER(nblab) [my_read_val "/tmp/$RENDER(name)_max1"]
+
+if {$RENDER(nblab) > $RENDER(nbmaxlab)} { 
+  puts stderr "labelrender: too many labels ($RENDER(nblab), max = $RENDER(nbmaxlab))"
+  exit 
+}
+
+# explodes the label image into several binary images
+for {set i 1} {$i <= $RENDER(nblab)} {incr i} {
+  my_exec_f selndg $RENDER(infilename) $i $i /tmp/$RENDER(name)_$i
+  my_exec_f threshold /tmp/$RENDER(name)_$i 1 /tmp/$RENDER(name)_$i
+  my_exec_f 3dkhalimskize /tmp/$RENDER(name)_$i h /tmp/$RENDER(name)_$i.k
+  my_exec_f 3dborder /tmp/$RENDER(name)_$i.k /tmp/$RENDER(name)_$i.k
+  my_exec_f pgm2vtk /tmp/$RENDER(name)_$i.k 1 /tmp/$RENDER(name)_$i.vtk
+}
+
+# CHARGEMENT DES DIFFERENTES GEOMETRIES
+for {set i 0} {$i <= $RENDER(nblab)} {incr i} {
+  vtkPolyDataReader obj$i
+  obj$i SetFileName "/tmp/$RENDER(name)_$i.vtk"
+  vtkPolyDataNormals normals$i
+  normals$i SetInput [obj$i GetOutput]
+  normals$i FlipNormalsOn
+  vtkPolyDataMapper objMapper$i
+  objMapper$i SetInput [normals$i GetOutput]
+  vtkActor objActor$i
+  objActor$i SetMapper objMapper$i
+  if {$i == 0} { 
+   eval [objActor$i GetProperty] SetColor $RENDER_COL0
+   eval [objActor$i GetProperty] SetOpacity 1
+  } else {
+   eval [objActor$i GetProperty] SetColor $RENDER_COL1
+   eval [objActor$i GetProperty] SetOpacity 0
+  }
+  ren1 AddProp objActor$i
+}
+
+set cam1 [ren1 GetActiveCamera]
+$cam1 ParallelProjectionOff
+
+ren1 ResetCamera
+
+# then binds rendering window to a tk widget
+set vtkw [vtkTkRenderWidget .ren \
+        -width $RENDER(rs) \
+        -height $RENDER(cs) \
+        -rw renWin]
+BindTkRenderWidget $vtkw
+
+# command zone
+frame .commands
+frame .buttons
+set quitbutton [button .buttons.quit -text "Quit" -command RENDER_bye\
+                -activebackground white]
+set savebutton [button .buttons.save -text "Save" -command RENDER_savepng\
+                -activebackground white]
+# what to do in case of window closing:
+wm protocol . WM_DELETE_WINDOW RENDER_bye
+bind . "q" RENDER_bye
+
+set wirebutton [checkbutton .commands.wire -text "Wireframe" \
+                -variable RENDER(wireframe) -command RENDER_togglewire\
+                -activebackground white]
+set setlabel [scale .commands.setlabel \
+        -from 0 -to $RENDER(nblab) -res 1 \
+        -orient horizontal \
+        -label "Label" \
+	-variable RENDER(label) \
+        -command RENDER_setLabel]
+
+set opacity [scale .commands.opacity \
+        -from 0.0 -to 1.0 -res 0.1 \
+        -orient horizontal \
+        -label "Opacity" \
+	-variable RENDER(opacity) \
+        -command RENDER_setOpacity]
+
+proc RENDER_setOpacity {opa} {
+  global RENDER
+  global objActor0
+  eval [objActor0 GetProperty] SetOpacity $opa
+  renWin Render
+  set RENDER(opacity) $opa
+}
+
+proc RENDER_setLabel {curlab} {
+  global RENDER
+  global objActor$RENDER(label)
+  global objActor$curlab
+  if {$RENDER(oldlabel) != 0} {   
+    eval [objActor$RENDER(oldlabel) GetProperty] SetOpacity 0
+  }
+  eval [objActor$curlab GetProperty] SetOpacity 1
+  renWin Render
+  set RENDER(oldlabel) $curlab
+  renWin Render
+}
+
+set saveposbutton [button .buttons.savepos -text "Savepos" -command RENDER_savepos\
+                -activebackground white]
+set setposbutton [button .buttons.setpos -text "SetPos" -command RENDER_setpos\
+                -activebackground white]
+
+pack $quitbutton -side right
+pack $savebutton -side left
+pack $saveposbutton -side left
+pack $setposbutton -side left
+pack $setlabel -side left
+pack $wirebutton -side left
+pack $opacity .buttons -side top -anchor nw -fill both
+pack $vtkw .commands -side top -fill both -expand yes
+
+proc RENDER_savepos {} {
+  global RENDER
+  global ren1
+  set pos [[ren1 GetActiveCamera] GetPosition]
+  set foc [[ren1 GetActiveCamera] GetFocalPoint]
+  set vup [[ren1 GetActiveCamera] GetViewUp]
+  set sca [[ren1 GetActiveCamera] GetParallelScale]
+  my_write_text $RENDER(coordfilename) "$pos\n$foc\n$vup\n$sca"
+}
+
+proc RENDER_setpos {} {
+  global RENDER
+  global ren1
+  global renWin
+  set pos [my_read_text $RENDER(coordfilename)]
+  [ren1 GetActiveCamera] SetPosition [lindex $pos 0] [lindex $pos 1] [lindex $pos 2]
+  [ren1 GetActiveCamera] SetFocalPoint [lindex $pos 3] [lindex $pos 4] [lindex $pos 5]
+  [ren1 GetActiveCamera] SetViewUp [lindex $pos 6] [lindex $pos 7] [lindex $pos 8]
+  [ren1 GetActiveCamera] SetParallelScale [lindex $pos 9]
+  renWin Render
+}
+
+proc RENDER_bye {} {
+  global RENDER
+  foreach file [glob -nocomplain "/tmp/$RENDER(name)_*"] {
+    exec rm -f $file
+  }
+  vtkCommand DeleteAllObjects
+  exit
+}
+
+proc RENDER_togglewire {} {
+  global RENDER
+  global RENDER_WFR
+  set a $RENDER(active)
+  global objActor$a
+  if ($RENDER(wireframe)) {
+    eval [objActor$a GetProperty] SetRepresentationToWireframe
+  } else {
+    eval [objActor$a GetProperty] SetRepresentationToSurface
+  }
+  renWin Render
+  set RENDER_WFR($a) $RENDER(wireframe)
+}
+
+proc RENDER_savepng {} {
+  global RENDER
+  set i $RENDER(indexframe)
+  set ii [format "%04d" $i]
+  vtkWindowToImageFilter w2i$i
+  w2i$i SetInput renWin
+
+  vtkPNGWriter writer$i
+  writer$i SetInput [w2i$i GetOutput]
+  writer$i SetFileName "render_save$ii.png"
+  writer$i Write
+  set RENDER(indexframe) [expr $i+1]
+}

@@ -1,0 +1,25 @@
+#!/bin/sh
+USAGE="Usage: $0 in param out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+medialaxis $1 0 0 /tmp/hccut_1
+seuil      /tmp/hccut_1 1 /tmp/hccut_2
+inverse    $1 /tmp/hccut_3
+dist       /tmp/hccut_3 0 /tmp/hccut_3
+long2byte  /tmp/hccut_3 /tmp/hccut_3
+max        /tmp/hccut_3 /tmp/hccut_2 /tmp/hccut_4
+byte2long  /tmp/hccut_4 /tmp/hccut_4
+squelubp   $1 /tmp/hccut_4 8 255 /tmp/hccut_5
+hthin      /tmp/hccut_5 null 4 $2 delta /tmp/hccut_5
+max        /tmp/hccut_3 /tmp/hccut_1 /tmp/hccut_6
+min        /tmp/hccut_5 /tmp/hccut_6 /tmp/hccut_6
+medialaxis /tmp/hccut_6 0 1 /tmp/hccut_7
+seuil      /tmp/hccut_7 1 $3

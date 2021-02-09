@@ -1,0 +1,14 @@
+#!/bin/sh
+USAGE="Usage: $0 in1.k in2.k"
+if [ $# -ne 2 ]
+then
+	echo $USAGE
+        exit
+fi
+3dborder $1 /tmp/visu1k_b
+pgm2vtk /tmp/visu1k_b 1 /tmp/visu1k_b.vtk
+pgm2vtk $2 1 /tmp/visu1k_1.vtk
+pgm2vtk $2 6 /tmp/visu1k_6.vtk
+pgm2vtk $2 7 /tmp/visu1k_7.vtk
+multirender /tmp/visu1k_b.vtk /tmp/visu1k_1.vtk /tmp/visu1k_6.vtk /tmp/visu1k_7.vtk
+rm -f /tmp/visu1k_*

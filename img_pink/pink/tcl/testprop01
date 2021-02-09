@@ -1,0 +1,102 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec tclsh $0 $1
+
+# for testing the property: 
+# the exact euclidean medial axis filtered by the criterion 
+# bisector(x) > 0
+# allows to reconstruct exactly the original object
+
+ if {($argc != 1)} { 
+   puts stderr "usage: testprop in"
+   exit 
+ }
+
+set PINK "$env(PINK)"
+source "$PINK/tcl/my_exec.tcl"
+
+# generates temp. file names
+#-----------------------------------
+proc tmpfile {tmpname} {
+  return [file join "/tmp" "_$tmpname"]
+}
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%d %d" v1 v2
+  close $input
+  return $v2
+}
+
+set in [lindex $argv 0]
+set verbose 0
+
+my_exec_q cp $in [tmpfile o]
+
+if {$verbose} { puts " distc $in 3 [tmpfile d]" }
+my_exec_q distc $in 3 [tmpfile d]
+
+if {$verbose} { puts " bisector [tmpfile d] $in [tmpfile b]" }
+my_exec_q bisector [tmpfile d] $in [tmpfile b]
+
+if {$verbose} { puts " seuil [tmpfile b] 0.00001 [tmpfile b]1" }
+my_exec_q seuil [tmpfile b] 0.00001 [tmpfile b1]
+
+if {$verbose} { puts " seuil2 [tmpfile b1] 0 1 1 1 [tmpfile b1]" }
+my_exec_q seuil2 [tmpfile b1] 0 1 1 1 [tmpfile b1]
+
+if {$verbose} { puts " medialaxis $in 3 [tmpfile m]" }
+my_exec_q medialaxis $in 3 [tmpfile m]
+
+if {$verbose} { puts " mult [tmpfile b1] [tmpfile m] [tmpfile m1]" }
+my_exec_q mult [tmpfile b1] [tmpfile m] [tmpfile m1]
+
+if {$verbose} { puts " redt [tmpfile m1] [tmpfile r]" }
+my_exec_q redt [tmpfile m1] [tmpfile r]
+
+if {$verbose} { puts " diffimages $in [tmpfile r] [tmpfile p]" }
+my_exec_q diffimages $in [tmpfile r] [tmpfile p]
+
+if {$verbose} { puts " area [tmpfile p] [tmpfile a]" }
+my_exec_q area [tmpfile p] [tmpfile a]
+
+set delta [my_read_val [tmpfile a]]
+puts "nb de points differents : $delta"
+

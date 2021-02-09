@@ -1,0 +1,19 @@
+#!/bin/sh
+USAGE="Usage: $0 in connex k out"
+if [ $# -gt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 4 ]
+then
+	echo $USAGE
+        exit
+fi
+medialaxis $1 $2 0 /tmp/_squel1_1
+seuil      /tmp/_squel1_1 1 /tmp/_squel1_1
+hthin      $1 /tmp/_squel1_1 $2 -1 delta /tmp/_squel1_2
+squelbin   /tmp/_squel1_2 $2 /tmp/_squel1_3
+ebarbe     /tmp/_squel1_3 $2 $3 $4
+rm         /tmp/_squel1_?
+

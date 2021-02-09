@@ -1,0 +1,67 @@
+1ere 1/2 journée : utilisation simple de Pink
+=============================================
+
+1.1 Démarrage rapide
+
+- lancer l'interpréteur
+- charger une image 2D
+- visualiser l'image
+- lancer un traitement simple (seuil)
+- sauver le résultat
+
+1.2 Première application
+
+- images MET, correction d'un gradient d'illumination
+- recherche d'une solution
+- opérateurs interactifs (manipulate)
+- écriture d'un script, paramétrage
+MC-TP5-2
+
+1.3 Exploration des principaux modules de Pink
+- operateurs arithmétiques
+- operateurs géométriques
+- digital topology
+MC-TP2-1
+
+2eme 1/2 journée : morphologie mathématique
+=============================================
+
+2.1 morpho binaire
+MC-TP1
+
+2.2 morpho en niveaux de gris
+
+  exemple : détection de carbures (top hat)
+MC-TP5-4
+
+2.3 ligne de partage des eaux et opérateurs connexes
+
+  exemple : segmentation de grains
+MC-TP6-1
+MC-TP6-2
+
+
+3eme et 4eme 1/2 journée : applications avancées 
+==================================================
+
+3.1 étude de cas 1 : corrosion des joints
+MC-TP5-1
+
+3.2 étude de cas 2 : traitement de grandes images avec effet de bord
+MC-TP7-2
+
+3.3 étude de cas 3 : segmentation 3D (mortier)
+MC-TP5-5
+MC-TP5-6
+
+_______________________________________
+S'il reste du temps : 
+
+correction drappé
+MC-TP5-3 
+
+opérateurs topologiques avancés
+MC-TP3
+MC-TP4
+
+

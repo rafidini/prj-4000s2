@@ -1,0 +1,16 @@
+#!/bin/sh
+USAGE="Usage: $0 in seuil out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+3dflowskeleton $1 2 _flsk1
+seuil _flsk1 $2 _flsk2
+3dseltopo _flsk2 2 3 0 100 0 100 _flsk3
+3dpardircollapse _flsk2 -1 _flsk3 $3

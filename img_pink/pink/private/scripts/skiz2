@@ -1,0 +1,19 @@
+#!/bin/sh
+# les composantes de in1 sont considerees comme un meme objet
+USAGE="Usage: $0 in1 in2 out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+max $1 $2 /tmp/_skiz0
+dist /tmp/_skiz0 0 /tmp/_skiz1
+long2byte /tmp/_skiz1 2 /tmp/_skiz1
+lpemeyer /tmp/_skiz1 4 $2 $1 $3
+changename   $3 "skiz2($1,$2)"
+#rm /tmp/_skiz?

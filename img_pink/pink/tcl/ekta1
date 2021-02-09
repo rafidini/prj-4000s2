@@ -1,0 +1,112 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+#!/bin/sh
+# The next line is executed by /bin/sh, but not Tcl \
+#exec tclsh $0 $1
+
+set EKTA1(name) "ekta1"
+
+if {($argc != 1)} { 
+  puts stderr "usage: $EKTA1(name) in.bmp"
+  exit 
+}
+
+set infilename [lindex $argv 0]
+
+if {![file exists $infilename]} {
+  puts stderr "$EKTA1(name): file $infilename not found"
+  exit 
+} 
+
+puts "processing file $infilename"
+set EKTA1(initial) 20
+set EKTA1(final) 150
+set EKTA1(step) 5
+set EKTA1(deltaniv) 10
+
+set PINK "$env(PINK)"
+set env(path) "$PINK/bin;$env(path)"
+source "$PINK/tcl/my_exec.tcl"
+source "$PINK/tcl/my_read.tcl"
+
+# LINUX:
+#set PORTABLE(tmpdir) "/Tmp"
+# WINDOWS:
+set PORTABLE(tmpdir) "C:\\Tmp"
+
+proc tmpfile {tmpname} {
+  global EKTA1
+  global PORTABLE
+  return [file join $PORTABLE(tmpdir) "$EKTA1(name)_$tmpname"]
+}
+
+my_exec_q bmp2pgm $infilename [tmpfile 6]
+
+# calcule l'indice de deformabilite
+#-----------------------------------
+proc compute_index {seuil} {
+  global EKTA1
+  my_exec_q seuil [tmpfile 6] $seuil [tmpfile 7]
+  #my_exec_q seuil infilename $seuil  [tmpfile 7]
+  my_exec_q seuil [tmpfile 6] [expr $seuil+$EKTA1(deltaniv)] [tmpfile 8]
+  #my_exec_q seuil infilename [expr $seuil+$EKTA1(deltaniv)][tmpfile 8]
+ 
+  my_exec_q sub [tmpfile 7] [tmpfile 8] [tmpfile 9]
+  my_exec_q pgm2list [tmpfile 9] b [tmpfile 10]
+  set nbpoints [lindex $readtext 1]
+  if {$nbpoints >= 20} {
+    my_exec_q ellipseparams [tmpfile 10] [tmpfile 11]
+    set readtext [my_read_text [tmpfile 11]]
+    set ge [lindex $readtext 2]
+    set pe [lindex $readtext 3]
+    set ind [expr ($ge - $pe) / ($ge + $pe)]
+    return $ind
+  } else {
+    return -1
+  }
+}
+
+puts "[expr $EKTA1(initial) - $EKTA1(step)] 0"
+for {set k $EKTA1(initial)} {$k < $EKTA1(final)} {incr k $EKTA1(step)} {
+  set i [compute_index $k]
+  puts "$k $i"
+}
+
+foreach file [glob -nocomplain [tmpfile "?"]] {
+  file delete -force $file
+}
+
+foreach file [glob -nocomplain [tmpfile "??"]] {
+  file delete -force $file
+}

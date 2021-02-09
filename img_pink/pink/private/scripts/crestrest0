@@ -1,0 +1,4 @@
+hthin $1 null 4 5 $1.th
+crestheight $1.th 4 $1.th.ch
+hthin $1.th.ch null 4 1 $1.th.ch
+crestsegment $1 4 $2 $3 $4 $1.cs

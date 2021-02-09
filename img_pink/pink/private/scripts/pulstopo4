@@ -1,0 +1,44 @@
+#!/bin/sh
+USAGE="Usage: $0 in out"
+if [ $# -gt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 2 ]
+then
+	echo $USAGE
+        exit
+fi
+openballnumrec        $1       11 asft_tmp
+pseudocloseballnumrec asft_tmp 11 _$1.res11
+
+openballnumrec        _$1.res11 12 asft_tmp
+pseudocloseballnumrec asft_tmp 12 _$1.res12
+
+openballnumrec        _$1.res12 13 asft_tmp
+pseudocloseballnumrec asft_tmp 13 _$1.res13
+
+openballnumrec        _$1.res13 14 asft_tmp
+pseudocloseballnumrec asft_tmp 14 _$1.res14
+
+openballnumrec        _$1.res14 15 asft_tmp
+pseudocloseballnumrec asft_tmp 15 _$1.res15
+
+openballnumrec        _$1.res15 16 asft_tmp
+pseudocloseballnumrec asft_tmp 16 _$1.res16
+
+openballnumrec        _$1.res16 17 asft_tmp
+pseudocloseballnumrec asft_tmp 17 _$1.res17
+
+openballnumrec        _$1.res17 18 asft_tmp
+pseudocloseballnumrec asft_tmp 18 _$1.res18
+
+openballnumrec        _$1.res18 19 asft_tmp
+pseudocloseballnumrec asft_tmp 19 _$1.res19
+
+openballnumrec        _$1.res19 20 asft_tmp
+pseudocloseballnumrec asft_tmp 20 _$1.res20
+
+rm -f asft_tmp
+mv _$1.res20 $2

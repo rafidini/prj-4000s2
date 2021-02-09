@@ -1,0 +1,338 @@
+/* operateur de calcul du noyau de homotopique par abaissement */
+/* methode: saturation avec politique 4-directionnelle 
+   utilise 4 fifo */
+/* Michel Couprie -  avril 1997 */
+
+#include <stdio.h>
+#include <mccodimage.h>
+#include <mcimage.h>
+#include <mcfifo.h>
+#include <mctopo.h>
+#include <mcindic.h>
+#ifdef PERF
+#include <mcchrono.h>
+#endif
+#include <llabelextrema.h>
+#include <lhtkern.h>
+
+#define EN_FIFO       0
+#define PARANO
+
+
+/*
+#define DEBUG
+*/
+
+/* ==================================== */
+int testabaisse4(unsigned char *SOURCE, int x, int rs, int N)
+/* ==================================== */
+{
+  int modifie = 0;
+
+#ifdef DEBUG
+printf("testabaisse : point %d (%d %d), val = %d\n", x, x%rs, x/rs, SOURCE[x]);
+#endif
+
+  while (pdestr4(SOURCE,x,rs,N)) 
+  { 
+    modifie = 1; 
+    SOURCE[x] = alpha8m(SOURCE,x,rs,N); /* alpha8m : sic */
+  }
+
+#ifdef DEBUG
+if (modifie) printf("========> ABAISSE : %d\n", SOURCE[x]);
+#endif
+
+  return modifie;
+} /* testabaisse4() */
+
+/* ==================================== */
+int testabaisse8(unsigned char *SOURCE, int x, int rs, int N)
+/* ==================================== */
+{
+  int modifie = 0;
+
+#ifdef DEBUG
+printf("testabaisse : point %d (%d %d), val = %d\n", x, x%rs, x/rs, SOURCE[x]);
+#endif
+
+  while (pdestr8(SOURCE,x,rs,N)) 
+  { 
+    modifie = 1; 
+    SOURCE[x] = alpha8m(SOURCE,x,rs,N); 
+  }
+
+#ifdef DEBUG
+if (modifie) printf("========> ABAISSE : %d\n", SOURCE[x]);
+#endif
+
+  return modifie;
+} /* testabaisse8() */
+
+/* ==================================== */
+void empilevoisins(int x, int rs, int N, Fifo *FIFOna, Fifo *FIFOea, Fifo *FIFOsa, Fifo *FIFOoa)
+/* ==================================== */
+{
+  int y;
+
+  y = voisin(x, NORD, rs, N);
+  if ((y!=-1) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+    { FifoPush(FIFOna, y); Set(y, EN_FIFO); }
+  y = voisin(x, NORD+1, rs, N);
+  if ((y!=-1) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+    { FifoPush(FIFOna, y); Set(y, EN_FIFO); }
+  y = voisin(x, EST, rs, N);
+  if ((y!=-1) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+    { FifoPush(FIFOea, y); Set(y, EN_FIFO); }
+  y = voisin(x, EST+1, rs, N);
+  if ((y!=-1) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+    { FifoPush(FIFOea, y); Set(y, EN_FIFO); }
+  y = voisin(x, SUD, rs, N);
+  if ((y!=-1) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+    { FifoPush(FIFOsa, y); Set(y, EN_FIFO); }
+  y = voisin(x, SUD+1, rs, N);
+  if ((y!=-1) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+    { FifoPush(FIFOsa, y); Set(y, EN_FIFO); }
+  y = voisin(x, OUEST, rs, N);
+  if ((y!=-1) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+    { FifoPush(FIFOoa, y); Set(y, EN_FIFO); }
+  y = voisin(x, OUEST+1, rs, N);
+  if ((y!=-1) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+    { FifoPush(FIFOoa, y); Set(y, EN_FIFO); }
+} /* empilevoisins() */
+
+/* ==================================== */
+int lhtkern(struct xvimage *image, int nitermax, int connex)
+/* ==================================== */
+{ 
+  int i;
+  int x;                       /* index muet de pixel */
+  int y;                       /* index muet (generalement un voisin de x) */
+  int z;                       /* index muet (generalement un voisin de y) */
+  int k;                       /* index muet */
+  int rs = rowsize(image);     /* taille ligne */
+  int cs = colsize(image);     /* taille colonne */
+  int N = rs * cs;             /* taille image */
+  unsigned char *SOURCE = UCHARDATA(image);      /* l'image de depart */
+  struct xvimage *lab;
+  unsigned long *M;            /* l'image d'etiquettes de composantes connexes */
+  int nminima;                 /* nombre de minima differents */
+  int niter;                   /* nombre d'iterations effectuees (4 directions) */
+  Fifo * FIFOn;
+  Fifo * FIFOs;
+  Fifo * FIFOe;
+  Fifo * FIFOo;
+  Fifo * FIFOna;
+  Fifo * FIFOsa;
+  Fifo * FIFOea;
+  Fifo * FIFOoa;
+  Fifo * FIFOtmp;
+#ifdef PERF
+  chrono chrono1;
+#endif
+
+  if (depth(image) != 1) 
+  {
+    fprintf(stderr, "lhtkern: cette version ne traite pas les images volumiques\n");
+    exit(0);
+  }
+
+#ifdef PERF  
+  start_chrono(&chrono1);  /* pour l'analyse de performances */
+#endif
+
+  lab = allocimage(NULL, rs, cs, 1, VFF_TYP_4_BYTE);
+  if (lab == NULL)
+  {   
+    fprintf(stderr, "lhtkern: allocimage failed\n");
+    return 0;
+  }
+  M = ULONGDATA(lab);
+
+  if (!llabelextrema(image, connex, LABMIN, lab, &nminima))
+  {   
+    fprintf(stderr, "lhtkern: llabelextrema failed\n");
+    return 0;
+  }
+
+  IndicsInit(N);
+
+  FIFOn = CreeFifoVide(N/2);
+  FIFOs = CreeFifoVide(N/2);
+  FIFOe = CreeFifoVide(N/2);
+  FIFOo = CreeFifoVide(N/2);
+  if ((FIFOn == NULL) && (FIFOs == NULL) && (FIFOe == NULL) && (FIFOo == NULL))
+  {   fprintf(stderr, "lhtkern() : CreeFifoVide failed\n");
+      return(0);
+  }
+
+  /* ================================================ */
+  /*                  DEBUT ALGO                      */
+  /* ================================================ */
+
+  /* ========================================================= */
+  /*   INITIALISATION DES FIFOs: empile les voisins des minima */
+  /* ========================================================= */
+
+  for (x = 0; x < N; x++)
+  {
+    if (M[x] != 0)                  /* le pixel appartient a un minimum */
+    {
+        y = voisin(x, NORD, rs, N);
+        if ((y!=-1) && (M[y]==0) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+          { FifoPush(FIFOn, y); Set(y, EN_FIFO); }
+        y = voisin(x, NORD+1, rs, N);
+        if ((y!=-1) && (M[y]==0) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+          { FifoPush(FIFOn, y); Set(y, EN_FIFO); }
+        y = voisin(x, EST, rs, N);
+        if ((y!=-1) && (M[y]==0) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+          { FifoPush(FIFOe, y); Set(y, EN_FIFO); }
+        y = voisin(x, EST+1, rs, N);
+        if ((y!=-1) && (M[y]==0) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+          { FifoPush(FIFOe, y); Set(y, EN_FIFO); }
+        y = voisin(x, SUD, rs, N);
+        if ((y!=-1) && (M[y]==0) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+          { FifoPush(FIFOs, y); Set(y, EN_FIFO); }
+        y = voisin(x, SUD+1, rs, N);
+        if ((y!=-1) && (M[y]==0) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+          { FifoPush(FIFOs, y); Set(y, EN_FIFO); }
+        y = voisin(x, OUEST, rs, N);
+        if ((y!=-1) && (M[y]==0) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+          { FifoPush(FIFOo, y); Set(y, EN_FIFO); }
+        y = voisin(x, OUEST+1, rs, N);
+        if ((y!=-1) && (M[y]==0) && !IsSet(y,EN_FIFO) && nonbord(y,rs,N))
+          { FifoPush(FIFOo, y); Set(y, EN_FIFO); }
+    } /* if (M[x] != 0) */
+  } /* for x */
+
+  freeimage(lab);
+
+  FIFOna = CreeFifoVide(N/4);
+  FIFOsa = CreeFifoVide(N/4);
+  FIFOea = CreeFifoVide(N/4);
+  FIFOoa = CreeFifoVide(N/4);
+  if ((FIFOna == NULL) && (FIFOsa == NULL) && (FIFOea == NULL) && (FIFOoa == NULL))
+  {   fprintf(stderr, "lhtkern() : CreeFifoVide failed\n");
+      return(0);
+  }
+
+  /* ================================================ */
+  /*                  DEBUT SATURATION                */
+  /* ================================================ */
+
+  niter = 0;
+
+if (connex == 4)
+{
+  while (! (FifoVide(FIFOn) && FifoVide(FIFOe) && FifoVide(FIFOs) && FifoVide(FIFOo))
+          && ((nitermax == 0) || (niter < nitermax))
+        )
+  {
+    niter++;
+    while (! FifoVide(FIFOn))
+    {
+      x = FifoPop(FIFOn);
+      UnSet(x, EN_FIFO);
+      if (testabaisse4(SOURCE, x, rs, N))         /* modifie l'image le cas echeant */
+        empilevoisins(x, rs, N, FIFOna, FIFOea, FIFOsa, FIFOoa);
+    } /* while (! FifoVide(FIFOn)) */
+
+    while (! FifoVide(FIFOs))
+    {
+      x = FifoPop(FIFOs);
+      UnSet(x, EN_FIFO);
+      if (testabaisse4(SOURCE, x, rs, N))         /* modifie l'image le cas echeant */
+        empilevoisins(x, rs, N, FIFOna, FIFOea, FIFOsa, FIFOoa);
+    } /* while (! FifoVide(FIFOs)) */
+
+    while (! FifoVide(FIFOe))
+    {
+      x = FifoPop(FIFOe);
+      UnSet(x, EN_FIFO);
+      if (testabaisse4(SOURCE, x, rs, N))         /* modifie l'image le cas echeant */
+        empilevoisins(x, rs, N, FIFOna, FIFOea, FIFOsa, FIFOoa);
+    } /* while (! FifoVide(FIFOe)) */
+
+    while (! FifoVide(FIFOo))
+    {
+      x = FifoPop(FIFOo);
+      UnSet(x, EN_FIFO);
+      if (testabaisse4(SOURCE, x, rs, N))         /* modifie l'image le cas echeant */
+        empilevoisins(x, rs, N, FIFOna, FIFOea, FIFOsa, FIFOoa);
+    } /* while (! FifoVide(FIFOo)) */
+
+    FIFOtmp = FIFOn; FIFOn = FIFOna; FIFOna = FIFOtmp;
+    FIFOtmp = FIFOe; FIFOe = FIFOea; FIFOea = FIFOtmp;
+    FIFOtmp = FIFOs; FIFOs = FIFOsa; FIFOsa = FIFOtmp;
+    FIFOtmp = FIFOo; FIFOo = FIFOoa; FIFOoa = FIFOtmp;
+
+  } /* while (! (FifoVide(FIFOn) && FifoVide(FIFOe) && FifoVide(FIFOs) && FifoVide(FIFOo))) */
+}
+
+else /* connex == 8 */
+
+{
+  while (! (FifoVide(FIFOn) && FifoVide(FIFOe) && FifoVide(FIFOs) && FifoVide(FIFOo))
+          && ((nitermax == 0) || (niter < nitermax))
+        )
+  {
+    niter++;
+    while (! FifoVide(FIFOn))
+    {
+      x = FifoPop(FIFOn);
+      UnSet(x, EN_FIFO);
+      if (testabaisse8(SOURCE, x, rs, N))         /* modifie l'image le cas echeant */
+        empilevoisins(x, rs, N, FIFOna, FIFOea, FIFOsa, FIFOoa);
+    } /* while (! FifoVide(FIFOn)) */
+
+    while (! FifoVide(FIFOs))
+    {
+      x = FifoPop(FIFOs);
+      UnSet(x, EN_FIFO);
+      if (testabaisse8(SOURCE, x, rs, N))         /* modifie l'image le cas echeant */
+        empilevoisins(x, rs, N, FIFOna, FIFOea, FIFOsa, FIFOoa);
+    } /* while (! FifoVide(FIFOs)) */
+
+    while (! FifoVide(FIFOe))
+    {
+      x = FifoPop(FIFOe);
+      UnSet(x, EN_FIFO);
+      if (testabaisse8(SOURCE, x, rs, N))         /* modifie l'image le cas echeant */
+        empilevoisins(x, rs, N, FIFOna, FIFOea, FIFOsa, FIFOoa);
+    } /* while (! FifoVide(FIFOe)) */
+
+    while (! FifoVide(FIFOo))
+    {
+      x = FifoPop(FIFOo);
+      UnSet(x, EN_FIFO);
+      if (testabaisse8(SOURCE, x, rs, N))         /* modifie l'image le cas echeant */
+        empilevoisins(x, rs, N, FIFOna, FIFOea, FIFOsa, FIFOoa);
+    } /* while (! FifoVide(FIFOo)) */
+
+    FIFOtmp = FIFOn; FIFOn = FIFOna; FIFOna = FIFOtmp;
+    FIFOtmp = FIFOe; FIFOe = FIFOea; FIFOea = FIFOtmp;
+    FIFOtmp = FIFOs; FIFOs = FIFOsa; FIFOsa = FIFOtmp;
+    FIFOtmp = FIFOo; FIFOo = FIFOoa; FIFOoa = FIFOtmp;
+
+  } /* while (! (FifoVide(FIFOn) && FifoVide(FIFOe) && FifoVide(FIFOs) && FifoVide(FIFOo))) */
+}
+  /* ================================================ */
+  /* UN PEU DE MENAGE                                 */
+  /* ================================================ */
+
+  IndicsTermine();
+  FifoTermine(FIFOn);
+  FifoTermine(FIFOe);
+  FifoTermine(FIFOs);
+  FifoTermine(FIFOo);
+  FifoTermine(FIFOna);
+  FifoTermine(FIFOea);
+  FifoTermine(FIFOsa);
+  FifoTermine(FIFOoa);
+
+#ifdef PERF
+  save_time(N, read_chrono(&chrono1), "lhtkern", image->name);    
+#endif
+  return(1);
+}
+/* -library_code_end */

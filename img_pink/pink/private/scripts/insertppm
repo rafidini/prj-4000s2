@@ -1,0 +1,21 @@
+#!/bin/sh
+USAGE="Usage: $0 in1.ppm in2.ppm x y out"
+if [ $# -gt 5 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 5 ]
+then
+	echo $USAGE
+        exit
+fi
+ppm2pgm     $1 _$1.r _$1.g _$1.b
+ppm2pgm     $2 _$2.r _$2.g _$2.b
+insert     _$1.r  _$2.r  $3  $4  0 _$1.r
+insert     _$1.g  _$2.g  $3  $4  0 _$1.g
+insert     _$1.b  _$2.b  $3  $4  0 _$1.b
+pgm2ppm    _$1.r _$1.g _$1.b $5
+rm         _$1.r _$1.g _$1.b
+rm         _$2.r _$2.g _$2.b
+

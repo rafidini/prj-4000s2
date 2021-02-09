@@ -1,0 +1,17 @@
+#!/bin/sh
+USAGE="Usage: $0 in n out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+hthick        $1      null       4         $2   _$1.tmp 
+deletewells  _$1.tmp    4        _$1.tmp
+htkern       _$1.tmp    $1       4         $3
+rm           _$1.tmp
+

@@ -1,0 +1,17 @@
+#!/bin/sh
+USAGE="Usage: $0 in n out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+lthin         $1       null     8         $2      delta     _$1.tmp1 
+htkernu      _$1.tmp1  $1       8         _$1.tmp2
+lthick       _$1.tmp2  null     4         $2      delta     _$1.tmp3 
+htkern       _$1.tmp3  _$1.tmp2 4         $3 
+

@@ -1,0 +1,5 @@
+#!/bin/csh
+foreach file ($PINK/include/*.h)
+  filefilter $file toto
+  cat cpphead toto cpptail > $file
+end

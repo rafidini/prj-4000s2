@@ -1,0 +1,260 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec tclsh $0 $1 $2 $3
+
+ if {($argc != 3)} { 
+   puts stderr "usage: hscp in nsteps out"
+   exit 
+ }
+
+set PINK "$env(PINK)"
+set MASKS "$env(PINK)/masks"
+source "$PINK/tcl/my_exec.tcl"
+
+global HSCP
+set HSCP(name) "hscp"
+set HSCP(infilename) [lindex $argv 0]
+set HSCP(nsteps) [lindex $argv 1]
+set HSCP(outfilename) [lindex $argv 2]
+my_exec_q cp $HSCP(infilename) "/tmp/$HSCP(name)_t0" 
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%d %d" v1 v2
+  close $input
+  return $v2
+}
+
+# expanding templates
+#-----------------------------------
+# codage des templates : 
+# 0 = don't care
+# 1 = hit
+# 2 = miss
+
+my_exec_q rotse "$MASKS/HSCP1.pgm" 90 "/tmp/HSCP2"
+my_exec_q rotse "$MASKS/HSCP1.pgm" 180 "/tmp/HSCP3"
+my_exec_q rotse "$MASKS/HSCP1.pgm" 270 "/tmp/HSCP4"
+
+my_exec_q seuil "$MASKS/HSCP1.pgm" 1 2 "/tmp/HSCP1_h" 
+my_exec_q setorigin "/tmp/HSCP1_h" "$MASKS/HSCP1.pgm"
+my_exec_q seuil "$MASKS/HSCP1.pgm" 2 3 "/tmp/HSCP1_m" 
+my_exec_q setorigin "/tmp/HSCP1_m" "$MASKS/HSCP1.pgm"
+
+my_exec_q seuil "/tmp/HSCP2" 1 2 "/tmp/HSCP2_h" 
+my_exec_q setorigin "/tmp/HSCP2_h" "/tmp/HSCP2"
+my_exec_q seuil "/tmp/HSCP2" 2 3 "/tmp/HSCP2_m" 
+my_exec_q setorigin "/tmp/HSCP2_m" "/tmp/HSCP2"
+
+my_exec_q seuil "/tmp/HSCP3" 1 2 "/tmp/HSCP3_h" 
+my_exec_q setorigin "/tmp/HSCP3_h" "/tmp/HSCP3"
+my_exec_q seuil "/tmp/HSCP3" 2 3 "/tmp/HSCP3_m" 
+my_exec_q setorigin "/tmp/HSCP3_m" "/tmp/HSCP3"
+
+my_exec_q seuil "/tmp/HSCP4" 1 2 "/tmp/HSCP4_h" 
+my_exec_q setorigin "/tmp/HSCP4_h" "/tmp/HSCP4"
+my_exec_q seuil "/tmp/HSCP4" 2 3 "/tmp/HSCP4_m" 
+my_exec_q setorigin "/tmp/HSCP4_m" "/tmp/HSCP4"
+
+my_exec_q rotse "$MASKS/HSCP5.pgm" 90 "/tmp/HSCP6"
+my_exec_q rotse "$MASKS/HSCP5.pgm" 180 "/tmp/HSCP7"
+my_exec_q rotse "$MASKS/HSCP5.pgm" 270 "/tmp/HSCP8"
+
+my_exec_q seuil "$MASKS/HSCP5.pgm" 1 2 "/tmp/HSCP5_h" 
+my_exec_q setorigin "/tmp/HSCP5_h" "$MASKS/HSCP5.pgm"
+my_exec_q seuil "$MASKS/HSCP5.pgm" 2 3 "/tmp/HSCP5_m" 
+my_exec_q setorigin "/tmp/HSCP5_m" "$MASKS/HSCP5.pgm"
+
+my_exec_q seuil "/tmp/HSCP6" 1 2 "/tmp/HSCP6_h" 
+my_exec_q setorigin "/tmp/HSCP6_h" "/tmp/HSCP6"
+my_exec_q seuil "/tmp/HSCP6" 2 3 "/tmp/HSCP6_m" 
+my_exec_q setorigin "/tmp/HSCP6_m" "/tmp/HSCP6"
+
+my_exec_q seuil "/tmp/HSCP7" 1 2 "/tmp/HSCP7_h" 
+my_exec_q setorigin "/tmp/HSCP7_h" "/tmp/HSCP7"
+my_exec_q seuil "/tmp/HSCP7" 2 3 "/tmp/HSCP7_m" 
+my_exec_q setorigin "/tmp/HSCP7_m" "/tmp/HSCP7"
+
+my_exec_q seuil "/tmp/HSCP8" 1 2 "/tmp/HSCP8_h" 
+my_exec_q setorigin "/tmp/HSCP8_h" "/tmp/HSCP8"
+my_exec_q seuil "/tmp/HSCP8" 2 3 "/tmp/HSCP8_m" 
+my_exec_q setorigin "/tmp/HSCP8_m" "/tmp/HSCP8"
+
+my_exec_q rotse "$MASKS/HSCP9.pgm" 90 "/tmp/HSCP10"
+my_exec_q rotse "$MASKS/HSCP9.pgm" 180 "/tmp/HSCP11"
+my_exec_q rotse "$MASKS/HSCP9.pgm" 270 "/tmp/HSCP12"
+
+my_exec_q seuil "$MASKS/HSCP9.pgm" 1 2 "/tmp/HSCP9_h" 
+my_exec_q setorigin "/tmp/HSCP9_h" "$MASKS/HSCP9.pgm"
+my_exec_q seuil "$MASKS/HSCP9.pgm" 2 3 "/tmp/HSCP9_m" 
+my_exec_q setorigin "/tmp/HSCP9_m" "$MASKS/HSCP9.pgm"
+
+my_exec_q seuil "/tmp/HSCP10" 1 2 "/tmp/HSCP10_h" 
+my_exec_q setorigin "/tmp/HSCP10_h" "/tmp/HSCP10"
+my_exec_q seuil "/tmp/HSCP10" 2 3 "/tmp/HSCP10_m" 
+my_exec_q setorigin "/tmp/HSCP10_m" "/tmp/HSCP10"
+
+my_exec_q seuil "/tmp/HSCP11" 1 2 "/tmp/HSCP11_h" 
+my_exec_q setorigin "/tmp/HSCP11_h" "/tmp/HSCP11"
+my_exec_q seuil "/tmp/HSCP11" 2 3 "/tmp/HSCP11_m" 
+my_exec_q setorigin "/tmp/HSCP11_m" "/tmp/HSCP11"
+
+my_exec_q seuil "/tmp/HSCP12" 1 2 "/tmp/HSCP12_h" 
+my_exec_q setorigin "/tmp/HSCP12_h" "/tmp/HSCP12"
+my_exec_q seuil "/tmp/HSCP12" 2 3 "/tmp/HSCP12_m" 
+my_exec_q setorigin "/tmp/HSCP12_m" "/tmp/HSCP12"
+
+my_exec_q rotse "$MASKS/HSCP13.pgm" 90 "/tmp/HSCP14"
+my_exec_q rotse "$MASKS/HSCP13.pgm" 180 "/tmp/HSCP15"
+my_exec_q rotse "$MASKS/HSCP13.pgm" 270 "/tmp/HSCP16"
+
+my_exec_q seuil "$MASKS/HSCP13.pgm" 1 2 "/tmp/HSCP13_h" 
+my_exec_q setorigin "/tmp/HSCP13_h" "$MASKS/HSCP13.pgm"
+my_exec_q seuil "$MASKS/HSCP13.pgm" 2 3 "/tmp/HSCP13_m" 
+my_exec_q setorigin "/tmp/HSCP13_m" "$MASKS/HSCP13.pgm"
+
+my_exec_q seuil "/tmp/HSCP14" 1 2 "/tmp/HSCP14_h" 
+my_exec_q setorigin "/tmp/HSCP14_h" "/tmp/HSCP14"
+my_exec_q seuil "/tmp/HSCP14" 2 3 "/tmp/HSCP14_m" 
+my_exec_q setorigin "/tmp/HSCP14_m" "/tmp/HSCP14"
+
+my_exec_q seuil "/tmp/HSCP15" 1 2 "/tmp/HSCP15_h" 
+my_exec_q setorigin "/tmp/HSCP15_h" "/tmp/HSCP15"
+my_exec_q seuil "/tmp/HSCP15" 2 3 "/tmp/HSCP15_m" 
+my_exec_q setorigin "/tmp/HSCP15_m" "/tmp/HSCP15"
+
+my_exec_q seuil "/tmp/HSCP16" 1 2 "/tmp/HSCP16_h" 
+my_exec_q setorigin "/tmp/HSCP16_h" "/tmp/HSCP16"
+my_exec_q seuil "/tmp/HSCP16" 2 3 "/tmp/HSCP16_m" 
+my_exec_q setorigin "/tmp/HSCP16_m" "/tmp/HSCP16"
+
+my_exec_q seuil   "$MASKS/HSCP17.pgm" 1 2 "/tmp/HSCP17_h" 
+my_exec_q setorigin "/tmp/HSCP17_h"     "$MASKS/HSCP17.pgm"
+my_exec_q seuil   "$MASKS/HSCP17.pgm" 2 3 "/tmp/HSCP17_m" 
+my_exec_q setorigin "/tmp/HSCP17_m"     "$MASKS/HSCP17.pgm"
+
+my_exec_q seuil   "$MASKS/HSCP18.pgm" 1 2 "/tmp/HSCP18_h" 
+my_exec_q setorigin "/tmp/HSCP18_h"     "$MASKS/HSCP18.pgm"
+my_exec_q seuil   "$MASKS/HSCP18.pgm" 2 3 "/tmp/HSCP18_m" 
+my_exec_q setorigin "/tmp/HSCP18_m"     "$MASKS/HSCP18.pgm"
+
+my_exec_q seuil   "$MASKS/HSCP19.pgm" 1 2 "/tmp/HSCP19_h" 
+my_exec_q setorigin "/tmp/HSCP19_h"     "$MASKS/HSCP19.pgm"
+my_exec_q seuil   "$MASKS/HSCP19.pgm" 2 3 "/tmp/HSCP19_m" 
+my_exec_q setorigin "/tmp/HSCP19_m"     "$MASKS/HSCP19.pgm"
+
+my_exec_q seuil   "$MASKS/HSCP20.pgm" 1 2 "/tmp/HSCP20_h" 
+my_exec_q setorigin "/tmp/HSCP20_h"     "$MASKS/HSCP20.pgm"
+my_exec_q seuil   "$MASKS/HSCP20.pgm" 2 3 "/tmp/HSCP20_m" 
+my_exec_q setorigin "/tmp/HSCP20_m"     "$MASKS/HSCP20.pgm"
+
+# One thinning step
+#-----------------------------------
+proc one_step {} {
+    global HSCP
+    global MASKS
+    my_exec_q cp "/tmp/$HSCP(name)_t0" "/tmp/$HSCP(name)_t0_sav" 
+
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP1_h" "/tmp/HSCP1_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q mv "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP2_h" "/tmp/HSCP2_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP3_h" "/tmp/HSCP3_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP4_h" "/tmp/HSCP4_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP5_h" "/tmp/HSCP5_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP6_h" "/tmp/HSCP6_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP7_h" "/tmp/HSCP7_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP8_h" "/tmp/HSCP8_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP9_h" "/tmp/HSCP9_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP10_h" "/tmp/HSCP10_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP11_h" "/tmp/HSCP11_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP12_h" "/tmp/HSCP12_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP13_h" "/tmp/HSCP13_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP14_h" "/tmp/HSCP14_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP15_h" "/tmp/HSCP15_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP16_h" "/tmp/HSCP16_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q max "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t1"
+
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP17_h" "/tmp/HSCP17_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t1" "/tmp/HSCP18_h" "/tmp/HSCP18_m" "/tmp/$HSCP(name)_t02"
+    my_exec_q min "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t02" "/tmp/$HSCP(name)_t2"
+    my_exec_q sub "/tmp/$HSCP(name)_t1" "/tmp/$HSCP(name)_t2" "/tmp/$HSCP(name)_t3"
+
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t0" "/tmp/HSCP19_h" "/tmp/HSCP19_m" "/tmp/$HSCP(name)_t01"
+    my_exec_q hitormiss "/tmp/$HSCP(name)_t1" "/tmp/HSCP20_h" "/tmp/HSCP20_m" "/tmp/$HSCP(name)_t02"
+    my_exec_q min "/tmp/$HSCP(name)_t01" "/tmp/$HSCP(name)_t02" "/tmp/$HSCP(name)_t2"
+    my_exec_q sub "/tmp/$HSCP(name)_t3" "/tmp/$HSCP(name)_t2" "/tmp/$HSCP(name)_t3"
+    
+    my_exec_q sub "/tmp/$HSCP(name)_t0" "/tmp/$HSCP(name)_t3" "/tmp/$HSCP(name)_t0"
+
+    my_exec_q sub "/tmp/$HSCP(name)_t0_sav" "/tmp/$HSCP(name)_t0" "/tmp/$HSCP(name)_t0_sav"
+    my_exec_q area "/tmp/$HSCP(name)_t0_sav" "/tmp/$HSCP(name)_area"
+    set delta [my_read_val "/tmp/$HSCP(name)_area"]
+    return $delta
+}
+
+if {$HSCP(nsteps) != -1} {
+    for {set j 1} {$j<=$HSCP(nsteps)} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }
+} else {
+    set delta 1
+    for {set j 1} {$delta != 0} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }    
+}
+
+my_exec_q cp "/tmp/$HSCP(name)_t0" $HSCP(outfilename) 
+#my_exec_q rm "/tmp/$HSCP(name)_*" "/tmp/HSCP*" 

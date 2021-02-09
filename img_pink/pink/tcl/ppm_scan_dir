@@ -1,0 +1,286 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+#!/bin/sh
+# The next line is executed by /bin/sh, but not Tcl \
+exec wish $0 $1 $2
+
+# set window title
+wm title . "PPM scan dir"
+
+set PINK "$env(PINK)"
+source [file join "$PINK" "tcl" "my_exec.tcl"]
+
+# globals
+set PPMSCANDIR(param1) 0
+set PPMSCANDIR(param2) 0
+set PPMSCANDIR(param3) 0
+set PPMSCANDIR(param4) 0
+set PPMSCANDIR(param5) 0
+set PPMSCANDIR(name) ppmscandir
+set PPMSCANDIR(filelist) [lsort [glob "*.ppm"]]
+set PPMSCANDIR(nfiles) 0
+foreach file $PPMSCANDIR(filelist) {
+    set PPMSCANDIRFILES($PPMSCANDIR(nfiles)) $file
+    incr PPMSCANDIR(nfiles)
+}
+set PPMSCANDIR(curnumfile) 0
+set PPMSCANDIR(curfilename) $PPMSCANDIRFILES(0)
+set PPMSCANDIR(savdir) "sav_png"
+
+if {$argc != 0} { 
+  puts stderr "usage: ppm_scan_dir"
+  exit 
+}
+
+proc tmpfile {tmpname} {
+  global PPMSCANDIR
+  return [file join "/tmp" "$PPMSCANDIR(name)_$tmpname"]
+}
+
+# create a frame for buttons
+frame .but -borderwidth 10
+pack .but -side left
+
+# create a frame for a row of buttons
+frame .but.row1 -borderwidth 5
+pack .but.row1 -side top
+
+# create the quit button
+button .but.row1.quit -text Quit -command ppmscandir_quit
+pack .but.row1.quit -side right
+
+# create the save button
+button .but.row1.save -text Save -command ppmscandir_save
+pack .but.row1.save -side right
+
+# create a frame for a second row of buttons
+frame .but.row2s -borderwidth 5
+pack .but.row2s -side top
+
+# create the incr/decr 1 (slow) buttons
+button .but.row2s.incr1 -text "+1s" -repeatdelay 500 -repeatinterval 100 -command ppmscandir_incr1
+button .but.row2s.decr1 -text "-1s" -repeatdelay 500 -repeatinterval 100 -command ppmscandir_decr1
+pack .but.row2s.incr1 -side right
+pack .but.row2s.decr1 -side right
+
+# create a frame for another row of buttons
+frame .but.row2 -borderwidth 5
+pack .but.row2 -side top
+
+# create the incr/decr 1 buttons
+button .but.row2.incr1 -text "+1" -repeatdelay 500 -repeatinterval 40 -command ppmscandir_incr1
+button .but.row2.decr1 -text "-1" -repeatdelay 500 -repeatinterval 40 -command ppmscandir_decr1
+pack .but.row2.incr1 -side right
+pack .but.row2.decr1 -side right
+
+# create a frame for another row of buttons
+frame .but.row3 -borderwidth 5
+pack .but.row3 -side top
+
+# create the incr/decr 10 buttons
+button .but.row3.incr10 -text "+10" -repeatdelay 500 -repeatinterval 80 -command ppmscandir_incr10
+button .but.row3.decr10 -text "-10" -repeatdelay 500 -repeatinterval 80 -command ppmscandir_decr10
+pack .but.row3.incr10 -side right
+pack .but.row3.decr10 -side right
+
+# create a frame for another row of buttons
+frame .but.row4 -borderwidth 5
+pack .but.row4 -side top
+
+# create the incr/decr 100 buttons
+button .but.row4.incr100 -text "+100" -repeatdelay 500 -repeatinterval 300 -command ppmscandir_incr100
+button .but.row4.decr100 -text "-100" -repeatdelay 500 -repeatinterval 300 -command ppmscandir_decr100
+pack .but.row4.incr100 -side right
+pack .but.row4.decr100 -side right
+
+# create a frame for another row of buttons
+frame .but.row5 -borderwidth 5
+pack .but.row5 -side top
+
+# create the incr/decr 1000 buttons
+button .but.row5.incr1000 -text "+1000" -repeatdelay 500 -repeatinterval 300 -command ppmscandir_incr1000
+button .but.row5.decr1000 -text "-1000" -repeatdelay 500 -repeatinterval 300 -command ppmscandir_decr1000
+pack .but.row5.incr1000 -side right
+pack .but.row5.decr1000 -side right
+
+label .filename -text $PPMSCANDIR(curfilename)
+pack .filename -side bottom -fill x
+
+# create an image and load contents from file 
+set PPMSCANDIR(im) [image create photo imname -file "$PPMSCANDIR(curfilename)"]
+
+# get image size
+set PPMSCANDIR(im_cs) [image height $PPMSCANDIR(im)]
+set PPMSCANDIR(im_rs) [image width $PPMSCANDIR(im)]
+
+# create a frame for the image
+frame .imframe -borderwidth 10 -width $PPMSCANDIR(im_rs) -height $PPMSCANDIR(im_cs)
+pack .imframe -side top
+
+# create canvas with the right sizes
+set c [canvas .imframe.c -width [expr $PPMSCANDIR(im_rs) - 2] -height [expr $PPMSCANDIR(im_cs) - 2]]
+pack .imframe.c -fill both -expand true
+
+# put the image into the canvas
+$c create image 1 1 -anchor nw  -image $PPMSCANDIR(im)
+
+# action associated to save widget
+proc ppmscandir_save {} {
+    global PPMSCANDIR
+    file mkdir $PPMSCANDIR(savdir)
+    set name [file rootname $PPMSCANDIR(curfilename)]    
+    my_exec convert "$name.ppm" "$PPMSCANDIR(savdir)/$name.png"
+}
+
+# action associated to incr1 widget
+proc ppmscandir_incr1 {} {
+    global PPMSCANDIR
+    global PPMSCANDIRFILES
+    global .filename
+    set n [expr $PPMSCANDIR(curnumfile) + 1]
+    if {$n < $PPMSCANDIR(nfiles)} {
+	set PPMSCANDIR(curnumfile) $n
+	set PPMSCANDIR(curfilename) $PPMSCANDIRFILES($n) 
+	$PPMSCANDIR(im) read $PPMSCANDIR(curfilename)
+	.filename configure -text $PPMSCANDIR(curfilename)
+    }
+}
+
+# action associated to decr1 widget
+proc ppmscandir_decr1 {} {
+    global PPMSCANDIR
+    global PPMSCANDIRFILES
+    global .filename
+    set n [expr $PPMSCANDIR(curnumfile) - 1]
+    if {$n >= 0} {
+	set PPMSCANDIR(curnumfile) $n
+	set PPMSCANDIR(curfilename) $PPMSCANDIRFILES($n) 
+	$PPMSCANDIR(im) read $PPMSCANDIR(curfilename)
+	.filename configure -text $PPMSCANDIR(curfilename)
+    }
+}
+
+# action associated to incr10 widget
+proc ppmscandir_incr10 {} {
+    global PPMSCANDIR
+    global PPMSCANDIRFILES
+    global .filename
+    set n [expr $PPMSCANDIR(curnumfile) + 10]
+    if {$n < $PPMSCANDIR(nfiles)} {
+	set PPMSCANDIR(curnumfile) $n
+	set PPMSCANDIR(curfilename) $PPMSCANDIRFILES($n) 
+	$PPMSCANDIR(im) read $PPMSCANDIR(curfilename)
+	.filename configure -text $PPMSCANDIR(curfilename)
+    }
+}
+
+# action associated to decr10 widget
+proc ppmscandir_decr10 {} {
+    global PPMSCANDIR
+    global PPMSCANDIRFILES
+    global .filename
+    set n [expr $PPMSCANDIR(curnumfile) - 10]
+    if {$n >= 0} {
+	set PPMSCANDIR(curnumfile) $n
+	set PPMSCANDIR(curfilename) $PPMSCANDIRFILES($n) 
+	$PPMSCANDIR(im) read $PPMSCANDIR(curfilename)
+	.filename configure -text $PPMSCANDIR(curfilename)
+    }
+}
+
+# action associated to incr100 widget
+proc ppmscandir_incr100 {} {
+    global PPMSCANDIR
+    global PPMSCANDIRFILES
+    global .filename
+    set n [expr $PPMSCANDIR(curnumfile) + 100]
+    if {$n < $PPMSCANDIR(nfiles)} {
+	set PPMSCANDIR(curnumfile) $n
+	set PPMSCANDIR(curfilename) $PPMSCANDIRFILES($n) 
+	$PPMSCANDIR(im) read $PPMSCANDIR(curfilename)
+	.filename configure -text $PPMSCANDIR(curfilename)
+    }
+}
+
+# action associated to decr100 widget
+proc ppmscandir_decr100 {} {
+    global PPMSCANDIR
+    global PPMSCANDIRFILES
+    global .filename
+    set n [expr $PPMSCANDIR(curnumfile) - 100]
+    if {$n >= 0} {
+	set PPMSCANDIR(curnumfile) $n
+	set PPMSCANDIR(curfilename) $PPMSCANDIRFILES($n) 
+	$PPMSCANDIR(im) read $PPMSCANDIR(curfilename)
+	.filename configure -text $PPMSCANDIR(curfilename)
+    }
+}
+
+# action associated to incr1000 widget
+proc ppmscandir_incr1000 {} {
+    global PPMSCANDIR
+    global PPMSCANDIRFILES
+    global .filename
+    set n [expr $PPMSCANDIR(curnumfile) + 1000]
+    if {$n < $PPMSCANDIR(nfiles)} {
+	set PPMSCANDIR(curnumfile) $n
+	set PPMSCANDIR(curfilename) $PPMSCANDIRFILES($n) 
+	$PPMSCANDIR(im) read $PPMSCANDIR(curfilename)
+	.filename configure -text $PPMSCANDIR(curfilename)
+    }
+}
+
+# action associated to decr1000 widget
+proc ppmscandir_decr1000 {} {
+    global PPMSCANDIR
+    global PPMSCANDIRFILES
+    global .filename
+    set n [expr $PPMSCANDIR(curnumfile) - 1000]
+    if {$n >= 0} {
+	set PPMSCANDIR(curnumfile) $n
+	set PPMSCANDIR(curfilename) $PPMSCANDIRFILES($n) 
+	$PPMSCANDIR(im) read $PPMSCANDIR(curfilename)
+	.filename configure -text $PPMSCANDIR(curfilename)
+    }
+}
+
+# action associated to quit widget
+proc ppmscandir_quit {} {
+    global PPMSCANDIR
+    exit
+}
+wm protocol . WM_DELETE_WINDOW ppmscandir_quit
+bind . "q" ppmscandir_quit
+bind . <Key-Right> ppmscandir_incr1
+bind . <Key-Left> ppmscandir_decr1

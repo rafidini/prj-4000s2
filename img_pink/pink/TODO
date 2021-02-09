@@ -1,0 +1,101 @@
+operateur xv
+randrgb
+
+cadre can be replaced with functions:
+I=pink.cpp.frame(pink.cpp.char_image(size))
+
+MC operateur watershed : inversion 
+
+MC operateur segmentheight : mode
+
+MC threshold remplace seuil
+
+MC finir de changer les types des rs, cs, ..., N, i, x... de int32_t en index_t
+
+MC génération de pages "man" à partir du code doxygen
+
+UJ use 
+ncftpput -R -u u50446271 -p ******** ftp.ujoimro.com pinkhtml html/*
+for uploading
+-----BEGIN PGP MESSAGE-----
+Version: GnuPG v2.0.12 (GNU/Linux)
+
+hQQOA/zEFlCUZX+WEA//TTUYrJs7j53MG3hnQmZX94TuMY/8Gt7JbpZ1UVAX/yyc
+9K+aqB24xvD6v965prV9IpUNBUPYCzWOQqA7QcYxNtZw1VbRrvnFci11k2J71ej+
+w4GO5YEJ06iAPeTz80Z9+SQGGB+Rg2puZFmppLUYwM6TobBni+CL6Xw9l7FiBsX6
+JILdodUlCzNruMeEMdVk4TTD7xekM70EOmsfs7W0lAfzNgr+fAYpLEolH3txf6ct
+BvCdjYOtqRPNHkZiNeReXv6lBCR32WifueIWqdPfBZ51RrL68YNVrHlmuIIzZPFn
+SMaikD5eT5aVBJ7+aW2489jAMsQiflb9Vzc/xN9JD/adl4ftjBTwRuF/SgJZdd+v
+IKKcjiWBQPj/7wNDpThcvwDK/yuVGtSlJm2C1PIv6mPsIw08z/KJWCODcG8YY/AC
+vmwsIq7KzvUHXlux3vx/WBX4emiAYZDmUsMEy92sSNRXhDKhKjygR5uXgHzyEdCh
+mmUlAesJFX8gVKTMRLe3d3G7uHdh0A8uH/OR/njPoO+CDJqvzt6fq1B3Qm7q3Op4
+Kuy/AmVIJZ18WRd093vxAYdYiAAkZrzk0s458i9LE3s7lQ5mGZ/tsleepJf29EAC
+Z4cSzgmNSdJsSJuRBtkYkteVxhhHvwGUdbwopWMaLqUllpLd7MGsZsbA8FXX3hoP
+/3MGU/s06qpLbKpgisLD13MgMSnLXEH4eh1uCWPRF0XjeI1wA8LW+WtYOdjGDMne
+J+HSrEWPyv0f0NTneZztvhr0TLdZ6bb170S6wkzrDsSfSVeaQC8g0z7UYu9zmhbq
+pRHPTgBS8/8v8GM4tbStQoPzDEiKRkMLssGjGl4t0tsnYwSFBVjQXgKGk/hNWJlp
+/J522fI1GnEzAyBMP28b0q9TXlTQz/Dq73+Id8Pp1cs5bnNQKKce5lpHbjQ3wF4W
+xx0igtShSWq7piIb9nTlvpEHJRDE0RN0Lyg0P+ajBSKQ+id8sK1Ha8509B2A5GPh
+lVlZREwKVIHEI4dnT5XgneUQRW5UfYQZ8ONKAIuOJcq8NyL2VnU1OzeBU+r2Ef6+
+k3uXsdRJjeH7QB+VemsmveSBAWkTd/CoGggWb3v5MbCbVlNs8e++kaxBNzWU2QQc
+e4K6hbxabzO8gGrDMhmpU+/EyqD9ODiMyAlfp136cZFTspVTxlGCpeI3RsblfAy/
+/mkrwji96c9LEbspu0FaFp3z8I0bH6mVszKY2aMZgvAZMrKwLH1alKtnEfIxeHF/
+KqEcj52meZEERDYC4BtkBvM1/sk12XhJEYWd003prv9CvrM7BFaj+P2t+niVQUmC
+1urMYFKpJzHnYCUwdTziBsGCQ9GEboT9zh5gayIa5PNR0oIBEU2X8dZo3oGBFx9z
+0DWJbQJ8cTFi5GNreCik7IUeseXdZEtkiwRKYs+yoaQK64mReBCWwZEzddrhvP/Y
+EMkF54+kjfBEgEf59GlchfASlQCggAk8/Pa64qfiJvdcYJxeE4zeU1EHtrdH6/SW
+Q0q6tZdZodZCVwkPt1qsL92oJlZV
+=vrOh
+-----END PGP MESSAGE-----
+
+
+
+For cde package
+
+help pink
+imview colormap; 
+imview surimp
+
+CDE Packages:
+#----------------------------------------
+Pink-bin_2011-03-??_CDE_r400.tar.bz2
+http://dl.free.fr/nd6eSb3PE
+#----------------------------------------
+Pink-src_2011-03-18_r412.tar.bz2
+http://dl.free.fr/ny2d2D7Xd
+to delete: http://dl.free.fr/rm.pl?h=ny2d2D7Xd&i=29118838&s=acYKb4qP5GDI2YrJeRFY9qIL6HgqjtZM
+#----------------------------------------
+Pink-bin_2011-03-18_CDE_r412.tar.bz2
+http://dl.free.fr/nofEgH5jA
+to delete: http://dl.free.fr/rm.pl?h=nofEgH5jA&i=29118892&s=MPsFLYc0B4zAgVJfgCvfNBytgGDFhNwD
+#----------------------------------------
+debian review
+http://dl.free.fr/k91sBhfTg
+to delete: http://dl.free.fr/rm.pl?h=k91sBhfTg&i=29301800&s=PM65He65pK85mlX3AjYKomTBxcQsW3TH
+#----------------------------------------
+EDF formation 2011-04-06
+CDE Package with proof
+http://dl.free.fr/vs76sG8Bt
+to delete: http://dl.free.fr/rm.pl?h=vs76sG8Bt&i=29658360&s=Jn1okFeJGXiXTZxgsZi6sCZZXyQTrjIx
+#----------------------------------------
+EDF formation 2011-04-06
+CDE Package with no-proof
+http://dl.free.fr/u2J3eckBA
+to delete: http://dl.free.fr/rm.pl?h=u2J3eckBA&i=29658411&s=qOzeZiMpySNa6ddx2mbREgGsEPb2MpvQ
+#----------------------------------------
+
+UJ There are new features
+make package
+make package_source
+and these generate an compressed package with the name 
+0.9.r${SVN_REVISION_NUMBER}
+it has to be discussed
+
+BUGS ARE TRANSFERED TO https://developer.berlios.de/bugs/?group_id=12429
+
+MC images short (read, convert, arith, seuil...)
+
+MC structure en mémoire pour les splines
+
+
+# LuM end of file

@@ -1,0 +1,373 @@
+# Copyright ESIEE (2009) 
+#
+# m.couprie@esiee.fr
+#
+# This software is an image processing library whose purpose is to be
+# used primarily for research and teaching.
+#
+# This software is governed by the CeCILL  license under French law and
+# abiding by the rules of distribution of free software. You can  use, 
+# modify and/ or redistribute the software under the terms of the CeCILL
+# license as circulated by CEA, CNRS and INRIA at the following URL
+# "http://www.cecill.info". 
+#
+# As a counterpart to the access to the source code and  rights to copy,
+# modify and redistribute granted by the license, users are provided only
+# with a limited warranty  and the software's author,  the holder of the
+# economic rights,  and the successive licensors  have only  limited
+# liability. 
+#
+# In this respect, the user's attention is drawn to the risks associated
+# with loading,  using,  modifying and/or developing or reproducing the
+# software by the user in light of its specific status of free software,
+# that may mean  that it is complicated to manipulate,  and  that  also
+# therefore means  that it is reserved for developers  and  experienced
+# professionals having in-depth computer knowledge. Users are therefore
+# encouraged to load and test the software's suitability as regards their
+# requirements in conditions enabling the security of their systems and/or 
+# data to be ensured and,  more generally, to use and operate it in the 
+# same conditions as regards security. 
+#
+# The fact that you are presently reading this means that you have had
+# knowledge of the CeCILL license and that you accept its terms.
+#
+ #sh
+ # The next line is executed by /bin/sh, but not Tcl \
+ exec tclsh $0 $1 $2 $3
+
+# Jand and Chin : "One-pass parallel thinning: analysis, properties
+# and quantitative evaluation" PAMI 1992 
+
+ if {($argc != 3)} { 
+   puts stderr "usage: jang in nsteps out"
+   exit 
+ }
+
+set PINK "$env(PINK)"
+set MASKS "$env(PINK)/masks"
+source "$PINK/tcl/my_exec.tcl"
+
+global JANG
+set JANG(name) "jang"
+set JANG(infilename) [lindex $argv 0]
+set JANG(nsteps) [lindex $argv 1]
+set JANG(outfilename) [lindex $argv 2]
+my_exec_q cp $JANG(infilename) "/tmp/$JANG(name)_t0" 
+
+# reads a file
+#-----------------------------------
+proc my_read_val {filename} {
+  set input [open $filename]
+  set tag [gets $input]
+  set line [gets $input]
+  scan $line "%d %d" v1 v2
+  close $input
+  return $v2
+}
+
+# expanding templates
+#-----------------------------------
+# codage des templates : 
+# 0 = don't care
+# 1 = hit
+# 2 = miss
+
+my_exec_q rotse "$MASKS/JANG1.pgm" 90 "/tmp/JANG2"
+my_exec_q rotse "$MASKS/JANG1.pgm" 180 "/tmp/JANG3"
+my_exec_q rotse "$MASKS/JANG1.pgm" 270 "/tmp/JANG4"
+
+my_exec_q seuil "$MASKS/JANG1.pgm" 1 2 "/tmp/JANG1_h" 
+my_exec_q setorigin "/tmp/JANG1_h" "$MASKS/JANG1.pgm"
+my_exec_q seuil "$MASKS/JANG1.pgm" 2 3 "/tmp/JANG1_m" 
+my_exec_q setorigin "/tmp/JANG1_m" "$MASKS/JANG1.pgm"
+
+my_exec_q seuil "/tmp/JANG2" 1 2 "/tmp/JANG2_h" 
+my_exec_q setorigin "/tmp/JANG2_h" "/tmp/JANG2"
+my_exec_q seuil "/tmp/JANG2" 2 3 "/tmp/JANG2_m" 
+my_exec_q setorigin "/tmp/JANG2_m" "/tmp/JANG2"
+
+my_exec_q seuil "/tmp/JANG3" 1 2 "/tmp/JANG3_h" 
+my_exec_q setorigin "/tmp/JANG3_h" "/tmp/JANG3"
+my_exec_q seuil "/tmp/JANG3" 2 3 "/tmp/JANG3_m" 
+my_exec_q setorigin "/tmp/JANG3_m" "/tmp/JANG3"
+
+my_exec_q seuil "/tmp/JANG4" 1 2 "/tmp/JANG4_h" 
+my_exec_q setorigin "/tmp/JANG4_h" "/tmp/JANG4"
+my_exec_q seuil "/tmp/JANG4" 2 3 "/tmp/JANG4_m" 
+my_exec_q setorigin "/tmp/JANG4_m" "/tmp/JANG4"
+
+my_exec_q rotse "$MASKS/JANG5.pgm" 90 "/tmp/JANG6"
+my_exec_q rotse "$MASKS/JANG5.pgm" 180 "/tmp/JANG7"
+my_exec_q rotse "$MASKS/JANG5.pgm" 270 "/tmp/JANG8"
+
+my_exec_q seuil "$MASKS/JANG5.pgm" 1 2 "/tmp/JANG5_h" 
+my_exec_q setorigin "/tmp/JANG5_h" "$MASKS/JANG5.pgm"
+my_exec_q seuil "$MASKS/JANG5.pgm" 2 3 "/tmp/JANG5_m" 
+my_exec_q setorigin "/tmp/JANG5_m" "$MASKS/JANG5.pgm"
+
+my_exec_q seuil "/tmp/JANG6" 1 2 "/tmp/JANG6_h" 
+my_exec_q setorigin "/tmp/JANG6_h" "/tmp/JANG6"
+my_exec_q seuil "/tmp/JANG6" 2 3 "/tmp/JANG6_m" 
+my_exec_q setorigin "/tmp/JANG6_m" "/tmp/JANG6"
+
+my_exec_q seuil "/tmp/JANG7" 1 2 "/tmp/JANG7_h" 
+my_exec_q setorigin "/tmp/JANG7_h" "/tmp/JANG7"
+my_exec_q seuil "/tmp/JANG7" 2 3 "/tmp/JANG7_m" 
+my_exec_q setorigin "/tmp/JANG7_m" "/tmp/JANG7"
+
+my_exec_q seuil "/tmp/JANG8" 1 2 "/tmp/JANG8_h" 
+my_exec_q setorigin "/tmp/JANG8_h" "/tmp/JANG8"
+my_exec_q seuil "/tmp/JANG8" 2 3 "/tmp/JANG8_m" 
+my_exec_q setorigin "/tmp/JANG8_m" "/tmp/JANG8"
+
+my_exec_q rotse "$MASKS/JANG9a.pgm" 90 "/tmp/JANG10a"
+my_exec_q rotse "$MASKS/JANG9a.pgm" 180 "/tmp/JANG11a"
+my_exec_q rotse "$MASKS/JANG9a.pgm" 270 "/tmp/JANG12a"
+
+my_exec_q seuil "$MASKS/JANG9a.pgm" 1 2 "/tmp/JANG9a_h" 
+my_exec_q setorigin "/tmp/JANG9a_h" "$MASKS/JANG9a.pgm"
+my_exec_q seuil "$MASKS/JANG9a.pgm" 2 3 "/tmp/JANG9a_m" 
+my_exec_q setorigin "/tmp/JANG9a_m" "$MASKS/JANG9a.pgm"
+
+my_exec_q seuil "/tmp/JANG10a" 1 2 "/tmp/JANG10a_h" 
+my_exec_q setorigin "/tmp/JANG10a_h" "/tmp/JANG10a"
+my_exec_q seuil "/tmp/JANG10a" 2 3 "/tmp/JANG10a_m" 
+my_exec_q setorigin "/tmp/JANG10a_m" "/tmp/JANG10a"
+
+my_exec_q seuil "/tmp/JANG11a" 1 2 "/tmp/JANG11a_h" 
+my_exec_q setorigin "/tmp/JANG11a_h" "/tmp/JANG11a"
+my_exec_q seuil "/tmp/JANG11a" 2 3 "/tmp/JANG11a_m" 
+my_exec_q setorigin "/tmp/JANG11a_m" "/tmp/JANG11a"
+
+my_exec_q seuil "/tmp/JANG12a" 1 2 "/tmp/JANG12a_h" 
+my_exec_q setorigin "/tmp/JANG12a_h" "/tmp/JANG12a"
+my_exec_q seuil "/tmp/JANG12a" 2 3 "/tmp/JANG12a_m" 
+my_exec_q setorigin "/tmp/JANG12a_m" "/tmp/JANG12a"
+
+my_exec_q rotse "$MASKS/JANG9b.pgm" 90 "/tmp/JANG10b"
+my_exec_q rotse "$MASKS/JANG9b.pgm" 180 "/tmp/JANG11b"
+my_exec_q rotse "$MASKS/JANG9b.pgm" 270 "/tmp/JANG12b"
+
+my_exec_q seuil "$MASKS/JANG9b.pgm" 1 2 "/tmp/JANG9b_h" 
+my_exec_q setorigin "/tmp/JANG9b_h" "$MASKS/JANG9b.pgm"
+my_exec_q seuil "$MASKS/JANG9b.pgm" 2 3 "/tmp/JANG9b_m" 
+my_exec_q setorigin "/tmp/JANG9b_m" "$MASKS/JANG9b.pgm"
+
+my_exec_q seuil "/tmp/JANG10b" 1 2 "/tmp/JANG10b_h" 
+my_exec_q setorigin "/tmp/JANG10b_h" "/tmp/JANG10b"
+my_exec_q seuil "/tmp/JANG10b" 2 3 "/tmp/JANG10b_m" 
+my_exec_q setorigin "/tmp/JANG10b_m" "/tmp/JANG10b"
+
+my_exec_q seuil "/tmp/JANG11b" 1 2 "/tmp/JANG11b_h" 
+my_exec_q setorigin "/tmp/JANG11b_h" "/tmp/JANG11b"
+my_exec_q seuil "/tmp/JANG11b" 2 3 "/tmp/JANG11b_m" 
+my_exec_q setorigin "/tmp/JANG11b_m" "/tmp/JANG11b"
+
+my_exec_q seuil "/tmp/JANG12b" 1 2 "/tmp/JANG12b_h" 
+my_exec_q setorigin "/tmp/JANG12b_h" "/tmp/JANG12b"
+my_exec_q seuil "/tmp/JANG12b" 2 3 "/tmp/JANG12b_m" 
+my_exec_q setorigin "/tmp/JANG12b_m" "/tmp/JANG12b"
+
+my_exec_q rotse "$MASKS/JANG13.pgm" 90 "/tmp/JANG14"
+my_exec_q rotse "$MASKS/JANG13.pgm" 180 "/tmp/JANG15"
+my_exec_q rotse "$MASKS/JANG13.pgm" 270 "/tmp/JANG16"
+
+my_exec_q seuil "$MASKS/JANG13.pgm" 1 2 "/tmp/JANG13_h" 
+my_exec_q setorigin "/tmp/JANG13_h" "$MASKS/JANG13.pgm"
+my_exec_q seuil "$MASKS/JANG13.pgm" 2 3 "/tmp/JANG13_m" 
+my_exec_q setorigin "/tmp/JANG13_m" "$MASKS/JANG13.pgm"
+
+my_exec_q seuil "/tmp/JANG14" 1 2 "/tmp/JANG14_h" 
+my_exec_q setorigin "/tmp/JANG14_h" "/tmp/JANG14"
+my_exec_q seuil "/tmp/JANG14" 2 3 "/tmp/JANG14_m" 
+my_exec_q setorigin "/tmp/JANG14_m" "/tmp/JANG14"
+
+my_exec_q seuil "/tmp/JANG15" 1 2 "/tmp/JANG15_h" 
+my_exec_q setorigin "/tmp/JANG15_h" "/tmp/JANG15"
+my_exec_q seuil "/tmp/JANG15" 2 3 "/tmp/JANG15_m" 
+my_exec_q setorigin "/tmp/JANG15_m" "/tmp/JANG15"
+
+my_exec_q seuil "/tmp/JANG16" 1 2 "/tmp/JANG16_h" 
+my_exec_q setorigin "/tmp/JANG16_h" "/tmp/JANG16"
+my_exec_q seuil "/tmp/JANG16" 2 3 "/tmp/JANG16_m" 
+my_exec_q setorigin "/tmp/JANG16_m" "/tmp/JANG16"
+
+my_exec_q rotse "$MASKS/JANG17.pgm" 90 "/tmp/JANG18"
+my_exec_q rotse "$MASKS/JANG17.pgm" 180 "/tmp/JANG19"
+my_exec_q rotse "$MASKS/JANG17.pgm" 270 "/tmp/JANG20"
+
+my_exec_q seuil "$MASKS/JANG17.pgm" 1 2 "/tmp/JANG17_h" 
+my_exec_q setorigin "/tmp/JANG17_h" "$MASKS/JANG17.pgm"
+my_exec_q seuil "$MASKS/JANG17.pgm" 2 3 "/tmp/JANG17_m" 
+my_exec_q setorigin "/tmp/JANG17_m" "$MASKS/JANG17.pgm"
+
+my_exec_q seuil "/tmp/JANG18" 1 2 "/tmp/JANG18_h" 
+my_exec_q setorigin "/tmp/JANG18_h" "/tmp/JANG18"
+my_exec_q seuil "/tmp/JANG18" 2 3 "/tmp/JANG18_m" 
+my_exec_q setorigin "/tmp/JANG18_m" "/tmp/JANG18"
+
+my_exec_q seuil "/tmp/JANG19" 1 2 "/tmp/JANG19_h" 
+my_exec_q setorigin "/tmp/JANG19_h" "/tmp/JANG19"
+my_exec_q seuil "/tmp/JANG19" 2 3 "/tmp/JANG19_m" 
+my_exec_q setorigin "/tmp/JANG19_m" "/tmp/JANG19"
+
+my_exec_q seuil "/tmp/JANG20" 1 2 "/tmp/JANG20_h" 
+my_exec_q setorigin "/tmp/JANG20_h" "/tmp/JANG20"
+my_exec_q seuil "/tmp/JANG20" 2 3 "/tmp/JANG20_m" 
+my_exec_q setorigin "/tmp/JANG20_m" "/tmp/JANG20"
+
+my_exec_q seuil   "$MASKS/JANG21.pgm" 1 2 "/tmp/JANG21_h" 
+my_exec_q setorigin "/tmp/JANG21_h"     "$MASKS/JANG21.pgm"
+my_exec_q seuil   "$MASKS/JANG21.pgm" 2 3 "/tmp/JANG21_m" 
+my_exec_q setorigin "/tmp/JANG21_m"     "$MASKS/JANG21.pgm"
+
+my_exec_q seuil   "$MASKS/JANG22.pgm" 1 2 "/tmp/JANG22_h" 
+my_exec_q setorigin "/tmp/JANG22_h"     "$MASKS/JANG22.pgm"
+my_exec_q seuil   "$MASKS/JANG22.pgm" 2 3 "/tmp/JANG22_m" 
+my_exec_q setorigin "/tmp/JANG22_m"     "$MASKS/JANG22.pgm"
+
+my_exec_q seuil   "$MASKS/JANG23.pgm" 1 2 "/tmp/JANG23_h" 
+my_exec_q setorigin "/tmp/JANG23_h"     "$MASKS/JANG23.pgm"
+my_exec_q seuil   "$MASKS/JANG23.pgm" 2 3 "/tmp/JANG23_m" 
+my_exec_q setorigin "/tmp/JANG23_m"     "$MASKS/JANG23.pgm"
+
+my_exec_q seuil   "$MASKS/JANG24.pgm" 1 2 "/tmp/JANG24_h" 
+my_exec_q setorigin "/tmp/JANG24_h"     "$MASKS/JANG24.pgm"
+my_exec_q seuil   "$MASKS/JANG24.pgm" 2 3 "/tmp/JANG24_m" 
+my_exec_q setorigin "/tmp/JANG24_m"     "$MASKS/JANG24.pgm"
+
+my_exec_q seuil   "$MASKS/JANG25.pgm" 1 2 "/tmp/JANG25_h" 
+my_exec_q setorigin "/tmp/JANG25_h"     "$MASKS/JANG25.pgm"
+my_exec_q seuil   "$MASKS/JANG25.pgm" 2 3 "/tmp/JANG25_m" 
+my_exec_q setorigin "/tmp/JANG25_m"     "$MASKS/JANG25.pgm"
+
+my_exec_q seuil   "$MASKS/JANG26.pgm" 1 2 "/tmp/JANG26_h" 
+my_exec_q setorigin "/tmp/JANG26_h"     "$MASKS/JANG26.pgm"
+my_exec_q seuil   "$MASKS/JANG26.pgm" 2 3 "/tmp/JANG26_m" 
+my_exec_q setorigin "/tmp/JANG26_m"     "$MASKS/JANG26.pgm"
+
+my_exec_q rotse "$MASKS/JANG27.pgm" 90 "/tmp/JANG28"
+my_exec_q rotse "$MASKS/JANG27.pgm" 180 "/tmp/JANG29"
+my_exec_q rotse "$MASKS/JANG27.pgm" 270 "/tmp/JANG30"
+
+my_exec_q seuil "$MASKS/JANG27.pgm" 1 2 "/tmp/JANG27_h" 
+my_exec_q setorigin "/tmp/JANG27_h" "$MASKS/JANG27.pgm"
+my_exec_q seuil "$MASKS/JANG27.pgm" 2 3 "/tmp/JANG27_m" 
+my_exec_q setorigin "/tmp/JANG27_m" "$MASKS/JANG27.pgm"
+
+my_exec_q seuil "/tmp/JANG28" 1 2 "/tmp/JANG28_h" 
+my_exec_q setorigin "/tmp/JANG28_h" "/tmp/JANG28"
+my_exec_q seuil "/tmp/JANG28" 2 3 "/tmp/JANG28_m" 
+my_exec_q setorigin "/tmp/JANG28_m" "/tmp/JANG28"
+
+my_exec_q seuil "/tmp/JANG29" 1 2 "/tmp/JANG29_h" 
+my_exec_q setorigin "/tmp/JANG29_h" "/tmp/JANG29"
+my_exec_q seuil "/tmp/JANG29" 2 3 "/tmp/JANG29_m" 
+my_exec_q setorigin "/tmp/JANG29_m" "/tmp/JANG29"
+
+my_exec_q seuil "/tmp/JANG30" 1 2 "/tmp/JANG30_h" 
+my_exec_q setorigin "/tmp/JANG30_h" "/tmp/JANG30"
+my_exec_q seuil "/tmp/JANG30" 2 3 "/tmp/JANG30_m" 
+my_exec_q setorigin "/tmp/JANG30_m" "/tmp/JANG30"
+
+# One thinning step
+#-----------------------------------
+proc one_step {} {
+    global JANG
+    my_exec_q cp "/tmp/$JANG(name)_t0" "/tmp/$JANG(name)_t0_sav" 
+
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG1_h" "/tmp/JANG1_m" "/tmp/$JANG(name)_t01"
+    my_exec_q mv "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG2_h" "/tmp/JANG2_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG3_h" "/tmp/JANG3_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG4_h" "/tmp/JANG4_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG5_h" "/tmp/JANG5_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG6_h" "/tmp/JANG6_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG7_h" "/tmp/JANG7_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG8_h" "/tmp/JANG8_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG9a_h" "/tmp/JANG9a_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG10a_h" "/tmp/JANG10a_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG11a_h" "/tmp/JANG11a_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG12a_h" "/tmp/JANG12a_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG9b_h" "/tmp/JANG9b_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG10b_h" "/tmp/JANG10b_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG11b_h" "/tmp/JANG11b_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG12b_h" "/tmp/JANG12b_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG13_h" "/tmp/JANG13_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG14_h" "/tmp/JANG14_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG15_h" "/tmp/JANG15_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG16_h" "/tmp/JANG16_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG17_h" "/tmp/JANG17_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG18_h" "/tmp/JANG18_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG19_h" "/tmp/JANG19_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG20_h" "/tmp/JANG20_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t1"
+
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG21_h" "/tmp/JANG21_m" "/tmp/$JANG(name)_t01"
+    my_exec_q mv "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG22_h" "/tmp/JANG22_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t2" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG23_h" "/tmp/JANG23_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t2" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG24_h" "/tmp/JANG24_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t2" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG25_h" "/tmp/JANG25_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t2" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG26_h" "/tmp/JANG26_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t2" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG27_h" "/tmp/JANG27_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t2" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG28_h" "/tmp/JANG28_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t2" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG29_h" "/tmp/JANG29_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t2" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t2"
+    my_exec_q hitormiss "/tmp/$JANG(name)_t0" "/tmp/JANG30_h" "/tmp/JANG30_m" "/tmp/$JANG(name)_t01"
+    my_exec_q max "/tmp/$JANG(name)_t2" "/tmp/$JANG(name)_t01" "/tmp/$JANG(name)_t2"
+
+    my_exec_q sub "/tmp/$JANG(name)_t1" "/tmp/$JANG(name)_t2" "/tmp/$JANG(name)_t3"
+    
+    my_exec_q sub "/tmp/$JANG(name)_t0" "/tmp/$JANG(name)_t3" "/tmp/$JANG(name)_t0"
+
+    my_exec_q sub "/tmp/$JANG(name)_t0_sav" "/tmp/$JANG(name)_t0" "/tmp/$JANG(name)_t0_sav"
+    my_exec_q area "/tmp/$JANG(name)_t0_sav" "/tmp/$JANG(name)_area"
+    set delta [my_read_val "/tmp/$JANG(name)_area"]
+    return $delta
+}
+
+if {$JANG(nsteps) != -1} {
+    for {set j 1} {$j<=$JANG(nsteps)} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }
+} else {
+    set delta 1
+    for {set j 1} {$delta != 0} {incr j} { 
+	set delta [one_step]
+	puts "step: $j delta: $delta" 
+    }    
+}
+
+my_exec_q cp "/tmp/$JANG(name)_t0" $JANG(outfilename) 
+my_exec_q rm "/tmp/$JANG(name)_*" "/tmp/JANG*" 

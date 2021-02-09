@@ -1,0 +1,53 @@
+Les repertoires:
+
+~Pink/doc      : documentation
+~Pink/include  : les fichiers entete (.h)
+~Pink/obj      : les fichiers objet (.o)
+~Pink/bin      : les executables
+~Pink/src/com  : les sources des programmes destines a etre lances du shell
+~Pink/src/lib  : les sources des librairies mc (fonctions de base) et l 
+                   (operateurs de traitement d'image)
+~Pink/scripts  : les scripts en langage shell
+
+==========================================================
+
+Librairies mc : fonctions de base pour les operateurs d'image
+-------------------------------------------------------------
+
+Librairie mcimage : 
+   fonctions pour les entrees/sortie fichiers et l'allocation de structures
+   image en memoire.
+
+Librairie mccodimage : 
+   fonctions pour l'acces aux voisins d'un point et pour la detection de bord
+
+Librairie mclifo :
+   fonctions pour la gestion d'une file lifo
+
+Librairie mcfifo :
+   fonctions pour la gestion d'une file fifo
+
+Librairie mcfah :
+   fonctions pour la gestion d'une file d'attente hierarchique
+
+Librairie mctopo : 
+   calcul des nombres topologiques en 2,5D
+
+Librairie mccbt :
+   calcul de l'arbre des coupes 
+
+Librairie mcchrono:
+   fonctions de mesure de temps 
+
+Librairie mcfusion :
+   structure et algorithmes pour la "fusion" optimale de 
+   composantes connexes dans un graphe 
+
+Librairie mcgeo : 
+   fonctions pour les transformations geometriques
+
+Librairie mcgraphe :
+   gestion de graphes de regions
+
+Librairie mcindic :
+   gestion d'indicateurs binaires (jusqu'a 8)

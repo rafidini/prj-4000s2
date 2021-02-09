@@ -1,0 +1,17 @@
+#!/bin/sh
+USAGE="Usage: $0 in segprev rayon connex smooth out"
+if [ $# -gt 6 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 6 ]
+then
+	echo $USAGE
+        exit
+fi
+dilattopo $2 $3 $4 /tmp/segmentnext_1
+inverse /tmp/segmentnext_1 /tmp/segmentnext_1
+gradientcd $1 $5 /tmp/segmentnext_2
+watershed /tmp/segmentnext_2 /tmp/segmentnext_1 null null $4 $6
+

@@ -1,0 +1,470 @@
+/* $Id: 2dflowskeleton.c.foret,v 1.1 2009-09-02 14:23:36 mcouprie Exp $ */
+/* !\file 2dflowskeleton.c
+
+\brief computes the flow skeleton (see [Cou10]) of a 2D complex
+
+<B>Usage:</B> 2dflowskeleton in.pgm mode out.pgm
+
+<B>Description:</B>
+
+TODO
+
+The lowest values of the priority image correspond to the highest priority.
+
+The parameter \b mode selects the TODO 
+The possible choices are:
+\li 0: uniform null function 
+\li 1: uniform unity function 
+\li 2: border indicator function
+\li 3: border indicator function and substraction of lambda from the integrated map
+
+\warning The input image \b in.pgm must be a complex, otherwise the result is meaningless (no verification is done)
+
+References:<BR> 
+[Cou10] M. Couprie: "Topological flows, maps and skeletons", in preparation.<BR>
+
+<B>Types supported:</B> byte 2d
+
+<B>Category:</B> orders
+\ingroup  orders
+
+\author Michel Couprie
+*/
+
+#include <stdio.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <math.h>
+#include <mcutil.h>
+#include <mccodimage.h>
+#include <mcimage.h>
+#include <mckhalimsky2d.h>
+#include <mcgeo.h>
+#include <mcdrawps.h>
+#include <mcgraphe.h>
+#include <ldist.h>
+#include <lmedialaxis.h>
+#include <l2dcollapse.h>
+
+#define SHOWGRAPHS
+#define SHOWIMAGES
+
+#define FS_EPSILON 0.1
+
+#ifdef SHOWGRAPHS
+void ShowGraphe(graphe * g, char *filename, double s, double r, double t, double marge, int noms_sommets, int v_sommets, int col_sommets, int all_arcs, uint8_t *K, int rs, uint8_t *head) 
+/* ====================================================================== */
+#undef F_NAME
+#define F_NAME "ShowGraphe"
+{
+  int i, j, xx, yy, n = g->nsom;
+  double xmin, xmax, ymin, ymax;
+  double x1, y1, x2, y2, x3, y3, x, y, a, b, d;
+  pcell p;
+  FILE * fd = NULL;
+  char buf[80];
+  
+  if (g->gamma == NULL) 
+  {  fprintf(stderr, "%s: representation successeurs absente\n", F_NAME);
+     return;
+  }
+  
+  if (g->x == NULL) 
+  {  fprintf(stderr, "%s: coordonnees des sommets absentes\n", F_NAME);
+     return;
+  }
+
+  fd = fopen(filename,"w");
+  if (!fd)
+  {
+    fprintf(stderr, "%s: cannot open file: %s\n", F_NAME, filename);
+    return;
+  }
+
+  /* determine le rectangle englobant et genere le header */
+  xmin = xmax = s*g->x[0];
+  ymin = ymax = s*g->y[0];
+  for (i = 1; i < n; i++) 
+  {
+    if (s*g->x[i] < xmin) xmin = s*g->x[i]; else if (s*g->x[i] > xmax) xmax = s*g->x[i];
+    if (s*g->y[i] < ymin) ymin = s*g->y[i]; else if (s*g->y[i] > ymax) ymax = s*g->y[i];
+  }
+  EPSHeader(fd, xmax - xmin + 2.0 * marge, ymax - ymin + 2.0 * marge, 1.0, 14);
+  
+  /* dessine le fond */
+  PSSetColor (fd, 1.0);
+  PSDrawRect (fd, 0, 0, xmax - xmin + 2.0 * marge, ymax - ymin + 2.0 * marge);
+  PSSetColor (fd, 0.0);
+
+  /* dessine le complexe */
+  PSSetColor (fd, 0.75);
+  PSSetLineWidth (fd, 5);    
+  for (i = 0; i < n; i++) 
+    if (K[i])
+    {
+      xx = i%rs;
+      yy = i/rs;
+      if ((xx%2 == 0) && (yy%2 == 0))
+      {
+	PSDrawdisc(fd, s*g->x[i]-xmin+marge, s*g->y[i]-ymin+marge, 5);
+	if ((xx < rs-2) && K[i+2])
+	  PSLine(fd, s*g->x[i]-xmin+marge, s*g->y[i]-ymin+marge, s*g->x[i+2]-xmin+marge, s*g->y[i+2]-ymin+marge);
+	if ((i < n-(rs+rs)) && K[i+rs+rs])
+	  PSLine(fd, s*g->x[i]-xmin+marge, s*g->y[i]-ymin+marge, s*g->x[i+rs+rs]-xmin+marge, s*g->y[i+rs+rs]-ymin+marge);
+      }
+    }
+  PSSetColor (fd, 0.0);
+  PSSetLineWidth (fd, 1);
+
+  /* dessine les sommets */
+  for (i = 0; i < n; i++) 
+    if (K[i])
+    {
+      if (col_sommets && (g->v_sommets[i] != 0)) 
+	PSDrawdisc(fd, s*g->x[i]-xmin+marge, s*g->y[i]-ymin+marge, r);
+      else
+	PSDrawcircle(fd, s*g->x[i]-xmin+marge, s*g->y[i]-ymin+marge, r);
+    }
+
+  if (noms_sommets && g->nomsommet)
+    for (i = 0; i < n; i++) 
+      if (K[i])
+	PSString(fd, s*g->x[i]-xmin+marge+2*r, s*g->y[i]-ymin+marge-2*r, g->nomsommet[i]);
+  if (v_sommets)
+    for (i = 0; i < n; i++) 
+      //      if (K[i] && !head[i] && (g->v_sommets[i] < 0)) //pour dessiner une col. seq.
+      if (K[i])
+      {
+	//	sprintf(buf, "%g", -(double)(g->v_sommets[i]));//pour dessiner une col. seq.
+	sprintf(buf, "%g", (double)(g->v_sommets[i]));
+	PSString(fd, s*g->x[i]-xmin+marge+2*r, s*g->y[i]-ymin+marge+2*r, buf);
+      }
+
+  /* dessine les arcs */
+  for (i = 0; i < n; i++)
+    if (all_arcs || head[i])
+      for (p = g->gamma[i]; p != NULL; p = p->next)
+      {
+	j = p->som;
+	PSLine(fd, s*g->x[i]-xmin+marge, s*g->y[i]-ymin+marge, s*g->x[j]-xmin+marge, s*g->y[j]-ymin+marge);
+      }
+
+  /* dessine les fleches sur les arcs */
+  if (t > 0.0)
+  {
+    for (i = 0; i < n; i++) 
+    if (all_arcs || head[i])
+    for (p = g->gamma[i]; p != NULL; p = p->next)
+    {
+      j = p->som;
+      x1 = s*g->x[i]-xmin+marge;
+      y1 = s*g->y[i]-ymin+marge;
+      x2 = s*g->x[j]-xmin+marge;
+      y2 = s*g->y[j]-ymin+marge;
+      x = (x2 + x1) / 2; // milieu de l'arc
+      y = (y2 + y1) / 2;
+      a = x2 - x1;
+      b = y2 - y1;             /* (a,b) est un vecteur directeur de l'arc */
+      d = sqrt(a * a + b * b); /* longueur de l'arc */
+      if (d > 1) // sinon on ne dessine pas la fleche
+      { 
+        a /= d; b /= d;          /* norme le vecteur */
+        x1 = x + 2 * t * a;
+        y1 = y + 2 * t * b;      /* pointe de la fleche */
+        x2 = x - 2 * t * a;
+        y2 = y - 2 * t * b;      /* base de la fleche */
+        x3 = x2 + t * -b;        /* (-b,a) est normal a (a,b) */
+        y3 = y2 + t * a;
+        x2 = x2 - t * -b;
+        y2 = y2 - t * a;
+        PSLine(fd, x1, y1, x2, y2);
+        PSLine(fd, x2, y2, x3, y3);
+        PSLine(fd, x3, y3, x1, y1);
+      }
+    }
+  }
+  
+  PSFooter(fd);
+  fclose(fd);
+} // ShowGraphe()
+#endif
+
+/* ====================================================================== */
+/*! \fn void Morsify(graphe * g, boolean * Vh, TYP_VSOM epsilon)
+    \param g (entrée) : un graphe pondéré sur les sommets.
+    \brief TODO
+    \warning ne s'applique qu'aux graphes sans circuit
+*/
+void Morsify(graphe * g, boolean * Vh, TYP_VSOM epsilon)
+/* ====================================================================== */
+#undef F_NAME
+#define F_NAME "Morsify"
+{
+  int32_t x, y, i, r, rmax, cumul, n = g->nsom;
+  int32_t * T;   // pour les sommets triés
+  int32_t * H;   // histogramme des rangs
+  TYP_VSOM * M;   // sauvegarde fonction sommets
+  graphe * g_1 = Symetrique(g);
+  pcell p;
+
+  M = (TYP_VSOM *)malloc(n * sizeof(TYP_VSOM)); assert(M != NULL);
+  for (x = 0; x < n; x++) M[x] = g->v_sommets[x];
+  if (CircuitNiveaux(g))
+  {
+    fprintf(stderr, "%s: the graph is not acyclic\n", F_NAME);
+    exit(0);
+  }
+  rmax = 0;
+  for (x = 0; x < n; x++)
+  {
+    r = (int32_t)g->v_sommets[x];
+    if (r > rmax) rmax = r;
+  }
+  H = (int32_t *)calloc(rmax + 1, sizeof(int32_t)); assert(H != NULL);
+  for (x = 0; x < n; x++) H[(int32_t)g->v_sommets[x]]++; // calcule l'histo
+  cumul = H[0];
+  H[0] = 0;
+  for (i = 1; i <= rmax; i++) // calcule l'histo cumulé
+  {
+    x = H[i];
+    H[i] = cumul;
+    cumul += x;
+  }
+  T = (int32_t *)malloc(n * sizeof(int32_t));
+  if (T == NULL)
+  {
+    fprintf(stderr, "%s : malloc failed\n", F_NAME);
+    exit(0);
+  }
+  for (x = 0; x < n; x++)  // tri des sommets par rang croissant
+  {
+    r = (int32_t)g->v_sommets[x];
+    T[H[r]] = x;
+    H[r] += 1;
+  }
+  free(H);
+
+  for (i = 0; i < n; i++)
+  {
+    x = T[i];
+    for (p = g_1->gamma[x]; p != NULL; p = p->next)
+    { /* pour tout y prédécesseur de x */
+      y = p->som;
+      if (Vh[y])
+      {
+	if (M[y] != M[x])
+	  M[x] = M[y] = max(M[x],M[y]);
+      }
+      else
+      {
+	if (M[x] <= M[y])
+	  M[x] = max(M[x],(M[y]+epsilon));
+      }
+    }
+  }
+
+  for (x = 0; x < n; x++) g->v_sommets[x] = M[x];
+  free(M);
+  TermineGraphe(g_1);  
+  free(T);
+} /* Morsify() */
+
+/* =============================================================== */
+int main(int32_t argc, char **argv) 
+/* =============================================================== */
+{
+  struct xvimage * k;
+  struct xvimage * kk;
+  struct xvimage * dist;
+  struct xvimage * lambda;
+  struct xvimage * func;
+  int32_t mode;
+  uint8_t *K;
+  int32_t rs, cs, ds=1, N, i, j, xi, yi, xj, yj;
+  float * FUNC;
+  float * LAMBDA;
+  graphe * flow;
+  graphe * flow_s;
+  graphe * forest;
+  graphe * forest_s;
+  uint8_t * perm;
+  uint8_t * head;
+  TYP_VSOM vmax;
+  TYP_VSOM epsilon = FS_EPSILON;
+  pcell p;
+
+  if (argc != 4)
+  {
+    fprintf(stderr, "usage: %s in.pgm mode out.pgm\n", argv[0]);
+    exit(1);
+  }
+
+  k = readimage(argv[1]);  
+  if (k == NULL)
+  {
+    fprintf(stderr, "%s: readimage failed\n", argv[0]);
+    exit(1);
+  }
+  rs = rowsize(k);
+  cs = colsize(k);
+  N = rs*cs;
+  K = UCHARDATA(k);
+  assert(datatype(k) == VFF_TYP_1_BYTE);
+  assert(depth(k) == 1);
+
+  mode = atoi(argv[2]);
+
+  lambda = allocimage(NULL, rs, cs, ds, VFF_TYP_FLOAT);
+  assert(lambda != NULL);
+  dist = allocimage(NULL, rs, cs, ds, VFF_TYP_4_BYTE);
+  assert(dist != NULL);
+
+  if (! lsedt_meijster(k, dist))
+  {
+    fprintf(stderr, "%s: lsedt_meijster failed\n", argv[0]);
+    exit(1);
+  }
+
+  if (!llambdamedialaxis(dist, lambda))
+  {
+    fprintf(stderr, "%s: llambdamedialaxis failed\n", argv[0]);
+    exit(1);
+  }
+
+#ifdef SHOWIMAGES
+  writeimage(lambda, "_lambda");
+#endif
+
+  kk = copyimage(k); // sauve k car l2dtopoflow modifie le complexe
+  assert(kk != NULL);
+  if (! (flow = l2dtopoflow_f(kk, lambda, NULL, MAXFLOAT)))
+  {
+    fprintf(stderr, "%s: function l2dtopoflow_f failed\n", argv[0]);
+    exit(1);
+  }
+  freeimage(kk);
+
+  perm = (boolean *)calloc(N, sizeof(boolean)); assert(perm != NULL);
+  head = (boolean *)calloc(N, sizeof(boolean)); assert(head != NULL);
+  for (i = 0; i < N; i++)
+    if (flow->v_sommets[i] == TF_NOT_IN_F)
+      perm[i] = TRUE;
+    else if (flow->v_sommets[i] == TF_HEAD)
+      head[i] = TRUE;
+
+#ifdef SHOWGRAPHS
+  //  ShowGraphe(flow, "_flow", 30, 1, 3, 20, 0, 1, 0, 0, K, rs, head);//pour dessiner une col. seq.
+  ShowGraphe(flow, "_flow", 30, 1, 3, 20, 0, 0, 0, 1, K, rs, head);
+#endif
+  
+  flow_s = Symetrique(flow);
+  BellmanSCmax(flow_s);
+  
+  forest_s = ForetPCC(flow_s);
+  forest = Symetrique(forest_s);
+
+  // Calcule la fonction de poids pour les sommets
+  LAMBDA = FLOATDATA(lambda);
+  func = allocimage(NULL, rs, cs, ds, VFF_TYP_FLOAT);
+  assert(func != NULL);
+  FUNC = FLOATDATA(func);
+
+  if (mode == 0)
+  { // fonction uniformément nulle 
+    razimage(func);
+  }
+  else if (mode == 1)
+  { // fonction uniforme (unité)
+    for (i = 0; i < N; i++) 
+      if (K[i])
+	FUNC[i] = (float)1;
+      else
+	FUNC[i] = (float)0;
+  }
+  else if ((mode == 2) || (mode == 3))
+  { // fonction uniforme sur la frontière, nulle à l'intérieur 
+    struct xvimage * border = copyimage(k);
+    uint8_t *B;
+    assert(border != NULL);
+    if (! l2dborder(border))
+    {
+      fprintf(stderr, "%s: function l2dborder failed\n", argv[0]);
+      exit(1);
+    }
+    B = UCHARDATA(border);
+    for (i = 0; i < N; i++) 
+      if (B[i]) 
+	FUNC[i] = (float)1;
+      else
+	FUNC[i] = (float)0;
+    freeimage(border);
+  }
+  else
+  {
+    fprintf(stderr, "%s: bad mode: %d\n", argv[0], mode);
+    exit(1);
+  }
+
+  for (i = 0; i < N; i++)
+  { 
+    forest->v_sommets[i] = (TYP_VSOM)FUNC[i];
+    forest->x[i] = flow->x[i];
+    forest->y[i] = flow->y[i];
+  }
+
+  IntegreForet(forest);
+
+  // met à vmax (infini) les sommets "permanents" (non collapsés)
+  vmax = forest->v_sommets[0];
+  for (i = 0; i < N; i++)
+    if (forest->v_sommets[i] > vmax) vmax = forest->v_sommets[i];
+  for (i = 0; i < N; i++)
+    if (perm[i])
+      forest->v_sommets[i] = vmax;
+
+#ifdef SHOWGRAPHS
+  ShowGraphe(forest, "_forest", 30, 1, 3, 20, 0, 1, 0, 1, K, rs, head);
+#endif
+    
+  if (mode == 3)
+  {
+    MaxAlpha2d(lambda); // fermeture (en ndg)
+#ifdef SHOWIMAGES
+  writeimage(lambda, "_lambda_c");
+#endif
+    for (i = 0; i < N; i++)
+      flow->v_sommets[i] = forest->v_sommets[i] - (TYP_VSOM)LAMBDA[i];
+  }
+  else
+    for (i = 0; i < N; i++)
+      flow->v_sommets[i] = forest->v_sommets[i];
+
+  // transforme la fonction sur les sommets en 
+  // fonction de Morse (inversée) sur le complexe
+  
+  Morsify(flow, head, epsilon);
+
+#ifdef SHOWGRAPHS
+  ShowGraphe(flow, "_flow_final", 30, 1, 3, 20, 0, 1, 0, 1, K, rs, head);
+#endif
+  
+  for (i = 0; i < N; i++)
+    FUNC[i] = (float)flow->v_sommets[i];
+
+  writeimage(func, argv[argc-1]);
+
+  freeimage(k);
+  freeimage(dist);
+  freeimage(lambda);
+  freeimage(func);
+  free(perm);
+  free(head);
+  TermineGraphe(flow);
+  TermineGraphe(flow_s);
+  TermineGraphe(forest);
+  TermineGraphe(forest_s);
+
+  return 0;
+} /* main */

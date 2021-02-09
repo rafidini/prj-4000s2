@@ -1,0 +1,28 @@
+stretch imbriqpseudo.pgm _a.testlpetopo10
+zoom _a.testlpetopo10  8  _az.testlpetopo10
+xv -geometry +0+0 _az.testlpetopo10 &
+lpetopo _a.testlpetopo10 1 _b.testlpetopo10
+zoom _b.testlpetopo10  8  _bz.testlpetopo10
+xv -geometry +175+0 _bz.testlpetopo10 &
+lpetopo _b.testlpetopo10 1 _c.testlpetopo10
+zoom _c.testlpetopo10  8  _cz.testlpetopo10
+xv -geometry +350+0 _cz.testlpetopo10 &
+lpetopo _c.testlpetopo10 256 _d.testlpetopo10
+zoom _d.testlpetopo10  8  _dz.testlpetopo10
+xv -geometry +525+0 _dz.testlpetopo10 &
+
+echo -n "ok pour le menage des fichiers temporaires ? "
+read REP
+case $REP in
+      o|O|y|Y) rm _*.testlpetopo10
+esac
+
+echo -n "ok pour le menage des fenetres xv ? "
+read REP
+case $REP in
+      o|O|y|Y) echo 'kill -9 \' > clearscreen
+               ps -a|grep xv|grep testlpetopo10|awk '{printf(" %s", $1)}' >> clearscreen
+               chmod 755 clearscreen
+               clearscreen
+               rm clearscreen
+esac

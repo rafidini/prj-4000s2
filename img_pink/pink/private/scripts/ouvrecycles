@@ -1,0 +1,21 @@
+#!/bin/sh
+# ouverture de cycles 
+USAGE="Usage: $0 in area out"
+if [ $# -gt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+if [ $# -lt 3 ]
+then
+	echo $USAGE
+        exit
+fi
+ptseparating  $1 4 /tmp/ouvrecycles_1
+inverse       $1 /tmp/ouvrecycles_2
+areaopening   /tmp/ouvrecycles_2 4 $2 /tmp/ouvrecycles_2
+inverse       /tmp/ouvrecycles_2 /tmp/ouvrecycles_2
+ptseparating  /tmp/ouvrecycles_2 4 /tmp/ouvrecycles_2
+sub           /tmp/ouvrecycles_1 /tmp/ouvrecycles_2 /tmp/ouvrecycles_3
+sub           $1 /tmp/ouvrecycles_3 $3
+rm            /tmp/ouvrecycles_?
