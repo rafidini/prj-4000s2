@@ -16,4 +16,5 @@ Répartition du travail en 3 tâches avec un binôme par tâche:
 - **Texte**: Benjamin, Maxime
 
 # Notebooks
-- [introduction](notebooks/introduction.md) : Aperçu des données pour le challenge
+- [Introduction](notebooks/introduction.md) : Aperçu des données pour le challenge
+- [Exploration de données](notebooks/DataExploration.html) : Exploration des données, grahiques & stuff
