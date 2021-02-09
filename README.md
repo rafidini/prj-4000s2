@@ -16,5 +16,5 @@ Répartition du travail en 3 tâches avec un binôme par tâche:
 - **Manipulation du texte**: Benjamin, Maxime
 
 # Notebooks
-- [Introduction](notebooks/introduction.md) : Aperçu des données pour le challenge | Lundi 18 Février 2021
-- [Exploration de données](notebooks/DataExploration.html) : Exploration des données, grahiques & stuff | Mardi 19 Février 2021
+- [Introduction](notebooks/introduction.md) : Aperçu des données pour le challenge; **Lundi 18 Février 2021**
+- [Exploration de données](notebooks/DataExploration.html) : Exploration des données, grahiques & stuff; **Mardi 19 Février 2021**
