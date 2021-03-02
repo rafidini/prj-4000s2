@@ -4,3 +4,4 @@
 - [Sélection d'objets dans les images](notebooks/Preprocessing_image.html) : Utilisation d'opencv; **Mardi 09 Février 2021**
 - [CNN](https://www.kaggle.com/itokianarafidinarivo/rakuten) : Tentative d'implémentation d'un CNN avec **Tensorflow Keras**, structure aléatoire ;**Mardi 23 Février 2021**
 - [Traduction image](notebooks/traduction.html) : Traduction par Loic **Mardi 2 Mars 2021**
+- [RCNN Mask](notebooks/rcnnMask.html) : première implémentation d'un mask rcnn **Mardi 2 Mars 2021**
