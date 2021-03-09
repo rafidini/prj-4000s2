@@ -4,3 +4,4 @@
 - [Sélection d'objets dans les images](notebooks/Preprocessing_image.html) : Utilisation d'opencv; **Mardi 09 Février 2021**
 - [CNN](https://www.kaggle.com/itokianarafidinarivo/rakuten) : Tentative d'implémentation d'un CNN avec **Tensorflow Keras**, structure aléatoire ;**Mardi 23 Février 2021**
 - [Traduction image](notebooks/traduction.html) : Traduction par Loic **Mardi 2 Mars 2021**
+- [Vectorization & nettoyage des traductions](notebooks/vectorize.html) : ... ;**Mardi 9 Mars 2021**
